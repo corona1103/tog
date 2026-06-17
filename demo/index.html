@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOG 产品交互 Demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; min-height: 100vh; padding: 60px 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
+.subtitle { color: #666; margin-bottom: 40px; font-size: 15px; }
+.module { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.module-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.module-title::before { content: ''; width: 4px; height: 18px; background: #00BCD4; border-radius: 2px; }
+.demo-list { list-style: none; }
+.demo-list li { border-bottom: 1px solid #f0f0f0; }
+.demo-list li:last-child { border-bottom: none; }
+.demo-list a { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; color: #333; text-decoration: none; border-radius: 8px; transition: all 0.2s; }
+.demo-list a:hover { background: #f0fafa; color: #00BCD4; }
+.demo-list .arrow { color: #ccc; transition: all 0.2s; }
+.demo-list a:hover .arrow { color: #00BCD4; transform: translateX(4px); }
+.demo-desc { font-size: 12px; color: #999; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>TOG 产品交互 Demo</h1>
+  <p class="subtitle">各模块功能的交互原型演示</p>
+
+  <div class="module">
+    <div class="module-title">管理平台</div>
+    <ul class="demo-list">
+      <li>
+        <a href="manage/student-transfer/">
+          <div>
+            <div>换班功能</div>
+            <div class="demo-desc">学生换班流程交互演示</div>
+          </div>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="module">
+    <div class="module-title">智慧课堂</div>
+    <ul class="demo-list">
+      <li>
+        <a href="class/qiangda/">
+          <div>
+            <div>抢答功能</div>
+            <div class="demo-desc">课堂抢答交互演示</div>
+          </div>
+          <span class="arrow">→</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

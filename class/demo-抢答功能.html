@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抢答功能 - 三端联动 Demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #1a1a2e;
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.header {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.header p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+}
+
+.stage-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.stage-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.3s;
+}
+
+.stage-dot.active {
+  background: #4fc3f7;
+  box-shadow: 0 0 8px #4fc3f7;
+}
+
+.stage-dot.passed {
+  background: #66bb6a;
+}
+
+.stage-labels {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
+
+.stage-labels span {
+  width: 56px;
+  text-align: center;
+}
+
+.stage-labels span.active {
+  color: #4fc3f7;
+  font-weight: 600;
+}
+
+.devices-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 160px);
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .devices-container {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+}
+
+.device-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.device-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.device-label .icon {
+  font-size: 16px;
+}
+
+/* Teacher Small Screen */
+.teacher-device {
+  width: 260px;
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  position: relative;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  max-height: 520px;
+}
+
+.teacher-device .status-bar {
+  height: 28px;
+  min-height: 28px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+
+.teacher-device .content {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.teacher-device .quick-bar {
+  height: 56px;
+  min-height: 56px;
+  background: #fff;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 12px;
+}
+
+.quick-bar .bar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+}
+
+.quick-bar .bar-btn:hover {
+  background: #f0f0f0;
+}
+
+.quick-bar .bar-btn.highlight {
+  color: #1976d2;
+}
+
+.quick-bar .bar-btn .btn-icon {
+  font-size: 20px;
+}
+
+/* Big Screen */
+.bigscreen-device {
+  width: 100%;
+  aspect-ratio: 16/9;
+  max-height: 420px;
+  background: #1e1e2e;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  position: relative;
+  border: 3px solid #333;
+}
+
+.bigscreen-device .screen-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* Student Tablet */
+.student-device {
+  width: 260px;
+  height: 380px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  position: relative;
+  color: #333;
+}
+
+.student-device .tab-bar {
+  height: 24px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.student-device .content {
+  height: calc(100% - 24px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* Common Styles */
+.countdown-number {
+  font-size: 56px;
+  font-weight: 800;
+  color: #ff6b35;
+  text-shadow: 0 4px 20px rgba(255,107,53,0.4);
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.countdown-number.small {
+  font-size: 48px;
+}
+
+.rush-btn {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: none;
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.rush-btn.ready {
+  background: linear-gradient(135deg, #ff6b35, #f7c948);
+  color: #fff;
+  box-shadow: 0 8px 30px rgba(255,107,53,0.5);
+}
+
+.rush-btn.ready:hover {
+  transform: scale(1.05);
+}
+
+.rush-btn.ready:active {
+  transform: scale(0.95);
+}
+
+.rush-btn.disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 20px;
+  font-size: 15px;
+  animation: slideIn 0.5s ease-out both;
+}
+
+.result-item:nth-child(2) { animation-delay: 0.15s; }
+.result-item:nth-child(3) { animation-delay: 0.3s; }
+.result-item:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-item .name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 20px;
+}
+
+.result-item .points-tag {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffd54f;
+  margin-left: 12px;
+  opacity: 0;
+  animation: pointsFadeIn 0.6s ease-out forwards;
+}
+
+.result-item:nth-child(2) .points-tag { animation-delay: 0.3s; }
+.result-item:nth-child(3) .points-tag { animation-delay: 0.6s; }
+.result-item:nth-child(4) .points-tag { animation-delay: 0.9s; }
+
+@keyframes pointsFadeIn {
+  0% { opacity: 0; transform: translateY(8px) scale(0.8); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.2); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #4fc3f7, #1976d2);
+  color: #fff;
+}
+
+.action-btn.secondary {
+  background: linear-gradient(135deg, #ffd54f, #ff8f00);
+  color: #fff;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.action-btn.small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Phases */
+.phase {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.phase.active {
+  display: flex;
+}
+
+/* Big screen overlay phases — positioned container with flex centering */
+.phase.overlay-phase {
+  padding: 0;
+  display: none !important;
+}
+
+.phase.overlay-phase.active {
+  display: flex !important;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Teacher specific */
+.teacher-idle {
+  padding: 16px;
+}
+
+.teacher-idle .course-info {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #666;
+  text-align: left;
+}
+
+.teacher-idle .status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #e3f2fd;
+  border-radius: 8px;
+}
+
+.teacher-countdown .info-text {
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.teacher-result .result-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+}
+
+.teacher-result .result-card .item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #eee;
+}
+
+.teacher-result .result-card .item:last-child {
+  border-bottom: none;
+}
+
+.teacher-result .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Big screen specific */
+.bigscreen-idle {
+  background: linear-gradient(135deg, #1a237e, #283593);
+}
+
+.bigscreen-idle .courseware {
+  font-size: 18px;
+  color: rgba(255,255,255,0.8);
+}
+
+.bigscreen-idle .subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 8px;
+}
+
+/* Big screen modal styles */
+.bigscreen-modal .title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.bigscreen-modal .timer {
+  font-size: 36px;
+  font-weight: 800;
+  color: #ff6b35;
+  margin: 8px 0;
+}
+
+.bigscreen-modal .participants {
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+}
+
+.bigscreen-modal .button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: center;
+}
+
+.bigscreen-modal .star-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffd54f;
+  margin: 12px 0;
+  text-shadow: 0 2px 10px rgba(255,213,79,0.5);
+}
+
+.bigscreen-modal .points {
+  font-size: 16px;
+  color: #fff;
+}
+
+.star-rolling {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffd54f;
+  animation: roll 0.1s linear infinite;
+}
+
+@keyframes roll {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Student specific */
+.student-idle .idle-text {
+  font-size: 14px;
+  color: #999;
+}
+
+.student-result .congrats {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.student-result .points {
+  font-size: 24px;
+  color: #ff8f00;
+  font-weight: 800;
+  margin: 8px 0;
+}
+
+.student-miss .miss-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.student-miss .winners {
+  font-size: 13px;
+  color: #999;
+}
+
+/* Student rush button wrapper */
+.rush-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Student rush float text - above the button */
+.rush-float-text {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ff6b35;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translate(-50%, 0);
+  animation: rushFloat 1s ease-out forwards;
+}
+
+@keyframes rushFloat {
+  0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -40px) scale(0.9); }
+}
+
+/* Points animation */
+.points-fly {
+  position: absolute;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ff8f00;
+  pointer-events: none;
+  animation: flyUp 1.5s ease-out forwards;
+}
+
+@keyframes flyUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+}
+
+/* Sparkle effect */
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffd54f;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparkle 1s ease-out forwards;
+}
+
+@keyframes sparkle {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0) translateY(-30px); }
+}
+
+/* Control panel */
+.control-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15,15,30,0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+}
+
+.control-panel .ctrl-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-panel .ctrl-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.control-panel .ctrl-btn.active {
+  background: #1976d2;
+  border-color: #1976d2;
+}
+
+.control-panel .ctrl-btn.reset {
+  background: rgba(244,67,54,0.2);
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.cancel-btn {
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: rgba(244,67,54,0.1);
+  border: 1px solid rgba(244,67,54,0.3);
+  color: #f44336;
+  font-size: 11px;
+  cursor: pointer;
+  cursor: pointer;
+}
+
+/* Toast */
+.toast {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  white-space: nowrap;
+  animation: toastIn 0.3s ease-out;
+  z-index: 10;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Participant counter animation */
+.counter-animate {
+  display: inline-block;
+  animation: counterPop 0.3s ease-out;
+}
+
+@keyframes counterPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.subtitle-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+}
+
+.close-btn {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: none;
+}
+
+
+.hint-badge {
+  position: absolute;
+  bottom: 70px;
+  left: 16px;
+  right: 16px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #f57f17;
+  text-align: center;
+}
+
+/* Toolbox */
+.toolbox-float-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbox-float-btn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-2px);
+}
+
+.toolbox-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  z-index: 20;
+  animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translate(-50%,-50%) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+}
+
+.toolbox-popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.toolbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.toolbox-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  transition: all 0.15s;
+}
+
+.toolbox-item:hover {
+  background: #e3f2fd;
+  border-color: #90caf9;
+}
+
+.toolbox-item-icon {
+  font-size: 24px;
+}
+
+.toolbox-close {
+  display: block;
+  margin: 14px auto 0;
+  padding: 6px 20px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Big screen overlay modal style */
+.bigscreen-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.bigscreen-modal {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  border-radius: 20px;
+  padding: 32px 40px;
+  width: 400px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.bigscreen-modal .close-btn {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bigscreen-modal.countdown-modal {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.bigscreen-modal.racing-modal {
+  background: linear-gradient(135deg, #1a1a2e, #0d1b2a);
+}
+
+.bigscreen-modal.star-modal {
+  background: linear-gradient(135deg, #4a148c, #6a1b9a);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>抢答功能 — 三端联动交互 Demo</h1>
+  <p>点击下方按钮模拟各阶段，或在教师小屏点击"抢答"按钮发起</p>
+  <div class="stage-indicator">
+    <div class="stage-dot active" data-stage="0"></div>
+    <div class="stage-dot" data-stage="1"></div>
+    <div class="stage-dot" data-stage="2"></div>
+    <div class="stage-dot" data-stage="3"></div>
+    <div class="stage-dot" data-stage="4"></div>
+    <div class="stage-dot" data-stage="5"></div>
+  </div>
+  <div class="stage-labels">
+    <span class="active">待机</span>
+    <span>倒计时</span>
+    <span>抢答中</span>
+    <span>结果</span>
+    <span>幸运星</span>
+    <span>完成</span>
+  </div>
+</div>
+
+<div class="devices-container">
+  <!-- Teacher Small Screen -->
+  <div class="device-wrapper">
+    <div class="device-label"><span class="icon">📱</span> 教师小屏（遥控器）</div>
+    <div class="teacher-device" id="teacherScreen">
+      <div class="status-bar">
+        <span>📱 在线 43/45 │ 课件播放中</span>
+      </div>
+      <div class="content">
+        <!-- Idle -->
+        <div class="phase teacher-idle active" id="teacher-idle">
+          <div class="status-row">🟢 在线 43人 │ 当前：课件播放中</div>
+          <div class="course-info">
+            <div style="font-weight:600;color:#333;margin-bottom:4px;">初二3班 · 数学</div>
+            <div>第3节 │ 一元二次方程</div>
+            <div style="margin-top:4px;color:#999;">课件第 12/18 页</div>
+          </div>
+          <div style="font-size:12px;color:#999;margin-top:8px;text-align:center;">
+            点击底部快捷栏"抢答"发起互动
+          </div>
+        </div>
+        <!-- In Progress (covers countdown + racing) -->
+        <div class="phase" id="teacher-inprogress" style="background:#fff;">
+          <div style="font-size:14px;color:#333;font-weight:600;">⚡ 抢答进行中...</div>
+          <div style="font-size:12px;color:#999;margin-top:8px;">等待学生抢答</div>
+          <div style="margin-top:16px;">
+            <div class="cancel-btn" onclick="closeAll()">关闭</div>
+          </div>
+        </div>
+        <!-- Result -->
+        <div class="phase" id="teacher-result" style="background:#fff;justify-content:flex-start;padding-top:20px;">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px;">🎉 本轮结果</div>
+          <div class="result-card">
+            <div class="item"><span>张小明</span> <span style="margin-left:auto;color:#ff8f00;font-weight:600;">+1分 ⭐</span></div>
+            <div class="item"><span>王小红</span> <span style="margin-left:auto;color:#ff8f00;font-weight:600;">+1分 ⭐</span></div>
+            <div class="item"><span>李大志</span> <span style="margin-left:auto;color:#ff8f00;font-weight:600;">+1分 ⭐</span></div>
+          </div>
+          <div style="font-size:12px;color:#66bb6a;margin-top:6px;">积分已结算</div>
+          <div class="actions">
+            <button class="action-btn primary small" onclick="startNewRound()">再来一轮</button>
+            <button class="action-btn secondary small" onclick="startLuckyStar()">幸运星 🌟</button>
+          </div>
+          <div style="margin-top:8px;"><div class="cancel-btn" onclick="closeAll()">关闭</div></div>
+        </div>
+        <!-- No Answer -->
+        <div class="phase" id="teacher-noanswer" style="background:#fff;">
+          <div style="font-size:40px;margin-bottom:8px;">😅</div>
+          <div style="font-size:14px;font-weight:600;color:#333;">本轮无人抢答</div>
+          <div style="font-size:12px;color:#999;margin-top:4px;">再试一次或换个方式</div>
+          <div class="actions" style="margin-top:16px;">
+            <button class="action-btn primary small" onclick="startNewRound()">再来一轮</button>
+            <button class="action-btn secondary small" onclick="startLuckyStar()">幸运星 🌟</button>
+          </div>
+          <div style="margin-top:8px;"><div class="cancel-btn" onclick="closeAll()">关闭</div></div>
+        </div>
+        <!-- Lucky Star -->
+        <div class="phase" id="teacher-luckystar" style="background:#fff;">
+          <div style="font-size:14px;font-weight:600;color:#6a1b9a;">🌟 幸运星结果</div>
+          <div style="font-size:20px;font-weight:700;color:#333;margin:12px 0;" id="teacher-star-name">赵小丽</div>
+          <div style="font-size:14px;color:#ff8f00;font-weight:600;">+2分</div>
+          <div style="font-size:11px;color:#999;margin-top:4px;">本课未参与抢答，优先选中</div>
+          <div class="actions" style="margin-top:16px;">
+            <button class="action-btn primary small" onclick="startNewRound()">再来一轮</button>
+            <button class="action-btn secondary small" onclick="startLuckyStar()">再抽一位 🌟</button>
+          </div>
+          <div style="margin-top:8px;"><div class="cancel-btn" onclick="closeAll()">关闭</div></div>
+        </div>
+      </div>
+      <div class="quick-bar">
+        <button class="bar-btn" onclick="quickQuiz()">
+          <span class="btn-icon">📝</span>
+          <span>随堂测</span>
+        </button>
+        <button class="bar-btn highlight" id="rush-bar-btn" onclick="initiateRush()">
+          <span class="btn-icon">⚡</span>
+          <span>抢答</span>
+        </button>
+        <button class="bar-btn">
+          <span class="btn-icon">🎯</span>
+          <span>点名</span>
+        </button>
+        <button class="bar-btn">
+          <span class="btn-icon">•••</span>
+          <span>更多</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Big Screen -->
+  <div class="device-wrapper">
+    <div class="device-label"><span class="icon">🖥️</span> 教室大屏（展示面）</div>
+    <div class="bigscreen-device" id="bigScreen">
+      <div class="screen-content">
+        <!-- Idle -->
+        <div class="phase bigscreen-idle active" id="big-idle">
+          <div class="courseware">一元二次方程 · 因式分解法</div>
+          <div class="subtitle">课件第 12 页</div>
+          <!-- Toolbox button -->
+          <button class="toolbox-float-btn" onclick="openToolbox()">🧰 工具箱</button>
+          <!-- Toolbox popup -->
+          <div class="toolbox-popup" id="toolbox-popup" style="display:none;">
+            <div class="toolbox-popup-title">工具箱</div>
+            <div class="toolbox-grid">
+              <button class="toolbox-item" onclick="closeToolbox();initiateRush();">
+                <span class="toolbox-item-icon">⚡</span>
+                <span>抢答</span>
+              </button>
+              <button class="toolbox-item" onclick="closeToolbox();">
+                <span class="toolbox-item-icon">🎯</span>
+                <span>随机点名</span>
+              </button>
+              <button class="toolbox-item" onclick="closeToolbox();">
+                <span class="toolbox-item-icon">⏱</span>
+                <span>倒计时</span>
+              </button>
+              <button class="toolbox-item" onclick="closeToolbox();">
+                <span class="toolbox-item-icon">📝</span>
+                <span>随堂测</span>
+              </button>
+            </div>
+            <button class="toolbox-close" onclick="closeToolbox()">关闭</button>
+          </div>
+        </div>
+        <!-- Overlay phases (modal on top of courseware) -->
+        <!-- Countdown -->
+        <div class="phase overlay-phase" id="big-countdown">
+          <div class="bigscreen-overlay">
+            <div class="bigscreen-modal countdown-modal">
+              <div class="title">⚡ 抢 答 ⚡</div>
+              <div class="countdown-number" id="big-countdown-num">3</div>
+              <div class="subtitle-hint">准备好了吗？最快点击的3位同学获得回答权！</div>
+              <button class="close-btn" onclick="closeAll()">关闭</button>
+            </div>
+          </div>
+        </div>
+        <!-- Racing -->
+        <div class="phase overlay-phase" id="big-racing">
+          <div class="bigscreen-overlay">
+            <div class="bigscreen-modal racing-modal">
+              <div class="title">⚡ 抢答中... ⚡</div>
+              <div class="timer" id="big-timer">⏱ 3</div>
+              <div class="participants">已有 <span id="big-participants" class="counter-animate">0</span> 人参与</div>
+              <button class="close-btn" onclick="closeAll()">关闭</button>
+            </div>
+          </div>
+        </div>
+        <!-- Result -->
+        <div class="phase overlay-phase" id="big-result">
+          <div class="bigscreen-overlay">
+            <div class="bigscreen-modal">
+              <div class="title">🎉 恭喜以下同学抢到！</div>
+              <div class="result-item"><span class="name">张小明</span><span class="points-tag">+1分 ⭐</span></div>
+              <div class="result-item"><span class="name">王小红</span><span class="points-tag">+1分 ⭐</span></div>
+              <div class="result-item"><span class="name">李大志</span><span class="points-tag">+1分 ⭐</span></div>
+              <div class="button-group">
+                <button class="action-btn primary" onclick="startNewRound()">再来一轮</button>
+                <button class="action-btn secondary" onclick="startLuckyStar()">随机幸运星 🌟</button>
+              </div>
+              <button class="close-btn" onclick="closeAll()">关闭</button>
+            </div>
+          </div>
+        </div>
+        <!-- Lucky Star -->
+        <div class="phase overlay-phase" id="big-luckystar">
+          <div class="bigscreen-overlay">
+            <div class="bigscreen-modal star-modal">
+              <div class="title" id="big-star-title">🌟 幸运星降临！ 🌟</div>
+              <div class="star-name" id="big-star-name">
+                <span class="star-rolling" id="star-rolling">滚动中...</span>
+              </div>
+              <div class="points" id="big-star-points" style="display:none;">+2分 ⭐</div>
+              <div class="button-group" id="star-buttons" style="display:none;">
+                <button class="action-btn primary" onclick="startNewRound()">再来一轮</button>
+                <button class="action-btn secondary" onclick="startLuckyStar()">再抽幸运星 🌟</button>
+              </div>
+              <button class="close-btn" onclick="closeAll()">关闭</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Tablet -->
+  <div class="device-wrapper">
+    <div class="device-label"><span class="icon">📋</span> 学生平板端</div>
+    <div class="student-device" id="studentScreen">
+      <div class="tab-bar"></div>
+      <div class="content">
+        <!-- Idle -->
+        <div class="phase active" id="student-idle">
+          <div style="font-size:40px;margin-bottom:12px;">📖</div>
+          <div class="idle-text">认真听讲中...</div>
+          <div style="font-size:11px;color:#ccc;margin-top:8px;">课件同步浏览</div>
+        </div>
+        <!-- Countdown -->
+        <div class="phase" id="student-countdown">
+          <div style="font-size:14px;color:#666;margin-bottom:8px;">⚡ 抢答即将开始</div>
+          <div class="countdown-number small" id="student-countdown-num" style="color:#ff6b35;">3</div>
+          <div style="font-size:12px;color:#999;">准备好手指！</div>
+        </div>
+        <!-- Racing (button always orange, can keep tapping) -->
+        <div class="phase" id="student-racing">
+          <div class="rush-btn-wrapper" id="rush-btn-wrapper">
+            <button class="rush-btn ready" id="student-rush-btn" onclick="studentClick()">
+              抢
+            </button>
+          </div>
+          <div style="font-size:11px;color:#999;margin-top:12px;">想好后积极抢答吧~</div>
+        </div>
+        <!-- Won -->
+        <div class="phase" id="student-won">
+          <div style="font-size:40px;margin-bottom:8px;">🎉</div>
+          <div class="congrats">恭喜！你抢到了！</div>
+          <div class="points">+1 积分 ⭐</div>
+          <div style="font-size:12px;color:#999;">等待老师提问</div>
+        </div>
+        <!-- Missed -->
+        <div class="phase" id="student-missed">
+          <div style="font-size:12px;color:#666;margin-bottom:12px;">本轮抢到的同学：</div>
+          <div style="font-size:14px;font-weight:600;color:#333;">张小明、王小红、李大志</div>
+          <div style="font-size:20px;margin-top:12px;">💪</div>
+          <div style="font-size:12px;color:#999;margin-top:4px;">下次加油！</div>
+        </div>
+        <!-- No Answer -->
+        <div class="phase" id="student-noanswer">
+          <div style="font-size:36px;margin-bottom:8px;">😅</div>
+          <div style="font-size:14px;color:#666;">本轮无人抢答</div>
+          <div style="font-size:12px;color:#999;margin-top:4px;">等待老师操作...</div>
+        </div>
+        <!-- Lucky Star Won -->
+        <div class="phase" id="student-star-won">
+          <div style="font-size:40px;margin-bottom:8px;">🌟</div>
+          <div style="font-size:16px;font-weight:700;color:#6a1b9a;">你是幸运星！</div>
+          <div style="font-size:22px;color:#ff8f00;font-weight:800;margin:8px 0;">+2 积分 ⭐</div>
+          <div style="font-size:12px;color:#999;">请准备回答老师的问题</div>
+        </div>
+        <!-- Lucky Star Others -->
+        <div class="phase" id="student-star-other">
+          <div style="font-size:30px;margin-bottom:8px;">🌟</div>
+          <div style="font-size:14px;color:#666;">幸运星选中了</div>
+          <div style="font-size:18px;font-weight:700;color:#333;margin:8px 0;">赵小丽</div>
+          <div style="font-size:12px;color:#999;">为她加油吧！</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Control Panel -->
+<div class="control-panel">
+  <button class="ctrl-btn active" onclick="goToStage(0)">待机</button>
+  <button class="ctrl-btn" onclick="goToStage(1)">倒计时</button>
+  <button class="ctrl-btn" onclick="goToStage(2)">抢答中</button>
+  <button class="ctrl-btn" onclick="goToStage(3)">结果揭晓</button>
+  <button class="ctrl-btn" onclick="stageNoAnswer()">无人抢答</button>
+  <button class="ctrl-btn" onclick="goToStage(4)">幸运星</button>
+  <button class="ctrl-btn reset" onclick="goToStage(0)">重置</button>
+</div>
+
+<script>
+// State
+let currentStage = 0;
+let countdownTimer = null;
+let racingTimer = null;
+let participantCount = 0;
+let racingSeconds = 3;
+let studentClicked = false;
+let noAnswerTriggered = false;
+
+const names = ['张小明','王小红','李大志','赵小丽','刘强','陈雪','周文','黄丽','吴凯','孙悦'];
+
+// Utility
+function showPhase(containerId, phaseId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const parent = container.querySelector('.content') || container.querySelector('.screen-content');
+  if (!parent) return;
+
+  if (containerId === 'bigScreen') {
+    // Big screen: always keep idle visible as background, toggle overlays
+    parent.querySelectorAll('.phase').forEach(p => {
+      if (p.id !== 'big-idle') p.classList.remove('active');
+    });
+    // Always show idle (courseware background)
+    document.getElementById('big-idle').classList.add('active');
+    // Show target overlay if not idle
+    if (phaseId !== 'big-idle') {
+      const target = document.getElementById(phaseId);
+      if (target) target.classList.add('active');
+    }
+  } else {
+    parent.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(phaseId);
+    if (target) target.classList.add('active');
+  }
+}
+
+function updateStageIndicator(stage) {
+  document.querySelectorAll('.stage-dot').forEach((dot, i) => {
+    dot.classList.remove('active', 'passed');
+    if (i === stage) dot.classList.add('active');
+    else if (i < stage) dot.classList.add('passed');
+  });
+  document.querySelectorAll('.stage-labels span').forEach((span, i) => {
+    span.classList.remove('active');
+    if (i === stage) span.classList.add('active');
+  });
+  document.querySelectorAll('.control-panel .ctrl-btn').forEach((btn, i) => {
+    btn.classList.remove('active');
+    if (i === stage) btn.classList.add('active');
+  });
+}
+
+function updateTeacherStatus(text) {
+  const bar = document.querySelector('.teacher-device .status-bar span');
+  if (bar) bar.textContent = text;
+}
+
+// Stage transitions
+function goToStage(stage) {
+  clearInterval(countdownTimer);
+  clearInterval(racingTimer);
+  currentStage = stage;
+  studentClicked = false;
+  updateStageIndicator(stage);
+
+  switch(stage) {
+    case 0: stageIdle(); break;
+    case 1: stageCountdown(); break;
+    case 2: stageRacing(); break;
+    case 3: stageResult(); break;
+    case 4: stageLuckyStar(); break;
+    case 5: stageComplete(); break;
+  }
+}
+
+function stageIdle() {
+  showPhase('teacherScreen', 'teacher-idle');
+  showPhase('bigScreen', 'big-idle');
+  showPhase('studentScreen', 'student-idle');
+  updateTeacherStatus('📱 在线 43/45 │ 课件播放中');
+  closeToolbox();
+}
+
+function stageCountdown() {
+  // Teacher sees simple "in progress" state (no real-time animation sync)
+  showPhase('teacherScreen', 'teacher-inprogress');
+  showPhase('bigScreen', 'big-countdown');
+  showPhase('studentScreen', 'student-countdown');
+  updateTeacherStatus('📱 在线 43/45 │ ⚡ 抢答进行中');
+
+  let count = 3;
+  document.getElementById('big-countdown-num').textContent = count;
+  document.getElementById('student-countdown-num').textContent = count;
+
+  countdownTimer = setInterval(() => {
+    count--;
+    if (count > 0) {
+      document.getElementById('big-countdown-num').textContent = count;
+      document.getElementById('student-countdown-num').textContent = count;
+    } else {
+      clearInterval(countdownTimer);
+      // Auto advance to racing
+      goToStage(2);
+    }
+  }, 1000);
+}
+
+function stageRacing() {
+  // Teacher stays on "in progress" state
+  showPhase('teacherScreen', 'teacher-inprogress');
+  showPhase('bigScreen', 'big-racing');
+  showPhase('studentScreen', 'student-racing');
+  updateTeacherStatus('📱 在线 43/45 │ ⚡ 抢答进行中');
+  updateStageIndicator(2);
+
+  racingSeconds = 3;
+  participantCount = 0;
+  document.getElementById('big-timer').textContent = '⏱ ' + racingSeconds;
+  document.getElementById('big-participants').textContent = '0';
+
+  // Reset student button
+  const btn = document.getElementById('student-rush-btn');
+  btn.className = 'rush-btn ready';
+  btn.textContent = '抢';
+  btn.style.transform = 'scale(1)';
+  studentClicked = false;
+  clickCount = 0;
+
+  racingTimer = setInterval(() => {
+    racingSeconds--;
+    document.getElementById('big-timer').textContent = '⏱ ' + racingSeconds;
+    if (racingSeconds <= 0) {
+      clearInterval(racingTimer);
+      // Key logic: if student didn't click → no answer → auto lucky star
+      if (!studentClicked) {
+        setTimeout(() => stageNoAnswer(), 500);
+      } else {
+        setTimeout(() => goToStage(3), 500);
+      }
+    }
+  }, 1000);
+}
+
+function stageResult() {
+  clearInterval(countdownTimer);
+  clearInterval(racingTimer);
+  showPhase('teacherScreen', 'teacher-result');
+  showPhase('bigScreen', 'big-result');
+  updateTeacherStatus('📱 在线 43/45 │ 🎉 抢答结果');
+  updateStageIndicator(3);
+
+  // Student clicked and won in this demo
+  showPhase('studentScreen', 'student-won');
+  addPointsAnimation('studentScreen');
+}
+
+function stageLuckyStar(fromNoAnswer) {
+  showPhase('teacherScreen', 'teacher-luckystar');
+  showPhase('bigScreen', 'big-luckystar');
+  showPhase('studentScreen', 'student-star-other');
+  updateTeacherStatus('📱 在线 43/45 │ 🌟 幸运星');
+  updateStageIndicator(4);
+
+  // Update title based on trigger source
+  const titleEl = document.getElementById('big-star-title');
+  if (fromNoAnswer || noAnswerTriggered) {
+    titleEl.textContent = '无人抢答，幸运星降临！';
+    noAnswerTriggered = false;
+  } else {
+    titleEl.textContent = '🌟 幸运星降临！ 🌟';
+  }
+
+  // Rolling animation
+  const nameEl = document.getElementById('big-star-name');
+  const pointsEl = document.getElementById('big-star-points');
+  const buttonsEl = document.getElementById('star-buttons');
+
+  nameEl.innerHTML = '<span class="star-rolling" id="star-rolling">滚动中...</span>';
+  pointsEl.style.display = 'none';
+  buttonsEl.style.display = 'none';
+
+  let rollCount = 0;
+  let rollInterval = setInterval(() => {
+    const randomName = names[Math.floor(Math.random() * names.length)];
+    document.getElementById('star-rolling').textContent = randomName;
+    rollCount++;
+    if (rollCount >= 15) {
+      clearInterval(rollInterval);
+      // Final selection
+      nameEl.innerHTML = '赵小丽';
+      nameEl.style.animation = 'none';
+      setTimeout(() => {
+        pointsEl.style.display = 'block';
+        buttonsEl.style.display = 'flex';
+      }, 500);
+    }
+  }, 150);
+}
+
+function stageComplete() {
+  stageIdle();
+  updateStageIndicator(5);
+}
+
+// Actions
+function initiateRush() {
+  if (currentStage === 0 || currentStage === 5) {
+    goToStage(1);
+  }
+}
+
+function startNewRound() {
+  goToStage(1);
+}
+
+function startLuckyStar() {
+  goToStage(4);
+}
+
+let clickCount = 0;
+
+function studentClick() {
+  // Register click (first click counts for result logic)
+  if (!studentClicked) {
+    studentClicked = true;
+    participantCount++;
+    document.getElementById('big-participants').textContent = participantCount;
+  }
+
+  clickCount++;
+
+  // Button pulse feedback
+  const btn = document.getElementById('student-rush-btn');
+  btn.style.transform = 'scale(0.92)';
+  setTimeout(() => { btn.style.transform = 'scale(1)'; }, 100);
+
+  // Float "抢答+1" animation (fixed text, above the button)
+  const wrapper = document.getElementById('rush-btn-wrapper');
+  const float = document.createElement('div');
+  float.className = 'rush-float-text';
+  float.textContent = '抢答+1';
+  wrapper.appendChild(float);
+  setTimeout(() => float.remove(), 1000);
+}
+
+function closeAll() {
+  goToStage(0);
+}
+
+function quickQuiz() {
+  // Not implemented in this demo
+}
+
+// UI Helpers
+
+function addPointsAnimation(screenId) {
+  const container = document.getElementById(screenId).querySelector('.content');
+  const fly = document.createElement('div');
+  fly.className = 'points-fly';
+  fly.textContent = '+1 ⭐';
+  fly.style.top = '40%';
+  fly.style.left = '50%';
+  container.appendChild(fly);
+  setTimeout(() => fly.remove(), 1500);
+}
+
+// Toolbox
+function openToolbox() {
+  document.getElementById('toolbox-popup').style.display = 'block';
+}
+
+function closeToolbox() {
+  const popup = document.getElementById('toolbox-popup');
+  if (popup) popup.style.display = 'none';
+}
+
+// No answer scenario → directly enter lucky star with modified title
+function stageNoAnswer() {
+  clearInterval(countdownTimer);
+  clearInterval(racingTimer);
+  noAnswerTriggered = true;
+  showPhase('teacherScreen', 'teacher-noanswer');
+  showPhase('studentScreen', 'student-noanswer');
+  updateTeacherStatus('📱 在线 43/45 │ 🌟 无人抢答·幸运星');
+  updateStageIndicator(4);
+  // Directly show lucky star on big screen with modified title
+  stageLuckyStar(true);
+}
+
+// Init
+goToStage(0);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学生管理系统 - 交互Demo</title>
+<style>
+:root {
+  --primary: #00BCD4;
+  --primary-hover: #00ACC1;
+  --primary-light: #E0F7FA;
+  --danger: #F44336;
+  --danger-hover: #D32F2F;
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-muted: #999;
+  --border: #E8E8E8;
+  --bg-gray: #F5F5F5;
+  --bg-white: #fff;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; font-size: 14px; color: var(--text-primary); background: var(--bg-gray); }
+button { cursor: pointer; border: none; font-size: 14px; font-family: inherit; }
+input, select { font-family: inherit; font-size: 14px; }
+
+/* Layout */
+.app { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 200px; background: var(--bg-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-logo { padding: 20px 16px; font-size: 16px; font-weight: 600; color: var(--primary); border-bottom: 1px solid var(--border); }
+.sidebar-menu { flex: 1; padding: 8px 0; overflow-y: auto; }
+.menu-item { display: flex; align-items: center; padding: 12px 16px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; position: relative; }
+.menu-item:hover { background: var(--primary-light); color: var(--primary); }
+.menu-item.active { color: var(--primary); background: var(--primary-light); }
+.menu-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); }
+.menu-item .icon { width: 20px; margin-right: 8px; text-align: center; }
+.menu-sub { padding-left: 28px; }
+.menu-sub .menu-item { padding: 10px 16px; font-size: 13px; }
+
+/* Main Content */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main-header { padding: 16px 24px; background: var(--bg-white); border-bottom: 1px solid var(--border); }
+.main-header h2 { font-size: 18px; font-weight: 500; }
+.main-body { flex: 1; padding: 24px; overflow-y: auto; }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Breadcrumb */
+.breadcrumb { margin-bottom: 16px; color: var(--text-muted); font-size: 13px; }
+.breadcrumb a { color: var(--primary); text-decoration: none; }
+.breadcrumb span { margin: 0 6px; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab { padding: 12px 20px; color: var(--text-secondary); cursor: pointer; position: relative; transition: color 0.2s; }
+.tab:hover { color: var(--primary); }
+.tab.active { color: var(--primary); }
+.tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Search Bar */
+.search-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; padding: 16px; background: var(--bg-white); border-radius: 4px; }
+.search-bar label { color: var(--text-secondary); font-size: 13px; white-space: nowrap; }
+.search-bar .field { display: flex; align-items: center; gap: 6px; }
+.search-bar input, .search-bar select { height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; min-width: 140px; }
+.search-bar select { min-width: 100px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 6px 16px; border-radius: 4px; transition: all 0.2s; height: 32px; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-default { background: var(--bg-white); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-default:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-text { background: none; padding: 4px 8px; height: auto; }
+.btn-text-primary { color: var(--primary); }
+.btn-text-primary:hover { color: var(--primary-hover); }
+.btn-text-danger { color: var(--danger); }
+.btn-text-danger:hover { color: var(--danger-hover); }
+.btn-sm { height: 28px; padding: 4px 12px; font-size: 13px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Table */
+.table-wrap { background: var(--bg-white); border-radius: 4px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--bg-gray); }
+th { padding: 12px 16px; text-align: left; font-weight: 500; color: var(--text-secondary); font-size: 13px; white-space: nowrap; }
+td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; color: var(--text-primary); font-size: 13px; }
+tr:hover td { background: #fafafa; }
+.table-actions { display: flex; gap: 4px; align-items: center; }
+.table-actions .divider { color: var(--border); margin: 0 2px; }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: flex-end; padding: 16px; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.pagination button { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--text-secondary); }
+.pagination button.active { border-color: var(--primary); color: var(--primary); }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; box-shadow: var(--shadow-lg); max-height: 80vh; display: flex; flex-direction: column; animation: modalIn 0.2s ease; }
+.modal-sm { width: 400px; }
+.modal-md { width: 600px; }
+.modal-lg { width: 800px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+.modal-header h3 { font-size: 16px; font-weight: 500; }
+.modal-close { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 18px; border-radius: 50%; }
+.modal-close:hover { background: var(--bg-gray); }
+.modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+/* Tags */
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.tag-success { background: #E8F5E9; color: #4CAF50; }
+.tag-warning { background: #FFF3E0; color: #FF9800; }
+.tag-danger { background: #FFEBEE; color: #F44336; }
+.tag-info { background: var(--primary-light); color: var(--primary); }
+.tag-gray { background: #F5F5F5; color: var(--text-muted); }
+.tag-new { background: #2196F3; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-left: 6px; font-weight: 500; }
+
+/* Toast */
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: #333; color: #fff; border-radius: 4px; z-index: 9999; animation: toastIn 0.3s ease; font-size: 14px; }
+.toast-success { background: var(--success); }
+.toast-error { background: var(--danger); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* Drawer */
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 900; }
+.drawer-overlay.show { display: block; }
+.drawer { position: fixed; top: 0; right: -500px; width: 500px; height: 100vh; background: #fff; box-shadow: -4px 0 16px rgba(0,0,0,0.1); z-index: 901; transition: right 0.3s ease; display: flex; flex-direction: column; }
+.drawer.open { right: 0; }
+.drawer-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.drawer-header h3 { font-size: 16px; font-weight: 500; }
+.drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+
+/* Cards */
+.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+.card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+.card-tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; margin-bottom: 8px; }
+.card-tag-blue { background: #E3F2FD; color: #1976D2; }
+.card-tag-green { background: #E8F5E9; color: #388E3C; }
+.card-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+.card-info { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+
+/* Upload area */
+.upload-area { border: 1px dashed var(--border); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 16px; }
+.upload-area:hover { border-color: var(--primary); }
+.upload-area .upload-icon { font-size: 24px; color: var(--text-muted); margin-bottom: 8px; }
+.upload-area p { color: var(--text-muted); font-size: 13px; }
+
+/* Transfer expand area */
+.transfer-expand { background: var(--bg-gray); border-radius: 4px; padding: 16px; margin-top: 12px; display: none; }
+.transfer-expand.show { display: block; animation: fadeIn 0.2s ease; }
+.transfer-expand .field-row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.transfer-expand label { font-size: 13px; color: var(--text-secondary); min-width: 60px; }
+.transfer-expand select { height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; min-width: 150px; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Confirm dialog */
+.confirm-dialog { text-align: center; padding: 20px 0; }
+.confirm-dialog .icon { font-size: 40px; margin-bottom: 12px; }
+.confirm-dialog p { color: var(--text-secondary); margin-bottom: 8px; }
+.confirm-dialog .warn { color: var(--danger); font-size: 13px; }
+
+/* Summary cards */
+.summary-cards { display: flex; gap: 16px; margin-bottom: 20px; }
+.summary-card { flex: 1; padding: 16px; background: var(--bg-gray); border-radius: 8px; text-align: center; }
+.summary-card .num { font-size: 24px; font-weight: 600; color: var(--primary); }
+.summary-card .label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* Placeholder */
+.placeholder-block { background: var(--bg-gray); border-radius: 8px; padding: 40px; text-align: center; color: var(--text-muted); }
+
+/* Dropdown with history */
+.class-dropdown { position: relative; }
+.class-dropdown-menu { position: absolute; top: 100%; left: 0; width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 4px; box-shadow: var(--shadow); z-index: 10; max-height: 200px; overflow-y: auto; display: none; }
+.class-dropdown-menu.show { display: block; }
+.class-dropdown-menu .dropdown-item { padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.class-dropdown-menu .dropdown-item:hover { background: var(--primary-light); }
+.class-dropdown-menu .dropdown-group { padding: 6px 12px; font-size: 12px; color: var(--text-muted); background: var(--bg-gray); }
+.history-tag { font-size: 11px; color: var(--text-muted); background: #f0f0f0; padding: 1px 6px; border-radius: 3px; }
+
+/* Section title */
+.section-title { font-size: 15px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+/* Status dot */
+.status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot-success { background: var(--success); }
+.status-dot-warning { background: var(--warning); }
+.status-dot-danger { background: var(--danger); }
+
+/* Filter area for page7 */
+.filter-area { display: flex; gap: 16px; align-items: center; padding: 16px; background: #fff; border-radius: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-area label { font-size: 13px; color: var(--text-secondary); }
+.filter-area select, .filter-area input { height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; }
+
+/* Ring chart placeholder */
+.ring-chart { width: 120px; height: 120px; border-radius: 50%; border: 12px solid var(--primary); position: relative; display: flex; align-items: center; justify-content: center; }
+.ring-chart span { font-size: 20px; font-weight: 600; color: var(--primary); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">📚 教务管理系统</div>
+    <nav class="sidebar-menu">
+      <div class="menu-item active" onclick="navigateTo('student-manage')">
+        <span class="icon">👤</span> 学生管理
+      </div>
+      <div class="menu-item" onclick="navigateTo('class-manage')">
+        <span class="icon">🏫</span> 班课管理
+      </div>
+      <div class="menu-item" onclick="navigateTo('homework')">
+        <span class="icon">📝</span> 作业任务
+      </div>
+      <div class="menu-item" onclick="navigateTo('student-analytics')">
+        <span class="icon">📊</span> 学情中心
+      </div>
+      <div class="menu-sub" id="analytics-sub" style="display:none;">
+        <div class="menu-item" onclick="navigateTo('student-analytics')">
+          <span class="icon">·</span> 学生学情
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="main-body">
+
+      <!-- ========== PAGE 1: 学生管理列表 ========== -->
+      <div class="page active" id="page-student-manage">
+        <div class="tabs">
+          <div class="tab active" onclick="switchStudentTab('list')">学生管理</div>
+          <div class="tab" onclick="switchStudentTab('import')">批量导入</div>
+        </div>
+
+        <!-- Tab1: 学生管理列表 -->
+        <div class="tab-content active" id="student-tab-list">
+          <div class="search-bar">
+            <div class="field"><label>用户ID</label><input type="text" placeholder="请输入"></div>
+            <div class="field"><label>姓名</label><input type="text" placeholder="请输入"></div>
+            <div class="field"><label>学号</label><input type="text" placeholder="请输入"></div>
+            <div class="field"><label>手机号</label><input type="text" placeholder="请输入"></div>
+            <div class="field"><label>状态</label>
+              <select><option>全部</option><option>正常</option><option>禁用</option></select>
+            </div>
+            <button class="btn btn-primary btn-sm">查询</button>
+            <button class="btn btn-default btn-sm">重置</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>用户ID</th><th>姓名</th><th>学号</th><th>关联手机号</th><th>所属班级</th><th>状态</th><th>添加时间</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="student-table-body">
+              </tbody>
+            </table>
+            <div class="pagination">
+              <span>共 6 条记录</span>
+              <button>&lt;</button>
+              <button class="active">1</button>
+              <button>&gt;</button>
+              <span>10条/页</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab2: 批量导入 (PAGE 3) -->
+        <div class="tab-content" id="student-tab-import">
+          <div class="section-title">模板下载</div>
+          <div style="margin-bottom:24px; padding:16px; background:#fff; border-radius:8px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <button class="btn btn-default btn-sm">📥 下载导入模板</button>
+            <button class="btn btn-default btn-sm" style="border-color:var(--primary); color:var(--primary);">📥 下载批量换班模板 <span class="tag-new" style="margin-left:4px;">NEW</span></button>
+            <span style="color:var(--text-muted); font-size:13px;">请根据操作类型选择对应模板</span>
+          </div>
+
+          <div class="section-title">批量新增</div>
+          <div class="upload-area">
+            <div class="upload-icon">📁</div>
+            <p>点击或拖拽文件到此处上传</p>
+            <p style="margin-top:4px;">支持 .xlsx 格式</p>
+          </div>
+
+          <div class="section-title">批量修改</div>
+          <div class="upload-area">
+            <div class="upload-icon">📁</div>
+            <p>点击或拖拽文件到此处上传</p>
+            <p style="margin-top:4px;">支持 .xlsx 格式</p>
+          </div>
+
+          <div class="section-title">批量换班 <span class="tag-new">NEW</span></div>
+          <div style="padding:20px; background:#fff; border-radius:8px; border: 1px solid var(--primary); margin-bottom:24px;">
+            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+              <div style="flex:1;">
+                <div class="upload-area" style="margin-bottom:0; border-color:var(--primary);">
+                  <div class="upload-icon">📁</div>
+                  <p>点击或拖拽换班文件到此处上传</p>
+                  <p style="margin-top:4px;">支持 .xlsx 格式，请使用换班专用模板</p>
+                </div>
+              </div>
+              <div>
+                <button class="btn btn-primary" onclick="showBatchPreview()">提交</button>
+              </div>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">💡 模板格式：学生姓名 + 学号 + 原班级ID（可选） + 目标班级ID（填-1表示退班） + 修改后学号（可选）。支持换班同时修改学号，系统自动检测学号冲突。未涉及的学生不受影响。</p>
+          </div>
+
+          <div class="section-title">历史记录</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>操作时间</th><th>操作类型</th><th>操作人</th><th>文件名</th><th>结果</th><th>操作</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024-03-15 14:30:22</td>
+                  <td><span class="tag tag-info">批量换班</span></td>
+                  <td>张老师</td>
+                  <td>三年级换班名单.xlsx</td>
+                  <td><span style="color:var(--success);">换班12人 / 退班5人</span> / <span style="color:var(--text-muted);">跳过1人</span></td>
+                  <td><button class="btn-text" onclick="showToast('已导出变动明细文件')">导出变动明细</button></td>
+                </tr>
+                <tr>
+                  <td>2024-03-14 09:15:00</td>
+                  <td><span class="tag tag-gray">批量新增</span></td>
+                  <td>李老师</td>
+                  <td>新生名单.xlsx</td>
+                  <td><span style="color:var(--success);">成功50人</span> / <span style="color:var(--danger);">失败2人</span></td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>2024-03-12 16:45:10</td>
+                  <td><span class="tag tag-info">批量换班</span></td>
+                  <td>张老师</td>
+                  <td>二年级分班调整.xlsx</td>
+                  <td><span style="color:var(--success);">换班8人 / 退班3人</span></td>
+                  <td><button class="btn-text" onclick="showToast('已导出变动明细文件')">导出变动明细</button></td>
+                </tr>
+                <tr>
+                  <td>2024-03-10 10:20:33</td>
+                  <td><span class="tag tag-gray">批量修改</span></td>
+                  <td>王老师</td>
+                  <td>学生信息更新.xlsx</td>
+                  <td><span style="color:var(--success);">成功30人</span></td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PAGE 4: 班级管理列表 ========== -->
+      <div class="page" id="page-class-manage">
+        <div class="search-bar">
+          <div class="field"><label>班级ID</label><input type="text" placeholder="请输入"></div>
+          <div class="field"><label>班级名称</label><input type="text" placeholder="请输入"></div>
+          <div class="field"><label>班主任</label><input type="text" placeholder="请输入"></div>
+          <div class="field"><label>年级</label>
+            <select><option>全部</option><option>一年级</option><option>二年级</option><option>三年级</option></select>
+          </div>
+          <div class="field"><label>状态</label>
+            <select><option>全部</option><option>正常</option><option>已归档</option></select>
+          </div>
+          <div class="field"><label>班级类型</label>
+            <select><option>全部</option><option>行政班</option><option>教学班</option></select>
+          </div>
+          <button class="btn btn-primary btn-sm">查询</button>
+          <button class="btn btn-default btn-sm">重置</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>班级ID</th><th>班级名称</th><th>入学年份</th><th>年级</th><th>类型</th><th>教室</th><th>班主任</th><th>班级状态</th><th>操作</th></tr>
+            </thead>
+            <tbody id="class-table-body">
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span>共 6 条记录</span>
+            <button>&lt;</button>
+            <button class="active">1</button>
+            <button>&gt;</button>
+            <span>10条/页</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PAGE 5: 班级 > 学生管理 ========== -->
+      <div class="page" id="page-class-students">
+        <div class="breadcrumb">
+          <a href="#" onclick="navigateTo('class-manage'); return false;">班课管理</a>
+          <span>></span>
+          <span id="class-student-title">三年级1班 - 学生管理</span>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active">学生管理</div>
+          <div class="tab">批量导入</div>
+        </div>
+
+        <div class="search-bar">
+          <div class="field"><label>用户ID</label><input type="text" placeholder="请输入"></div>
+          <div class="field"><label>姓名</label><input type="text" placeholder="请输入"></div>
+          <div class="field"><label>学号</label><input type="text" placeholder="请输入"></div>
+          <button class="btn btn-primary btn-sm">查询</button>
+          <button class="btn btn-default btn-sm">重置</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>用户ID</th><th>姓名</th><th>学号</th><th>加入班级时间</th><th>操作</th></tr>
+            </thead>
+            <tbody id="class-students-body">
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span>共 4 条记录</span>
+            <button>&lt;</button>
+            <button class="active">1</button>
+            <button>&gt;</button>
+            <span>10条/页</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PAGE 6: 作业任务 ========== -->
+      <div class="page" id="page-homework">
+        <div class="search-bar">
+          <div class="field"><label>作业名称</label><input type="text" placeholder="请输入"></div>
+          <div class="field"><label>班级</label>
+            <select><option>全部</option><option>三年级1班</option><option>三年级2班</option></select>
+          </div>
+          <button class="btn btn-primary btn-sm">查询</button>
+          <button class="btn btn-default btn-sm">重置</button>
+        </div>
+
+        <div class="card-grid" id="homework-cards">
+        </div>
+      </div>
+
+      <!-- ========== PAGE 7: 学生学情 ========== -->
+      <div class="page" id="page-student-analytics">
+        <div class="section-title">学生学情概览</div>
+
+        <div class="filter-area">
+          <div class="field">
+            <label>学生</label>
+            <select><option>张三（2024001）</option></select>
+          </div>
+          <div class="field">
+            <label>时间范围</label>
+            <select><option>近30天</option><option>近7天</option><option>本学期</option></select>
+          </div>
+          <div class="field">
+            <label>班级</label>
+            <select style="min-width:200px;" disabled>
+              <option>全部班级（含已转出）</option>
+            </select>
+            <span style="font-size:12px; color:var(--text-muted); margin-left:4px;">默认展示所选时间段内所有班级的综合学情</span>
+          </div>
+          <div class="field">
+            <label>学科</label>
+            <select><option>全部</option><option>数学</option><option>语文</option><option>英语</option></select>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:24px; margin-bottom:24px;">
+          <div style="background:#fff; border-radius:8px; padding:24px; text-align:center;">
+            <div class="ring-chart"><span>78%</span></div>
+            <p style="margin-top:12px; color:var(--text-secondary);">综合正确率</p>
+          </div>
+          <div style="flex:1; background:#fff; border-radius:8px; padding:24px;">
+            <h4 style="margin-bottom:16px;">学情概述</h4>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
+              <div class="summary-card"><div class="num">42</div><div class="label">已完成作业</div></div>
+              <div class="summary-card"><div class="num">3</div><div class="label">未完成作业</div></div>
+              <div class="summary-card"><div class="num">85%</div><div class="label">提交率</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="placeholder-block">
+          <p>📊 详细学情趋势图表区域（简化展示）</p>
+          <p style="margin-top:8px; font-size:12px;">选择不同班级可查看该学生在对应班级的历史学情数据</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ========== MODAL: 调整班级 (PAGE 2) ========== -->
+<div class="modal-overlay" id="modal-adjust-class">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>调整班级 <span class="tag-new">NEW</span></h3>
+      <span class="modal-close" onclick="closeModal('modal-adjust-class')">×</span>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px; padding:12px; background:var(--bg-gray); border-radius:4px;">
+        <span style="color:var(--text-muted);">学生信息：</span>
+        <strong id="adjust-student-name">张三</strong>
+        <span style="margin-left:16px; color:var(--text-muted);">学号：</span>
+        <span id="adjust-student-id">2024001</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>班级ID</th><th>班级名称</th><th>班级状态</th><th>班级类型</th><th>操作</th></tr>
+          </thead>
+          <tbody id="adjust-class-table">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 换班展开区域 -->
+      <div class="transfer-expand" id="transfer-expand-area">
+        <div style="margin-bottom:12px; font-weight:500; font-size:13px;">选择目标班级 <span id="transfer-class-type-hint" style="font-weight:normal; font-size:12px; color:var(--text-muted);"></span></div>
+        <div class="field-row">
+          <label>目标年级</label>
+          <select id="transfer-grade" onchange="updateTransferClasses()">
+            <option value="">请选择年级</option>
+            <option value="1">一年级</option>
+            <option value="2">二年级</option>
+            <option value="3">三年级</option>
+          </select>
+          <label>目标班级</label>
+          <select id="transfer-class" onchange="validateTransferClass()">
+            <option value="">请先选择年级</option>
+          </select>
+        </div>
+        <div id="transfer-warning" style="display:none; margin-top:8px; padding:8px 12px; background:#FFF3E0; border-radius:4px; color:var(--danger); font-size:13px;"></div>
+        <div class="field-row" style="margin-top:16px;">
+          <button class="btn btn-primary btn-sm" id="btn-confirm-transfer" onclick="confirmTransfer()" disabled>确认换班</button>
+          <button class="btn btn-default btn-sm" onclick="cancelTransfer()">取消</button>
+        </div>
+      </div>
+
+      <!-- 加入班级展开区域 -->
+      <div class="transfer-expand" id="join-class-area">
+        <div style="margin-bottom:12px; font-weight:500; font-size:13px;">选择要加入的班级</div>
+        <div class="field-row">
+          <label>年级</label>
+          <select id="join-grade" onchange="updateJoinClasses()">
+            <option value="">请选择年级</option>
+            <option value="1">一年级</option>
+            <option value="2">二年级</option>
+            <option value="3">三年级</option>
+          </select>
+          <label>班级</label>
+          <select id="join-class">
+            <option value="">请先选择年级</option>
+          </select>
+        </div>
+        <div class="field-row" style="margin-top:16px;">
+          <button class="btn btn-primary btn-sm" onclick="confirmJoinClass()">确认加入</button>
+          <button class="btn btn-default btn-sm" onclick="cancelJoinClass()">取消</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-sm" onclick="showJoinClassArea()">+ 加入班级</button>
+      <button class="btn btn-default btn-sm" onclick="closeModal('modal-adjust-class')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: 退班确认 ========== -->
+<div class="modal-overlay" id="modal-quit-confirm">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>退班确认</h3>
+      <span class="modal-close" onclick="closeModal('modal-quit-confirm')">×</span>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-dialog">
+        <div class="icon">⚠️</div>
+        <p>确认将该学生从 <strong id="quit-class-name">三年级1班</strong> 中退出？</p>
+        <p class="warn" style="margin-top:12px;">退班后，该学生在此班级的作业数据将保留但标注为"已退班"</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default btn-sm" onclick="closeModal('modal-quit-confirm')">取消</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmQuit()">确认退班</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: 批量换班预览 ========== -->
+<div class="modal-overlay" id="modal-batch-preview">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>变动预览</h3>
+      <span class="modal-close" onclick="closeModal('modal-batch-preview')">×</span>
+    </div>
+    <div class="modal-body">
+      <div class="summary-cards">
+        <div class="summary-card"><div class="num">10</div><div class="label">文件总记录</div></div>
+        <div class="summary-card"><div class="num" style="color:var(--success);">3</div><div class="label">换班</div></div>
+        <div class="summary-card"><div class="num" style="color:var(--warning);">2</div><div class="label">退班</div></div>
+        <div class="summary-card"><div class="num" style="color:var(--text-muted);">1</div><div class="label">仅改学号</div></div>
+        <div class="summary-card"><div class="num" style="color:var(--danger);">4</div><div class="label">校验失败</div></div>
+      </div>
+
+      <div class="section-title">变动明细</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>姓名</th><th>学号</th><th>原班级ID</th><th>目标班级ID</th><th>修改后学号</th><th>操作类型</th><th>原班级</th><th>目标班级</th><th>校验结果</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>张三</td><td>2024001</td><td><span style="color:var(--text-muted);">—</span></td><td>C302</td><td><span style="color:var(--primary);">S3-001</span></td><td><span class="tag tag-info">换班</span></td><td>三年级1班（行政班）<br><span style="font-size:11px;color:var(--text-muted);">系统自动识别</span></td><td>三年级2班（行政班）</td><td><span style="color:var(--success);">✓ 通过</span></td></tr>
+            <tr><td>王五</td><td>2024003</td><td>W101</td><td>W102</td><td><span style="color:var(--primary);">S3-003</span></td><td><span class="tag tag-info">换班</span></td><td>数学提高班A（走班）</td><td>数学提高班B（走班）</td><td><span style="color:var(--success);">✓ 通过</span></td></tr>
+            <tr><td>钱十</td><td>2024008</td><td><span style="color:var(--text-muted);">—</span></td><td>C301</td><td><span style="color:var(--text-muted);">—</span></td><td><span class="tag tag-info">换班</span></td><td>三年级3班（行政班）<br><span style="font-size:11px;color:var(--text-muted);">系统自动识别</span></td><td>三年级1班（行政班）</td><td><span style="color:var(--success);">✓ 通过</span></td></tr>
+            <tr><td>赵七</td><td>2024005</td><td><span style="color:var(--text-muted);">—</span></td><td>-1</td><td><span style="color:var(--text-muted);">—</span></td><td><span class="tag tag-warning">退班</span></td><td>全部班级</td><td>—</td><td><span style="color:var(--success);">✓ 通过</span></td></tr>
+            <tr><td>孙八</td><td>2024006</td><td>C302</td><td>-1</td><td><span style="color:var(--primary);">S3-006</span></td><td><span class="tag tag-warning">退班</span></td><td>三年级2班（行政班）</td><td>—</td><td><span style="color:var(--success);">✓ 通过</span></td></tr>
+            <tr><td>李四</td><td>2024002</td><td><span style="color:var(--text-muted);">—</span></td><td>C301</td><td><span style="color:var(--primary);">S3-002</span></td><td><span class="tag tag-gray">跳过</span></td><td>三年级1班（行政班）</td><td>三年级1班（一致）</td><td><span style="color:var(--success);">✓ 通过（仅修改学号）</span></td></tr>
+            <tr style="background:#FFEBEE;"><td>周十一</td><td>2024009</td><td><span style="color:var(--text-muted);">—</span></td><td>C302</td><td><span style="color:var(--text-muted);">—</span></td><td><span class="tag tag-danger">异常</span></td><td>语文阅读班（走班）</td><td>三年级2班（行政班）</td><td><span style="color:var(--danger);">✗ 班级类型不匹配</span></td></tr>
+            <tr style="background:#FFEBEE;"><td>郑十二</td><td>2024010</td><td><span style="color:var(--text-muted);">—</span></td><td>C999</td><td><span style="color:var(--text-muted);">—</span></td><td><span class="tag tag-danger">异常</span></td><td>三年级1班（行政班）</td><td>—</td><td><span style="color:var(--danger);">✗ 班级ID异常：不存在</span></td></tr>
+            <tr style="background:#FFEBEE;"><td>吴十三</td><td>2024011</td><td><span style="color:var(--text-muted);">—</span></td><td>W103</td><td><span style="color:var(--text-muted);">—</span></td><td><span class="tag tag-danger">异常</span></td><td>—</td><td>英语口语班（走班）</td><td><span style="color:var(--danger);">✗ 该学生有多个走班，请指定原班级ID</span></td></tr>
+            <tr style="background:#FFEBEE;"><td>马十四</td><td>2024012</td><td><span style="color:var(--text-muted);">—</span></td><td>C302</td><td><span style="color:var(--danger);">2024003</span></td><td><span class="tag tag-danger">异常</span></td><td>三年级1班（行政班）</td><td>三年级2班（行政班）</td><td><span style="color:var(--danger);">✗ 学号冲突：已被学生[王五]占用</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px; padding:10px 12px; background:#FFEBEE; border-radius:4px; font-size:13px; color:var(--danger);">
+        ⚠️ 校验未通过 4 条记录（已标红），这些记录将不会执行操作。其余 6 条有效记录（3换班+2退班+1仅改学号）可正常执行。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default btn-sm">导出变动明细</button>
+      <button class="btn btn-default btn-sm" onclick="closeModal('modal-batch-preview')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="showBatchConfirm()">确认执行</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: 批量换班二次确认 ========== -->
+<div class="modal-overlay" id="modal-batch-confirm">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>执行确认</h3>
+      <span class="modal-close" onclick="closeModal('modal-batch-confirm')">×</span>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-dialog">
+        <div class="icon">⚠️</div>
+        <p>确认执行本次批量换班操作？</p>
+        <p style="margin-top:8px; font-size:13px; color:var(--text-secondary);">将执行 <strong>3</strong> 人换班，<strong>2</strong> 人退班（已排除校验失败记录）</p>
+        <p class="warn" style="margin-top:12px;">此操作不可撤销，请确认变动明细无误</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default btn-sm" onclick="closeModal('modal-batch-confirm')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="executeBatch()">确认执行</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: 班级视角换班 ========== -->
+<div class="modal-overlay" id="modal-class-transfer">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <h3>换班 <span class="tag-new">NEW</span></h3>
+      <span class="modal-close" onclick="closeModal('modal-class-transfer')">×</span>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px; padding:12px; background:var(--bg-gray); border-radius:4px;">
+        <span style="color:var(--text-muted);">学生：</span><strong id="class-transfer-student">张三</strong>
+        <span style="margin-left:16px; color:var(--text-muted);">当前班级：</span><span id="class-transfer-from">三年级1班</span>
+        <span style="margin-left:8px; font-size:12px; color:var(--text-muted);" id="class-transfer-type-label">（行政班）</span>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div class="field-row" style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+          <label style="font-size:13px; color:var(--text-secondary); min-width:60px;">目标年级</label>
+          <select id="class-transfer-grade" style="height:32px; padding:0 10px; border:1px solid var(--border); border-radius:4px; min-width:150px;" onchange="updateClassTransferClasses()">
+            <option value="">请选择年级</option>
+            <option value="1">一年级</option>
+            <option value="2">二年级</option>
+            <option value="3">三年级</option>
+          </select>
+        </div>
+        <div class="field-row" style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+          <label style="font-size:13px; color:var(--text-secondary); min-width:60px;">目标班级</label>
+          <select id="class-transfer-target" style="height:32px; padding:0 10px; border:1px solid var(--border); border-radius:4px; min-width:150px;" onchange="validateClassTransfer()">
+            <option value="">请先选择年级</option>
+          </select>
+        </div>
+        <div id="class-transfer-warning" style="display:none; padding:8px 12px; background:#FFF3E0; border-radius:4px; color:var(--danger); font-size:13px;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default btn-sm" onclick="closeModal('modal-class-transfer')">取消</button>
+      <button class="btn btn-primary btn-sm" id="btn-confirm-class-transfer" onclick="confirmClassTransfer()" disabled>确认换班</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DRAWER: 作业详情 ========== -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="homework-drawer">
+  <div class="drawer-header">
+    <h3 id="drawer-title">作业详情</h3>
+    <span class="modal-close" onclick="closeDrawer()">×</span>
+  </div>
+  <div class="drawer-body">
+    <div class="tabs" style="margin-bottom:16px;">
+      <div class="tab active" onclick="switchDrawerTab('questions')">题目详情</div>
+      <div class="tab" onclick="switchDrawerTab('students')">学生详情</div>
+    </div>
+
+    <div class="tab-content active" id="drawer-tab-questions">
+      <div style="padding:16px; background:var(--bg-gray); border-radius:8px; margin-bottom:12px;">
+        <p style="font-weight:500; margin-bottom:8px;">第1题 - 选择题</p>
+        <p style="color:var(--text-secondary); font-size:13px;">已知 a=3, b=4，求 a²+b² 的值</p>
+        <p style="margin-top:8px; font-size:13px;"><span style="color:var(--success);">正确率: 85%</span></p>
+      </div>
+      <div style="padding:16px; background:var(--bg-gray); border-radius:8px; margin-bottom:12px;">
+        <p style="font-weight:500; margin-bottom:8px;">第2题 - 填空题</p>
+        <p style="color:var(--text-secondary); font-size:13px;">计算 (x+y)² 的展开式</p>
+        <p style="margin-top:8px; font-size:13px;"><span style="color:var(--warning);">正确率: 62%</span></p>
+      </div>
+      <div style="padding:16px; background:var(--bg-gray); border-radius:8px;">
+        <p style="font-weight:500; margin-bottom:8px;">第3题 - 解答题</p>
+        <p style="color:var(--text-secondary); font-size:13px;">证明三角形全等</p>
+        <p style="margin-top:8px; font-size:13px;"><span style="color:var(--danger);">正确率: 45%</span></p>
+      </div>
+    </div>
+
+    <div class="tab-content" id="drawer-tab-students">
+      <div class="table-wrap" style="font-size:12px;">
+        <table>
+          <thead>
+            <tr><th>姓名</th><th>提交</th><th>用时</th><th>正确率</th><th>批改</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>张三</td><td><span class="tag tag-success">已提交</span></td><td>25min</td><td>90%</td><td><span class="tag tag-success">已批改</span></td></tr>
+            <tr><td>李四</td><td><span class="tag tag-success">已提交</span></td><td>30min</td><td>85%</td><td><span class="tag tag-success">已批改</span></td></tr>
+            <tr><td>王五</td><td><span class="tag tag-success">已提交</span></td><td>22min</td><td>75%</td><td><span class="tag tag-success">已批改</span></td></tr>
+            <tr><td>赵六</td><td><span class="tag tag-success">已提交</span></td><td>35min</td><td>70%</td><td><span class="tag tag-info">待批改</span></td></tr>
+            <tr><td>孙七</td><td><span class="tag tag-warning">未提交</span></td><td>-</td><td>-</td><td>-</td></tr>
+            <tr><td>周八</td><td><span class="tag tag-success">已提交</span></td><td>28min</td><td>80%</td><td><span class="tag tag-success">已批改</span></td></tr>
+            <!-- 已退班学生 -->
+            <tr style="background:#fafafa;"><td colspan="5" style="padding:8px 16px; color:var(--text-muted); font-size:12px; border-bottom:none;">── 以下为已退班学生 ──</td></tr>
+            <tr style="background:#fafafa;">
+              <td>钱九 <span class="tag tag-gray" style="margin-left:4px;">已退班</span></td>
+              <td><span class="tag tag-success">已提交</span></td><td>20min</td><td>65%</td><td><span class="tag tag-success">已批改</span></td>
+            </tr>
+            <tr style="background:#fafafa;">
+              <td>吴十 <span class="tag tag-gray" style="margin-left:4px;">已退班</span></td>
+              <td><span class="tag tag-success">已提交</span></td><td>32min</td><td>55%</td><td><span class="tag tag-success">已批改</span></td>
+            </tr>
+            <tr style="background:#fafafa;">
+              <td>郑十一 <span class="tag tag-gray" style="margin-left:4px;">已退班</span></td>
+              <td><span class="tag tag-warning">未提交</span></td><td>-</td><td>-</td><td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const students = [
+  { id: 'U10001', name: '张三', studentId: '2024001', phone: '138****1234', classes: '三年级1班、数学提高班A', status: '正常', addTime: '2024-01-15 09:00' },
+  { id: 'U10002', name: '李四', studentId: '2024002', phone: '139****5678', classes: '三年级1班', status: '正常', addTime: '2024-01-15 09:00' },
+  { id: 'U10003', name: '王五', studentId: '2024003', phone: '137****9012', classes: '三年级1班、英语基础班', status: '正常', addTime: '2024-02-01 10:30' },
+  { id: 'U10004', name: '赵六', studentId: '2024004', phone: '136****3456', classes: '三年级2班', status: '正常', addTime: '2024-02-15 14:00' },
+  { id: 'U10005', name: '孙七', studentId: '2024005', phone: '135****7890', classes: '三年级2班、语文阅读班', status: '禁用', addTime: '2024-01-20 08:30' },
+  { id: 'U10006', name: '周八', studentId: '2024006', phone: '134****2345', classes: '三年级3班', status: '正常', addTime: '2024-03-01 11:00' },
+];
+
+const studentClasses = {
+  'U10001': [
+    { classId: 'C301', name: '三年级1班', status: '正常', type: '行政班' },
+    { classId: 'C501', name: '数学提高班A', status: '正常', type: '教学班' },
+  ],
+  'U10002': [{ classId: 'C301', name: '三年级1班', status: '正常', type: '行政班' }],
+  'U10003': [
+    { classId: 'C301', name: '三年级1班', status: '正常', type: '行政班' },
+    { classId: 'C601', name: '英语基础班', status: '正常', type: '教学班' },
+  ],
+  'U10004': [{ classId: 'C302', name: '三年级2班', status: '正常', type: '行政班' }],
+  'U10005': [
+    { classId: 'C302', name: '三年级2班', status: '正常', type: '行政班' },
+    { classId: 'C701', name: '语文阅读班', status: '正常', type: '教学班' },
+  ],
+  'U10006': [{ classId: 'C303', name: '三年级3班', status: '正常', type: '行政班' }],
+};
+
+const classes = [
+  { id: 'C301', name: '三年级1班', year: '2024', grade: '三年级', type: '行政班', room: '301教室', teacher: '张老师', status: '正常' },
+  { id: 'C302', name: '三年级2班', year: '2024', grade: '三年级', type: '行政班', room: '302教室', teacher: '李老师', status: '正常' },
+  { id: 'C303', name: '三年级3班', year: '2024', grade: '三年级', type: '行政班', room: '303教室', teacher: '王老师', status: '正常' },
+  { id: 'C501', name: '数学提高班A', year: '2024', grade: '三年级', type: '教学班', room: '501教室', teacher: '陈老师', status: '正常' },
+  { id: 'C201', name: '二年级1班', year: '2023', grade: '二年级', type: '行政班', room: '201教室', teacher: '刘老师', status: '正常' },
+  { id: 'C202', name: '二年级2班', year: '2023', grade: '二年级', type: '行政班', room: '202教室', teacher: '赵老师', status: '已归档' },
+];
+
+const classStudents = [
+  { id: 'U10001', name: '张三', studentId: '2024001', joinTime: '2024-01-15 09:00' },
+  { id: 'U10002', name: '李四', studentId: '2024002', joinTime: '2024-01-15 09:00' },
+  { id: 'U10003', name: '王五', studentId: '2024003', joinTime: '2024-02-01 10:30' },
+  { id: 'U10007', name: '钱九', studentId: '2024007', joinTime: '2024-02-20 14:00' },
+];
+
+const homeworks = [
+  { id: 'H001', tag: '数学', tagColor: 'blue', title: '第三章课后练习 - 勾股定理', class: '三年级1班', date: '2024-03-10', rate: '78%', submit: '25/28' },
+  { id: 'H002', tag: '数学', tagColor: 'blue', title: '单元测试 - 几何图形', class: '三年级1班', date: '2024-03-08', rate: '82%', submit: '27/28' },
+  { id: 'H003', tag: '语文', tagColor: 'green', title: '作文 - 我的家乡', class: '三年级2班', date: '2024-03-09', rate: '85%', submit: '26/28' },
+  { id: 'H004', tag: '英语', tagColor: 'blue', title: 'Unit 5 阅读理解', class: '三年级1班', date: '2024-03-07', rate: '71%', submit: '24/28' },
+  { id: 'H005', tag: '数学', tagColor: 'blue', title: '周测 - 方程求解', class: '三年级2班', date: '2024-03-06', rate: '75%', submit: '25/27' },
+  { id: 'H006', tag: '语文', tagColor: 'green', title: '古诗词默写', class: '三年级3班', date: '2024-03-05', rate: '90%', submit: '28/28' },
+];
+
+const classesForGrade = {
+  '1': [
+    { name: '一年级1班', type: '行政班', status: '正常' },
+    { name: '一年级2班', type: '行政班', status: '正常' },
+    { name: '一年级3班', type: '行政班', status: '正常' },
+  ],
+  '2': [
+    { name: '二年级1班', type: '行政班', status: '正常' },
+    { name: '二年级2班', type: '行政班', status: '已归档' },
+    { name: '二年级3班', type: '行政班', status: '正常' },
+  ],
+  '3': [
+    { name: '三年级1班', type: '行政班', status: '正常' },
+    { name: '三年级2班', type: '行政班', status: '正常' },
+    { name: '三年级3班', type: '行政班', status: '正常' },
+    { name: '数学提高班A', type: '教学班', status: '正常' },
+    { name: '英语基础班', type: '教学班', status: '正常' },
+    { name: '语文阅读班', type: '教学班', status: '正常' },
+  ],
+};
+
+// Grade mapping from class name to grade key
+const classToGrade = {
+  '三年级1班': '3', '三年级2班': '3', '三年级3班': '3',
+  '二年级1班': '2', '二年级2班': '2', '二年级3班': '2',
+  '一年级1班': '1', '一年级2班': '1', '一年级3班': '1',
+  '数学提高班A': '3', '英语基础班': '3', '语文阅读班': '3',
+};
+
+// ==================== STATE ====================
+let currentPage = 'student-manage';
+let currentTransferClassId = '';
+let currentTransferClassName = '';
+let currentTransferClassType = '';
+let currentQuitClassName = '';
+let currentStudentForAdjust = null;
+
+// ==================== NAVIGATION ====================
+function navigateTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+  const pageMap = {
+    'student-manage': 'page-student-manage',
+    'class-manage': 'page-class-manage',
+    'class-students': 'page-class-students',
+    'homework': 'page-homework',
+    'student-analytics': 'page-student-analytics',
+  };
+
+  const pageEl = document.getElementById(pageMap[page]);
+  if (pageEl) pageEl.classList.add('active');
+
+  // Highlight nav
+  const navItems = document.querySelectorAll('.sidebar-menu > .menu-item');
+  const navMap = { 'student-manage': 0, 'class-manage': 1, 'class-students': 1, 'homework': 2, 'student-analytics': 3 };
+  if (navMap[page] !== undefined && navItems[navMap[page]]) {
+    navItems[navMap[page]].classList.add('active');
+  }
+
+  // Show analytics sub menu
+  document.getElementById('analytics-sub').style.display = page === 'student-analytics' ? 'block' : 'none';
+}
+
+// ==================== STUDENT TAB ====================
+function switchStudentTab(tab) {
+  document.querySelectorAll('#page-student-manage .tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'list' && i === 0) || (tab === 'import' && i === 1));
+  });
+  document.getElementById('student-tab-list').classList.toggle('active', tab === 'list');
+  document.getElementById('student-tab-import').classList.toggle('active', tab === 'import');
+}
+
+// ==================== RENDER TABLES ====================
+function renderStudentTable() {
+  const tbody = document.getElementById('student-table-body');
+  tbody.innerHTML = students.map(s => `
+    <tr>
+      <td>${s.id}</td>
+      <td>${s.name}</td>
+      <td>${s.studentId}</td>
+      <td>${s.phone}</td>
+      <td>${s.classes}</td>
+      <td>${s.status === '正常' ? '<span class="tag tag-success">正常</span>' : '<span class="tag tag-danger">禁用</span>'}</td>
+      <td>${s.addTime}</td>
+      <td class="table-actions">
+        <button class="btn btn-text btn-text-primary" onclick="openAdjustClass('${s.id}')">调整班级</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-primary">修改</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-danger">${s.status === '正常' ? '禁用' : '启用'}</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderClassTable() {
+  const tbody = document.getElementById('class-table-body');
+  tbody.innerHTML = classes.map(c => `
+    <tr>
+      <td>${c.id}</td>
+      <td>${c.name}</td>
+      <td>${c.year}</td>
+      <td>${c.grade}</td>
+      <td>${c.type}</td>
+      <td>${c.room}</td>
+      <td>${c.teacher}</td>
+      <td>${c.status === '正常' ? '<span class="tag tag-success">正常</span>' : '<span class="tag tag-gray">已归档</span>'}</td>
+      <td class="table-actions">
+        <button class="btn btn-text btn-text-primary">编辑</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-primary" onclick="openClassStudents('${c.id}', '${c.name}')">学生管理</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-primary">课节管理</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-danger">归档</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderClassStudents() {
+  const tbody = document.getElementById('class-students-body');
+  tbody.innerHTML = classStudents.map(s => `
+    <tr>
+      <td>${s.id}</td>
+      <td>${s.name}</td>
+      <td>${s.studentId}</td>
+      <td>${s.joinTime}</td>
+      <td class="table-actions">
+        <button class="btn btn-text btn-text-primary" onclick="openClassTransfer('${s.name}')">换班</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-danger" onclick="openQuitFromClass('三年级1班')">退班</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderHomeworkCards() {
+  const container = document.getElementById('homework-cards');
+  container.innerHTML = homeworks.map(h => `
+    <div class="card" onclick="openHomeworkDrawer('${h.title}')">
+      <span class="card-tag card-tag-${h.tagColor}">${h.tag}</span>
+      <div class="card-title">${h.title}</div>
+      <div class="card-info">📚 ${h.class}</div>
+      <div class="card-info">📅 ${h.date}</div>
+      <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px;">
+        <span style="color:var(--success);">正确率 ${h.rate}</span>
+        <span style="color:var(--text-muted);">提交 ${h.submit}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== MODALS ====================
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// ==================== ADJUST CLASS (PAGE 2) ====================
+function openAdjustClass(userId) {
+  const student = students.find(s => s.id === userId);
+  if (!student) return;
+  currentStudentForAdjust = student;
+
+  document.getElementById('adjust-student-name').textContent = student.name;
+  document.getElementById('adjust-student-id').textContent = student.studentId;
+
+  const classList = studentClasses[userId] || [];
+  const tbody = document.getElementById('adjust-class-table');
+  tbody.innerHTML = classList.map(c => `
+    <tr>
+      <td>${c.classId}</td>
+      <td>${c.name}</td>
+      <td><span class="tag tag-success">${c.status}</span></td>
+      <td>${c.type}</td>
+      <td class="table-actions">
+        <button class="btn btn-text btn-text-primary" onclick="startTransfer('${c.classId}', '${c.name}', '${c.type}')">换班</button>
+        <span class="divider">|</span>
+        <button class="btn btn-text btn-text-danger" onclick="openQuitFromClass('${c.name}')">退班</button>
+      </td>
+    </tr>
+  `).join('');
+
+  // Hide expand areas
+  document.getElementById('transfer-expand-area').classList.remove('show');
+  document.getElementById('join-class-area').classList.remove('show');
+
+  openModal('modal-adjust-class');
+}
+
+function startTransfer(classId, className, classType) {
+  currentTransferClassId = classId;
+  currentTransferClassName = className;
+  currentTransferClassType = classType;
+  document.getElementById('transfer-expand-area').classList.add('show');
+  document.getElementById('join-class-area').classList.remove('show');
+  document.getElementById('transfer-class-type-hint').textContent = '（仅显示同类型班级：' + classType + '）';
+  document.getElementById('transfer-warning').style.display = 'none';
+  document.getElementById('btn-confirm-transfer').disabled = true;
+
+  // Auto-select grade matching current class
+  const gradeKey = classToGrade[className] || '';
+  document.getElementById('transfer-grade').value = gradeKey;
+  updateTransferClasses();
+}
+
+function updateTransferClasses() {
+  const grade = document.getElementById('transfer-grade').value;
+  const select = document.getElementById('transfer-class');
+  document.getElementById('transfer-warning').style.display = 'none';
+  document.getElementById('btn-confirm-transfer').disabled = true;
+  if (!grade) {
+    select.innerHTML = '<option value="">请先选择年级</option>';
+    return;
+  }
+  const allClasses = classesForGrade[grade] || [];
+  // Filter: same type + active status only
+  const filtered = allClasses.filter(c => c.type === currentTransferClassType && c.status === '正常');
+  select.innerHTML = '<option value="">请选择班级</option>' + filtered.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+}
+
+function validateTransferClass() {
+  const cls = document.getElementById('transfer-class').value;
+  const warning = document.getElementById('transfer-warning');
+  const btn = document.getElementById('btn-confirm-transfer');
+
+  if (!cls) {
+    warning.style.display = 'none';
+    btn.disabled = true;
+    return;
+  }
+
+  if (cls === currentTransferClassName) {
+    warning.textContent = '与当前班级一致，请重新检查';
+    warning.style.display = 'block';
+    btn.disabled = true;
+  } else {
+    warning.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function cancelTransfer() {
+  document.getElementById('transfer-expand-area').classList.remove('show');
+}
+
+function confirmTransfer() {
+  const cls = document.getElementById('transfer-class').value;
+
+  if (!cls || cls === currentTransferClassName) {
+    showToast('请选择有效的目标班级', 'error');
+    return;
+  }
+
+  showToast('换班成功！已将学生转入 ' + cls, 'success');
+  document.getElementById('transfer-expand-area').classList.remove('show');
+  closeModal('modal-adjust-class');
+}
+
+// ==================== JOIN CLASS ====================
+function showJoinClassArea() {
+  document.getElementById('join-class-area').classList.add('show');
+  document.getElementById('transfer-expand-area').classList.remove('show');
+  document.getElementById('join-grade').value = '';
+  document.getElementById('join-class').innerHTML = '<option value="">请先选择年级</option>';
+}
+
+function updateJoinClasses() {
+  const grade = document.getElementById('join-grade').value;
+  const select = document.getElementById('join-class');
+  if (!grade) {
+    select.innerHTML = '<option value="">请先选择年级</option>';
+    return;
+  }
+  const allClasses = classesForGrade[grade] || [];
+  // For join: show all active classes regardless of type
+  const filtered = allClasses.filter(c => c.status === '正常');
+  select.innerHTML = '<option value="">请选择班级</option>' + filtered.map(c => `<option value="${c.name}">${c.name}（${c.type}）</option>`).join('');
+}
+
+function cancelJoinClass() {
+  document.getElementById('join-class-area').classList.remove('show');
+}
+
+function confirmJoinClass() {
+  const cls = document.getElementById('join-class').value;
+  if (!cls) {
+    showToast('请选择要加入的班级', 'error');
+    return;
+  }
+  showToast('已成功加入 ' + cls, 'success');
+  document.getElementById('join-class-area').classList.remove('show');
+}
+
+// ==================== QUIT CLASS ====================
+function openQuitFromClass(className) {
+  currentQuitClassName = className;
+  document.getElementById('quit-class-name').textContent = className;
+  openModal('modal-quit-confirm');
+}
+
+function confirmQuit() {
+  showToast('退班成功！已从 ' + currentQuitClassName + ' 退出', 'success');
+  closeModal('modal-quit-confirm');
+  closeModal('modal-adjust-class');
+}
+
+// ==================== BATCH TRANSFER ====================
+function showBatchPreview() {
+  openModal('modal-batch-preview');
+}
+
+function showBatchConfirm() {
+  openModal('modal-batch-confirm');
+}
+
+function executeBatch() {
+  closeModal('modal-batch-confirm');
+  closeModal('modal-batch-preview');
+  showToast('批量换班执行完成！换班3人，退班2人，仅改学号1人，跳过4条异常记录', 'success');
+}
+
+// ==================== CLASS STUDENTS (PAGE 5) ====================
+function openClassStudents(classId, className) {
+  document.getElementById('class-student-title').textContent = className + ' - 学生管理';
+  navigateTo('class-students');
+}
+
+// ==================== CLASS VIEW TRANSFER ====================
+let classTransferFromName = '三年级1班';
+let classTransferFromType = '行政班';
+
+function openClassTransfer(studentName) {
+  classTransferFromName = '三年级1班';
+  classTransferFromType = '行政班';
+  document.getElementById('class-transfer-student').textContent = studentName;
+  document.getElementById('class-transfer-from').textContent = classTransferFromName;
+  document.getElementById('class-transfer-type-label').textContent = '（' + classTransferFromType + '）';
+  document.getElementById('class-transfer-warning').style.display = 'none';
+  document.getElementById('btn-confirm-class-transfer').disabled = true;
+
+  // Auto-select grade matching current class
+  const gradeKey = classToGrade[classTransferFromName] || '';
+  document.getElementById('class-transfer-grade').value = gradeKey;
+  updateClassTransferClasses();
+  openModal('modal-class-transfer');
+}
+
+function updateClassTransferClasses() {
+  const grade = document.getElementById('class-transfer-grade').value;
+  const select = document.getElementById('class-transfer-target');
+  document.getElementById('class-transfer-warning').style.display = 'none';
+  document.getElementById('btn-confirm-class-transfer').disabled = true;
+  if (!grade) {
+    select.innerHTML = '<option value="">请先选择年级</option>';
+    return;
+  }
+  const allClasses = classesForGrade[grade] || [];
+  // Filter: same type + active status only
+  const filtered = allClasses.filter(c => c.type === classTransferFromType && c.status === '正常');
+  select.innerHTML = '<option value="">请选择班级</option>' + filtered.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+}
+
+function validateClassTransfer() {
+  const cls = document.getElementById('class-transfer-target').value;
+  const warning = document.getElementById('class-transfer-warning');
+  const btn = document.getElementById('btn-confirm-class-transfer');
+
+  if (!cls) {
+    warning.style.display = 'none';
+    btn.disabled = true;
+    return;
+  }
+
+  if (cls === classTransferFromName) {
+    warning.textContent = '与当前班级一致，请重新检查';
+    warning.style.display = 'block';
+    btn.disabled = true;
+  } else {
+    warning.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function confirmClassTransfer() {
+  const cls = document.getElementById('class-transfer-target').value;
+  if (!cls || cls === classTransferFromName) {
+    showToast('请选择有效的目标班级', 'error');
+    return;
+  }
+  showToast('换班成功！已将学生转入 ' + cls, 'success');
+  closeModal('modal-class-transfer');
+}
+
+// ==================== HOMEWORK DRAWER (PAGE 6) ====================
+function openHomeworkDrawer(title) {
+  document.getElementById('drawer-title').textContent = title;
+  document.getElementById('drawer-overlay').classList.add('show');
+  document.getElementById('homework-drawer').classList.add('open');
+  // Reset to first tab
+  switchDrawerTab('questions');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('show');
+  document.getElementById('homework-drawer').classList.remove('open');
+}
+
+function switchDrawerTab(tab) {
+  const tabs = document.querySelectorAll('#homework-drawer .tab');
+  tabs[0].classList.toggle('active', tab === 'questions');
+  tabs[1].classList.toggle('active', tab === 'students');
+  document.getElementById('drawer-tab-questions').classList.toggle('active', tab === 'questions');
+  document.getElementById('drawer-tab-students').classList.toggle('active', tab === 'students');
+}
+
+// ==================== ANALYTICS DROPDOWN (PAGE 7) ====================
+function toggleAnalyticsDropdown(event) {
+  event.preventDefault();
+  const dropdown = document.getElementById('analytics-dropdown');
+  dropdown.classList.toggle('show');
+  event.stopPropagation();
+}
+
+function selectAnalyticsClass(el, name) {
+  document.getElementById('analytics-class-select').value = name;
+  document.getElementById('analytics-dropdown').classList.remove('show');
+  showToast('已切换到: ' + name, 'success');
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#analytics-class-select') && !e.target.closest('#analytics-dropdown')) {
+    document.getElementById('analytics-dropdown').classList.remove('show');
+  }
+});
+
+// ==================== TOAST ====================
+function showToast(message, type = 'success') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ==================== INIT ====================
+function init() {
+  renderStudentTable();
+  renderClassTable();
+  renderClassStudents();
+  renderHomeworkCards();
+}
+
+init();
+</script>
+</body>
+</html>
