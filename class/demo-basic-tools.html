@@ -558,16 +558,17 @@ body {
   border-radius: 3px;
   transition: all 0.3s;
   min-width: 2px;
-  background: #4fc3f7;
-  opacity: 0.45;
+  opacity: 0.55;
 }
 
-.quiz-bar-row.selected .quiz-bar {
+.quiz-bar-row.selected .quiz-bar,
+.hw-bar-row.selected .quiz-bar {
   opacity: 1;
 }
 
-.quiz-bar-row:hover .quiz-bar {
-  opacity: 0.7;
+.quiz-bar-row:hover .quiz-bar,
+.hw-bar-row:hover .quiz-bar {
+  opacity: 0.8;
 }
 
 .quiz-bar-pct {
@@ -579,7 +580,6 @@ body {
 }
 
 .quiz-bar-row.selected .quiz-bar-pct {
-  color: #4fc3f7;
   font-weight: 600;
 }
 
@@ -744,9 +744,8 @@ body {
 
 .quiz-fs-bar-item .fs-bar-fill {
   height: 100%;
-  background: #4fc3f7;
   border-radius: 3px;
-  opacity: 0.4;
+  opacity: 0.5;
 }
 
 .quiz-fs-bar-item.selected .fs-bar-fill {
@@ -2160,41 +2159,56 @@ body {
 }
 
 .hw-left {
-  width: 180px;
+  width: 200px;
+  min-width: 200px;
   border-right: 1px solid #333;
-  overflow-y: auto;
-  padding: 8px;
+  overflow: hidden;
+  padding: 10px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
-.hw-q-item {
-  padding: 10px;
-  border-radius: 6px;
-  border: 1.5px solid #333;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.hw-q-item:hover {
-  border-color: #555;
-}
-
-.hw-q-item.hw-q-active {
-  border-color: #4fc3f7;
-  background: rgba(79,195,247,0.05);
-}
-
-.hw-q-title {
-  font-weight: 600;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.hw-q-meta {
+.hw-barchart-title {
   font-size: 10px;
   color: #888;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.hw-bars-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.hw-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.hw-bar-row:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.hw-bar-row.selected {
+  background: rgba(79,195,247,0.1);
+}
+
+.hw-bar-row .quiz-bar-label {
+  color: #888;
+}
+
+.hw-bar-row.selected .quiz-bar-label {
+  color: #4fc3f7;
+  font-weight: 600;
 }
 
 .hw-right {
@@ -2203,6 +2217,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: auto;
 }
 
 .hw-right-header {
@@ -2226,6 +2241,41 @@ body {
   background: rgba(79,195,247,0.25);
 }
 
+.hw-q-content-box {
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #ddd;
+}
+
+.hw-section-label {
+  font-size: 10px;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hw-answer-box {
+  background: rgba(76,175,80,0.08);
+  border-left: 3px solid #4caf50;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #a5d6a7;
+}
+
+.hw-explain-box {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid #555;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #aaa;
+  line-height: 1.6;
+}
+
 .hw-stats-row {
   display: flex;
   gap: 12px;
@@ -2236,13 +2286,59 @@ body {
 .hw-stat.wrong { color: #ef5350; }
 .hw-stat.gray { color: #888; }
 
-.hw-detail-placeholder {
-  flex: 1;
+.hw-student-section {
+  margin-top: 4px;
+}
+
+.hw-student-section .section-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #555;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.hw-student-section .section-title {
   font-size: 11px;
+  font-weight: 600;
+}
+
+.hw-student-section .section-title.correct { color: #66bb6a; }
+.hw-student-section .section-title.wrong { color: #ef5350; }
+
+.hw-student-section .section-count {
+  font-size: 10px;
+  color: #888;
+}
+
+.hw-student-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hw-student-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 48px;
+}
+
+.hw-student-card .avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.hw-student-card .name {
+  font-size: 9px;
+  color: #aaa;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 /* Teacher homework buttons */
@@ -2360,7 +2456,7 @@ body {
   line-height: 1.8;
 }
 
-/* Summary (课堂总结) */
+/* Summary (排行榜单) */
 .summary-overlay {
   position: absolute;
   inset: 0;
@@ -2372,22 +2468,6 @@ body {
   color: #fff;
 }
 
-.summary-header {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.summary-title {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.summary-subtitle {
-  display: block;
-  font-size: 10px;
-  color: rgba(255,255,255,0.6);
-  margin-top: 4px;
-}
 
 .summary-tabs {
   display: flex;
@@ -2464,20 +2544,12 @@ body {
   transition: width 0.5s;
 }
 
-.rank-score {
+.rank-score, .group-score {
   font-size: 11px;
   font-weight: 600;
-  width: 36px;
   text-align: right;
   flex-shrink: 0;
-}
-
-.rank-delta {
-  font-size: 9px;
-  color: #69f0ae;
-  width: 28px;
-  text-align: right;
-  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .group-rank {
@@ -2487,11 +2559,10 @@ body {
   flex-shrink: 0;
 }
 
-.group-members {
-  font-size: 9px;
+.group-member-list {
+  font-size: 10px;
   color: rgba(255,255,255,0.5);
-  width: 28px;
-  flex-shrink: 0;
+  line-height: 1.4;
 }
 
 .summary-note {
@@ -2501,31 +2572,6 @@ body {
   margin-top: 10px;
 }
 
-.summary-footer {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.summary-rules {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-}
-
-.rules-label {
-  font-size: 9px;
-  color: rgba(255,255,255,0.5);
-}
-
-.rule-tag {
-  font-size: 8px;
-  background: rgba(255,255,255,0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: rgba(255,255,255,0.7);
-}
 
 /* Photo selection panel (选人上墙) */
 .photo-select-panel {
@@ -2736,12 +2782,12 @@ body {
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid #666;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 2px solid #888;
   background: rgba(0,0,0,0.3);
-  color: #888;
+  color: transparent;
   font-size: 14px;
   cursor: pointer;
   display: flex;
@@ -2752,20 +2798,11 @@ body {
 }
 
 .photo-star-btn.active {
-  background: #ffc107;
-  border-color: #ffc107;
+  background: #4fc3f7;
+  border-color: #4fc3f7;
   color: #fff;
 }
 
-.photo-star-btn .star-plus {
-  font-size: 10px;
-  font-weight: 700;
-  margin-left: -1px;
-}
-
-.photo-star-btn.active .star-plus {
-  display: none;
-}
 
 /* Big screen multi-wall single display with nav */
 .bs-multi-display {
@@ -2812,7 +2849,7 @@ body {
   top: -4px;
   right: -4px;
   font-size: 9px;
-  color: #888;
+  color: transparent;
   line-height: 1;
   cursor: pointer;
   width: 14px;
@@ -2820,13 +2857,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 3px;
+  border: 1.5px solid #888;
   background: rgba(0,0,0,0.4);
 }
 
 .strip-star-btn.active {
-  color: #ffc107;
-  background: rgba(255,193,7,0.2);
+  color: #fff;
+  background: #4fc3f7;
+  border-color: #4fc3f7;
 }
 
 /* "进行中" badge on on-wall strip items */
@@ -3446,7 +3485,7 @@ body {
     <button class="tab-btn" onclick="switchScene('quiz')">随堂测</button>
     <button class="tab-btn" onclick="switchScene('photo')">拍照上墙</button>
     <button class="tab-btn" onclick="switchScene('homework')">作业讲评</button>
-    <button class="tab-btn" onclick="switchScene('summary')">课堂总结</button>
+    <button class="tab-btn" onclick="switchScene('summary')">排行榜单</button>
   </div>
 </div>
 
@@ -3500,7 +3539,7 @@ body {
         <button class="t-toolbox-item" onclick="teacherLaunch('quiz')">📝 随堂测</button>
         <button class="t-toolbox-item" onclick="teacherLaunch('photo')">📷 拍照上墙</button>
         <button class="t-toolbox-item" onclick="teacherLaunch('homework')">📋 作业讲评</button>
-        <button class="t-toolbox-item" onclick="teacherLaunch('summary')">🏆 课堂总结</button>
+        <button class="t-toolbox-item" onclick="teacherLaunch('summary')">🏆 排行榜单</button>
         <button class="t-toolbox-item" onclick="teacherLaunch('other')">⚡ 更多</button>
       </div>
       <div class="tablet-content" id="teacherContent">
@@ -3588,7 +3627,7 @@ const steps = {
   quiz: ['待发起', '作答中', '查看数据', '结束'],
   photo: ['待发起', '拍照收集/选人上墙', '上墙展示', '结束'],
   homework: ['题目数据', '全屏讲题'],
-  summary: ['课堂总结']
+  summary: ['排行榜单']
 };
 
 const phaseMap = {
@@ -4028,7 +4067,7 @@ function renderPhotoDataDetail(histIdx) {
     const onWall = isItemOnWall ? 'on-wall' : '';
     const sel = i === selectedIdx ? 'selected' : '';
     const wallBadge = isItemOnWall ? '<span class="strip-wall-badge">进行中</span>' : '';
-    const starBtn = `<span class="strip-star-btn ${iStarred ? 'active' : ''}" onclick="event.stopPropagation();replayToggleStar(${i},${histIdx})">★</span>`;
+    const starBtn = `<span class="strip-star-btn ${iStarred ? 'active' : ''}" onclick="event.stopPropagation();replayToggleStar(${i},${histIdx})">✓</span>`;
     stripHtml += `<div class="photo-strip-item ${sel} ${onWall}" onclick="replaySelectStudent(${i},${histIdx})">
       <div class="strip-thumb">📷${wallBadge}${starBtn}</div>
       <div class="strip-name">${name}</div>
@@ -4047,7 +4086,7 @@ function renderPhotoDataDetail(histIdx) {
       <div class="photo-select-body">
         <div class="photo-preview-area">
           <div class="preview-img">
-            <button class="photo-star-btn ${isStarred ? 'active' : ''}" onclick="replayToggleStar(${selectedIdx},${histIdx})" title="加入上墙名单">★<span class="star-plus">+</span></button>
+            <button class="photo-star-btn ${isStarred ? 'active' : ''}" onclick="replayToggleStar(${selectedIdx},${histIdx})" title="加入上墙名单">✓</button>
             <div style="text-align:center;padding:12px;">
               <div style="font-size:28px;margin-bottom:6px;">📄</div>
               <div style="font-size:11px;color:#aaa;">${previewName}的课堂笔记</div>
@@ -4329,14 +4368,29 @@ function goToStep(idx) {
 // ======= Homework Review =======
 function renderBsHwDataPanel() {
   const sel = hwQuestions[state.hwSelectedQ];
-  let qList = '';
+  const totalStudents = 43;
+  const correctCount = Math.round(totalStudents * sel.accuracy / 100);
+  const wrongCount = totalStudents - correctCount;
+
+  // Left: bar chart (reuse quiz style)
+  let barsHtml = '';
   hwQuestions.forEach((q, idx) => {
-    const active = idx === state.hwSelectedQ ? 'hw-q-active' : '';
-    qList += `<div class="hw-q-item ${active}" onclick="hwSelectQ(${idx})">
-      <div class="hw-q-title">${q.title}</div>
-      <div class="hw-q-meta">题型【${q.type}】 &nbsp; 正确率 <b>${q.accuracy}%</b></div>
+    const barWidth = Math.max(4, q.accuracy);
+    const barColor = getAccuracyColor(q.accuracy, true);
+    const selected = idx === state.hwSelectedQ ? 'selected' : '';
+    barsHtml += `<div class="hw-bar-row ${selected}" onclick="hwSelectQ(${idx})">
+      <div class="quiz-bar-label">${idx + 1}</div>
+      <div class="quiz-bar-track"><div class="quiz-bar" style="width:${barWidth}%;background:${barColor};"></div></div>
+      <div class="quiz-bar-pct" style="color:${barColor};">${q.accuracy}%</div>
     </div>`;
   });
+
+  // Right: question detail with content, answer, explanation, then students
+  const wrongStudentNames = ['孙楠','李明轩','周雨薇','赵语晨','吴昊天','郑思琪','黄文博','杨晨曦','何雅文','罗子轩','谢诗涵','唐浩宇'];
+  let wrongCards = '';
+  for (let i = 0; i < Math.min(wrongCount, 12); i++) {
+    wrongCards += `<div class="hw-student-card"><div class="avatar"></div><div class="name">${wrongStudentNames[i % wrongStudentNames.length]}</div></div>`;
+  }
 
   return `<div class="hw-data-panel">
     <div class="hw-header">
@@ -4345,21 +4399,43 @@ function renderBsHwDataPanel() {
       <span style="margin-left:auto;font-size:10px;color:#888;">06.02 23:59 公布答案</span>
     </div>
     <div class="hw-body">
-      <div class="hw-left">${qList}</div>
+      <div class="hw-left">
+        <div class="hw-barchart-title">各题正确率</div>
+        <div class="hw-bars-container">${barsHtml}</div>
+      </div>
       <div class="hw-right">
         <div class="hw-right-header">
-          <span style="font-weight:600;">${sel.title}</span>
+          <span style="font-weight:600;">第${state.hwSelectedQ + 1}题 <span style="font-size:10px;color:#888;font-weight:400;">【${sel.type}】</span></span>
           <div style="display:flex;gap:8px;">
             <button class="hw-fullscreen-btn" onclick="showHwOriginal()">📄 查看原卷</button>
             <button class="hw-fullscreen-btn" onclick="enterHwFullscreen()">⛶ 全屏讲题</button>
           </div>
         </div>
-        <div class="hw-stats-row">
-          <span class="hw-stat correct">回答正确 <b>${Math.round(43 * sel.accuracy / 100)}</b>人</span>
-          <span class="hw-stat wrong">回答错误 <b>${43 - Math.round(43 * sel.accuracy / 100)}</b>人</span>
-          <span class="hw-stat gray">未作答 <b>0</b>人</span>
+        <div>
+          <div class="hw-section-label">题干</div>
+          <div class="hw-q-content-box">${sel.content}</div>
         </div>
-        <div class="hw-detail-placeholder">点击"全屏讲题"查看题目详情并投屏讲解</div>
+        <div>
+          <div class="hw-section-label">答案</div>
+          <div class="hw-answer-box">${sel.answer}</div>
+        </div>
+        <div>
+          <div class="hw-section-label">解析</div>
+          <div class="hw-explain-box">${sel.explanation}</div>
+        </div>
+        <div class="hw-student-section">
+          <div class="section-header">
+            <span class="section-title correct">回答正确</span>
+            <span class="section-count">${correctCount}人</span>
+          </div>
+        </div>
+        <div class="hw-student-section">
+          <div class="section-header">
+            <span class="section-title wrong">回答错误</span>
+            <span class="section-count">${wrongCount}人</span>
+          </div>
+          <div class="hw-student-grid">${wrongCards}</div>
+        </div>
       </div>
     </div>
   </div>`;
@@ -4374,9 +4450,10 @@ function renderBsHwFullscreen() {
   let sidebarHtml = '';
   hwQuestions.forEach((q, idx) => {
     const selected = idx === state.hwSelectedQ ? 'selected' : '';
+    const barColor = getAccuracyColor(q.accuracy, true);
     sidebarHtml += `<div class="quiz-fs-bar-item ${selected}" onclick="hwFsSelect(${idx})">
       <span class="fs-bar-num">${idx + 1}</span>
-      <div class="fs-bar-track"><div class="fs-bar-fill" style="width:${q.accuracy}%;"></div></div>
+      <div class="fs-bar-track"><div class="fs-bar-fill" style="width:${q.accuracy}%;background:${barColor};"></div></div>
       <span class="fs-bar-pct">${q.accuracy}%</span>
     </div>`;
   });
@@ -4471,36 +4548,32 @@ function closeHwOriginal() {
   if (overlay) overlay.remove();
 }
 
-// ======= Summary (课堂总结) =======
+// ======= Summary (排行榜单) =======
 const summaryTop10 = [
-  { name: '林雅琪', score: 58, delta: '+12' },
-  { name: '马天宇', score: 52, delta: '+8' },
-  { name: '张思远', score: 48, delta: '+15' },
-  { name: '宋雨桐', score: 45, delta: '+5' },
-  { name: '陈浩然', score: 42, delta: '+10' },
-  { name: '王子涵', score: 40, delta: '+6' },
-  { name: '刘诗瑶', score: 38, delta: '+9' },
-  { name: '付博', score: 35, delta: '+3' },
-  { name: '赵语晨', score: 33, delta: '+7' },
-  { name: '邹琪', score: 30, delta: '+4' }
+  { name: '林雅琪', score: 58 },
+  { name: '马天宇', score: 52 },
+  { name: '张思远', score: 48 },
+  { name: '宋雨桐', score: 45 },
+  { name: '陈浩然', score: 42 },
+  { name: '王子涵', score: 40 },
+  { name: '刘诗瑶', score: 38 },
+  { name: '付博', score: 35 },
+  { name: '赵语晨', score: 33 },
+  { name: '邹琪', score: 30 }
 ];
 
 const summaryGroups = [
-  { name: '第1组', score: 186, members: 8, color: '#f44336' },
-  { name: '第2组', score: 172, members: 8, color: '#2196f3' },
-  { name: '第3组', score: 168, members: 7, color: '#4caf50' },
-  { name: '第4组', score: 155, members: 8, color: '#ff9800' },
-  { name: '第5组', score: 148, members: 7, color: '#9c27b0' },
-  { name: '第6组', score: 140, members: 7, color: '#009688' }
+  { name: '第1组', score: 186, members: ['林雅琪','马天宇','张思远','宋雨桐','陈浩然','王子涵','刘诗瑶','付博'], color: '#f44336' },
+  { name: '第2组', score: 172, members: ['赵语晨','邹琪','孙梓萱','李明轩','周雨薇','吴昊天','郑思琪','黄文博'], color: '#2196f3' },
+  { name: '第3组', score: 168, members: ['杨晨曦','何雅文','罗子轩','谢诗涵','唐浩宇','韩梦瑶','冯俊杰'], color: '#4caf50' },
+  { name: '第4组', score: 155, members: ['曹雨萱','彭子涵','潘思远','董雅琪','袁博文','蒋梓轩','薛诗涵','魏天宇'], color: '#ff9800' },
+  { name: '第5组', score: 148, members: ['许文博','叶雨桐','余浩然','陆梦琪','姚天宇','段雅文','钟子萱'], color: '#9c27b0' },
+  { name: '第6组', score: 140, members: ['邓思远','廖雨薇','贾浩宇','夏诗涵','田子轩','范梦瑶','石俊杰'], color: '#009688' }
 ];
 
-const summaryPointRules = [
-  { label: '随堂测满分', pts: '+5' },
-  { label: '抢答正确', pts: '+3' },
-  { label: '互动作答', pts: '+2' },
-  { label: '拍照上墙', pts: '+2' },
-  { label: '随堂测提交', pts: '+1' }
-];
+// 班级是否有小组分组数据（设为true时展示小组排行tab）
+const classHasGroups = true;
+
 
 function switchSummaryTab(tab) {
   state.summaryTab = tab;
@@ -4521,63 +4594,61 @@ function renderBsSummary() {
         <span class="rank-medal">${medal}</span>
         <span class="rank-name">${s.name}</span>
         <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${barW}%;"></div></div>
-        <span class="rank-score">${s.score}分</span>
-        <span class="rank-delta">${s.delta}</span>
+        <span class="rank-score">${s.score} 爱学值</span>
       </div>`;
     });
     contentHtml = `<div class="summary-list">${listHtml}</div>
-      <div class="summary-note">仅展示班级前10名 · 每位同学可在个人端查看自己的积分详情</div>`;
+      <div class="summary-note">仅展示班级前10名 · 每位同学可在个人端查看自己的排名</div>`;
   } else {
     let groupHtml = '';
     summaryGroups.forEach((g, i) => {
       const barW = Math.round(g.score / summaryGroups[0].score * 100);
       const medal = i === 0 ? '🏆' : '';
+      const memberNames = g.members.join('、');
       groupHtml += `<div class="summary-group-item">
         <span class="group-rank">${medal || (i+1)}</span>
         <span class="group-name" style="border-left:3px solid ${g.color};padding-left:6px;">${g.name}</span>
-        <span class="group-members">${g.members}人</span>
+        <span class="group-score">${g.score} 爱学值</span>
         <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${barW}%;background:${g.color};"></div></div>
-        <span class="rank-score">${g.score}分</span>
-      </div>`;
+      </div>
+      <div class="group-member-list" style="margin-left:52px;margin-bottom:8px;font-size:11px;color:#b0bec5;">${memberNames}</div>`;
     });
     contentHtml = `<div class="summary-list">${groupHtml}</div>`;
   }
 
+  // 仅在班级有分组数据时展示小组排行tab
+  const tabsHtml = classHasGroups
+    ? `<button class="summary-tab ${tabPersonal}" onclick="switchSummaryTab('personal')">个人排行</button>
+       <button class="summary-tab ${tabGroup}" onclick="switchSummaryTab('group')">小组排行</button>`
+    : `<button class="summary-tab active" onclick="switchSummaryTab('personal')">个人排行</button>`;
+
   return `<div class="summary-overlay fade-in">
-    <div class="summary-header">
-      <span class="summary-title">🏆 课堂总结</span>
-      <span class="summary-subtitle">第3章 函数的基本性质 · 2026-06-17</span>
-    </div>
     <div class="summary-tabs">
-      <button class="summary-tab ${tabPersonal}" onclick="switchSummaryTab('personal')">个人排行</button>
-      <button class="summary-tab ${tabGroup}" onclick="switchSummaryTab('group')">小组排行</button>
+      ${tabsHtml}
     </div>
     <div class="summary-body">${contentHtml}</div>
-    <div class="summary-footer">
-      <div class="summary-rules">
-        <span class="rules-label">积分规则：</span>
-        ${summaryPointRules.map(r => `<span class="rule-tag">${r.label} ${r.pts}</span>`).join('')}
-      </div>
-    </div>
   </div>`;
 }
 
 function renderTeacherSummary(content) {
   const tabPersonal = state.summaryTab === 'personal' ? 'active' : '';
   const tabGroup = state.summaryTab === 'group' ? 'active' : '';
+  let tabsHtml = `<button class="config-opt ${tabPersonal}" onclick="switchSummaryTab('personal')" style="flex:1;padding:6px;font-size:10px;border-radius:6px;border:1px solid #ddd;background:${state.summaryTab==='personal'?'#4fc3f7':'#fff'};color:${state.summaryTab==='personal'?'#fff':'#555'};cursor:pointer;">个人排行</button>`;
+  if (classHasGroups) {
+    tabsHtml += `<button class="config-opt ${tabGroup}" onclick="switchSummaryTab('group')" style="flex:1;padding:6px;font-size:10px;border-radius:6px;border:1px solid #ddd;background:${state.summaryTab==='group'?'#4fc3f7':'#fff'};color:${state.summaryTab==='group'?'#fff':'#555'};cursor:pointer;">小组排行</button>`;
+  }
   content.innerHTML = `<div class="teacher-control-panel fade-in" style="padding:12px 14px;gap:6px;align-items:stretch;">
-    <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:4px;">🏆 课堂总结</div>
+    <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:4px;">🏆 排行榜单</div>
     <div style="display:flex;gap:6px;margin-bottom:8px;">
-      <button class="config-opt ${tabPersonal}" onclick="switchSummaryTab('personal')" style="flex:1;padding:6px;font-size:10px;border-radius:6px;border:1px solid #ddd;background:${state.summaryTab==='personal'?'#4fc3f7':'#fff'};color:${state.summaryTab==='personal'?'#fff':'#555'};cursor:pointer;">个人排行</button>
-      <button class="config-opt ${tabGroup}" onclick="switchSummaryTab('group')" style="flex:1;padding:6px;font-size:10px;border-radius:6px;border:1px solid #ddd;background:${state.summaryTab==='group'?'#4fc3f7':'#fff'};color:${state.summaryTab==='group'?'#fff':'#555'};cursor:pointer;">小组排行</button>
+      ${tabsHtml}
     </div>
     <div style="background:#f8f9fa;border-radius:8px;padding:10px;font-size:10px;color:#555;line-height:1.8;">
       <div><b>本节课互动数据</b></div>
       <div>随堂测：2次 · 拍照上墙：1次 · 互动题：3次</div>
-      <div>全班平均积分：<b style="color:#1976d2;">28分</b></div>
-      <div>最高积分：<b style="color:#e65100;">58分</b>（林雅琪）</div>
+      <div>全班平均爱学值：<b style="color:#1976d2;">28</b></div>
+      <div>最高爱学值：<b style="color:#e65100;">58</b>（林雅琪）</div>
     </div>
-    <button onclick="endSummary()" style="width:100%;margin-top:8px;padding:8px;border-radius:6px;background:#666;color:#fff;border:none;font-size:11px;cursor:pointer;">结束总结</button>
+    <button onclick="endSummary()" style="width:100%;margin-top:8px;padding:8px;border-radius:6px;background:#666;color:#fff;border:none;font-size:11px;cursor:pointer;">关闭榜单</button>
   </div>`;
 }
 
@@ -4585,30 +4656,24 @@ function renderStudentSummary(content) {
   content.innerHTML = `<div class="student-content" style="text-align:left;padding:12px 16px;">
     <div style="text-align:center;margin-bottom:10px;">
       <div style="font-size:20px;">🎉</div>
-      <div style="font-size:13px;font-weight:600;color:#333;">本节课表现</div>
+      <div style="font-size:13px;font-weight:600;color:#333;">本节课获得</div>
     </div>
     <div style="background:#fff3e0;border-radius:10px;padding:12px;margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;color:#e65100;">本节积分</span>
+        <span style="font-size:11px;color:#e65100;">本节爱学值</span>
         <span style="font-size:22px;font-weight:700;color:#e65100;">+24</span>
       </div>
       <div style="font-size:9px;color:#999;margin-top:4px;">随堂测满分+5 · 互动作答+2×3 · 拍照上墙+2 · 提交+1×5</div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <div style="flex:1;background:#e3f2fd;border-radius:8px;padding:8px;text-align:center;">
-        <div style="font-size:9px;color:#1565c0;">月度累计</div>
-        <div style="font-size:16px;font-weight:700;color:#1565c0;">368</div>
+        <div style="font-size:9px;color:#1565c0;">我的班级排名</div>
+        <div style="font-size:16px;font-weight:700;color:#1565c0;">第5名</div>
       </div>
       <div style="flex:1;background:#e8f5e9;border-radius:8px;padding:8px;text-align:center;">
-        <div style="font-size:9px;color:#2e7d32;">环比上周</div>
-        <div style="font-size:16px;font-weight:700;color:#2e7d32;">↑ 12%</div>
+        <div style="font-size:9px;color:#2e7d32;">我的小组排名</div>
+        <div style="font-size:16px;font-weight:700;color:#2e7d32;">第2名</div>
       </div>
-    </div>
-    <div style="background:#f5f5f5;border-radius:8px;padding:8px;font-size:10px;color:#666;line-height:1.6;">
-      <div style="font-weight:600;margin-bottom:2px;">💪 个人进步</div>
-      <div>· 本周互动参与率 100%</div>
-      <div>· 随堂测正确率提升至 85%</div>
-      <div>· 连续3节课获得积分奖励</div>
     </div>
   </div>`;
 }
@@ -4692,14 +4757,14 @@ function getCoursewareText() {
   } else if (state.scene === 'homework') {
     return '6月2日数学作业 · 讲评';
   } else if (state.scene === 'summary') {
-    return '课堂总结';
+    return '排行榜单';
   } else {
     return '请同学们将课堂笔记拍照上传<br><br>📷 拍照上墙';
   }
 }
 
 function getSceneName() {
-  return { choice: '选择题', interact: '互动题', quiz: '随堂测', photo: '拍照上墙', homework: '作业讲评', summary: '课堂总结' }[state.scene];
+  return { choice: '选择题', interact: '互动题', quiz: '随堂测', photo: '拍照上墙', homework: '作业讲评', summary: '排行榜单' }[state.scene];
 }
 
 // ======= Big Screen - Choice Phases =======
@@ -4749,7 +4814,7 @@ function renderBsToolboxPopup() {
         </button>
         <button class="bs-toolbox-item" onclick="teacherLaunch('summary')">
           <span class="tb-icon">🏆</span>
-          <span>课堂总结</span>
+          <span>排行榜单</span>
         </button>
         <button class="bs-toolbox-item">
           <span class="tb-icon">🎲</span>
@@ -5082,16 +5147,27 @@ function renderQuizStudentTab(done) {
   return `<div class="quiz-student-grid">${cards}</div>`;
 }
 
+function getAccuracyColor(accuracy, submitted) {
+  if (!submitted) return '#666';  // 灰色：尚未提交
+  if (accuracy === 100) return '#4caf50';       // 绿色
+  if (accuracy >= 85) return '#8bc34a';         // 浅绿色
+  if (accuracy >= 60) return '#ffeb3b';         // 黄色
+  if (accuracy >= 30) return '#ff9800';         // 橙黄色
+  return '#f44336';                              // 红色（<30% 及 0%）
+}
+
 function renderQuizQuestionTab(done) {
+  const hasSubmitted = done > 0;
   // Left: horizontal bar chart
   let barsHtml = '';
   quizQuestions.forEach((q, idx) => {
-    const barWidth = Math.max(2, q.accuracy); // percentage as width
+    const barWidth = hasSubmitted ? Math.max(4, q.accuracy) : 30; // 未提交时统一宽度
+    const barColor = getAccuracyColor(q.accuracy, hasSubmitted);
     const selected = idx === state.quizSelectedQ ? 'selected' : '';
     barsHtml += `<div class="quiz-bar-row ${selected}" onclick="selectQuizQuestion(${idx})">
       <div class="quiz-bar-label">${idx + 1}</div>
-      <div class="quiz-bar-track"><div class="quiz-bar" style="width:${barWidth}%;"></div></div>
-      <div class="quiz-bar-pct">${q.accuracy}%</div>
+      <div class="quiz-bar-track"><div class="quiz-bar" style="width:${barWidth}%;background:${barColor};"></div></div>
+      <div class="quiz-bar-pct" style="color:${barColor};">${hasSubmitted ? q.accuracy + '%' : '--'}</div>
     </div>`;
   });
 
@@ -5182,9 +5258,10 @@ function renderBsQuizFullscreen() {
   let sidebarHtml = '';
   quizQuestions.forEach((q, idx) => {
     const selected = idx === state.quizSelectedQ ? 'selected' : '';
+    const barColor = getAccuracyColor(q.accuracy, true);
     sidebarHtml += `<div class="quiz-fs-bar-item ${selected}" onclick="fsSelectQuestion(${idx})">
       <span class="fs-bar-num">${idx + 1}</span>
-      <div class="fs-bar-track"><div class="fs-bar-fill" style="width:${q.accuracy}%;"></div></div>
+      <div class="fs-bar-track"><div class="fs-bar-fill" style="width:${q.accuracy}%;background:${barColor};"></div></div>
       <span class="fs-bar-pct">${q.accuracy}%</span>
     </div>`;
   });
@@ -5638,7 +5715,7 @@ function renderTeacherPhoto(content) {
       const sel = i === selectedIdx ? 'selected' : '';
       const starred = iStarred ? 'starred' : '';
       const wallBadge = isItemOnWall ? '<span class="strip-wall-badge">进行中</span>' : '';
-      const starBtn = `<span class="strip-star-btn ${iStarred ? 'active' : ''}" onclick="event.stopPropagation();photoToggleStar(${i})">★</span>`;
+      const starBtn = `<span class="strip-star-btn ${iStarred ? 'active' : ''}" onclick="event.stopPropagation();photoToggleStar(${i})">✓</span>`;
       stripHtml += `<div class="photo-strip-item ${sel} ${onWall} ${starred}" onclick="photoSelectStudent(${i})">
         <div class="strip-thumb">📷${wallBadge}${starBtn}</div>
         <div class="strip-name">${name}</div>
@@ -5657,7 +5734,7 @@ function renderTeacherPhoto(content) {
         <button class="nav-arrow right" onclick="photoNavNext()">›</button>
         <div class="photo-preview-area">
           <div class="preview-img">
-            <button class="photo-star-btn ${isStarred ? 'active' : ''}" onclick="photoToggleStar()" title="加入上墙名单">★<span class="star-plus">+</span></button>
+            <button class="photo-star-btn ${isStarred ? 'active' : ''}" onclick="photoToggleStar()" title="加入上墙名单">✓</button>
             <div style="text-align:center;padding:12px;">
               <div style="font-size:28px;margin-bottom:6px;">📄</div>
               <div style="font-size:11px;color:#aaa;">${previewName}的课堂笔记</div>
