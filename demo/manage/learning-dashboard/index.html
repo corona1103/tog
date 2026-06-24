@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课堂学情看板 Demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #333; font-size: 14px; }
+
+/* Layout */
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 180px; background: #fff; border-right: 1px solid #e8e8e8; padding: 16px 0; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; }
+.main { flex: 1; margin-left: 180px; padding: 20px 24px; }
+
+/* Sidebar */
+.sidebar-logo { font-size: 15px; font-weight: 600; color: #1890ff; padding: 0 16px 16px; }
+.nav-group-title { font-size: 12px; color: #999; padding: 12px 16px 4px; }
+.nav-item { padding: 8px 16px 8px 20px; cursor: pointer; color: #666; font-size: 13px; }
+.nav-item:hover { color: #1890ff; }
+.nav-item.active { color: #1890ff; font-weight: 500; background: #e6f7ff; }
+
+/* Breadcrumb */
+.breadcrumb { font-size: 12px; color: #999; margin-bottom: 16px; }
+.breadcrumb a { color: #999; text-decoration: none; }
+.breadcrumb a:hover { color: #1890ff; }
+
+/* Top filter bar */
+.filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-select { padding: 5px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; background: #fff; }
+.filter-type-tabs { display: inline-flex; margin-left: auto; }
+.filter-type-tab { padding: 5px 12px; font-size: 12px; border: 1px solid #d9d9d9; background: #fff; cursor: pointer; color: #666; }
+.filter-type-tab:first-child { border-radius: 4px 0 0 4px; }
+.filter-type-tab:last-child { border-radius: 0 4px 4px 0; }
+.filter-type-tab + .filter-type-tab { border-left: none; }
+.filter-type-tab.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+.btn-export { padding: 5px 14px; background: #1890ff; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+
+/* Summary card - unified */
+.summary-card-unified { background: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.summary-card-unified .card-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; color: #333; }
+.metric-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.metric-item { }
+.metric-label { font-size: 12px; color: #999; margin-bottom: 6px; }
+.metric-main { font-size: 28px; font-weight: 700; }
+.metric-unit { font-size: 12px; color: #999; margin-left: 2px; }
+.metric-aux { font-size: 12px; color: #666; margin-top: 4px; }
+.metric-compare { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* Chart area */
+.chart-section { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.chart-title { font-size: 14px; font-weight: 600; }
+.chart-tabs { display: flex; gap: 4px; }
+.chart-tab { padding: 3px 10px; font-size: 12px; border: 1px solid #d9d9d9; background: #fff; cursor: pointer; border-radius: 3px; color: #666; }
+.chart-tab.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+
+/* Bar chart */
+.hbar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.hbar-label { width: 70px; font-size: 12px; color: #666; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar-track { flex: 1; height: 20px; background: #f5f5f5; border-radius: 3px; overflow: hidden; display: flex; }
+.hbar-fill { height: 100%; display: flex; align-items: center; font-size: 10px; color: #fff; padding-left: 6px; min-width: 0; }
+.hbar-value { width: 50px; font-size: 12px; color: #666; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; padding: 8px 12px; font-size: 12px; color: #999; font-weight: 500; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+.data-table td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+.data-table tr:hover td { background: #fafafa; }
+.link { color: #1890ff; cursor: pointer; font-size: 12px; }
+.link:hover { text-decoration: underline; }
+.tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; margin-left: 4px; }
+.tag-red { background: #fff1f0; color: #f5222d; }
+.tag-orange { background: #fff7e6; color: #fa8c16; }
+.tag-green { background: #f6ffed; color: #52c41a; }
+
+/* Alert */
+.alert-card { padding: 10px 12px; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.alert-card.warn { background: #fffbe6; border: 1px solid #ffe58f; }
+.alert-card.danger { background: #fff1f0; border: 1px solid #ffa39e; }
+.alert-avatar { width: 28px; height: 28px; border-radius: 50%; background: #e6f7ff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #1890ff; flex-shrink: 0; }
+.alert-text { flex: 1; font-size: 12px; }
+.alert-name { font-weight: 500; }
+
+/* Timeline */
+.tl-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+.tl-time { width: 40px; font-size: 11px; color: #999; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.tl-body { flex: 1; font-size: 12px; }
+.tl-title { font-weight: 500; }
+.tl-desc { color: #666; margin-top: 3px; }
+.tl-desc span { margin-right: 12px; }
+
+/* Student header */
+.stu-header { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.stu-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #1890ff, #36cfc9); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #fff; }
+.stu-info h2 { font-size: 16px; }
+.stu-info p { font-size: 12px; color: #999; }
+.stu-stats { display: flex; gap: 20px; margin-left: auto; }
+.stu-stat { text-align: center; }
+.stu-stat-val { font-size: 20px; font-weight: 700; color: #1890ff; }
+.stu-stat-lbl { font-size: 11px; color: #999; }
+
+/* KP bar */
+.kp-track { width: 60px; height: 5px; background: #f0f0f0; border-radius: 3px; display: inline-block; vertical-align: middle; overflow: hidden; }
+.kp-fill { height: 100%; border-radius: 3px; }
+
+/* View tabs */
+.view-tabs { display: flex; gap: 20px; border-bottom: 1px solid #f0f0f0; margin-bottom: 16px; }
+.view-tab { padding: 8px 0; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
+.view-tab.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 500; }
+
+/* Line chart */
+.line-chart { height: 140px; position: relative; border-bottom: 1px solid #f0f0f0; margin-bottom: 8px; }
+.line-chart svg { width: 100%; height: 100%; }
+.line-legend { display: flex; gap: 16px; font-size: 11px; color: #999; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-logo">九章爱学</div>
+    <div class="nav-group-title">学情中心</div>
+    <div class="nav-item active" onclick="showView('school')">校级学情</div>
+    <div class="nav-item" onclick="showView('class')">班级学情</div>
+    <div class="nav-item" onclick="showView('student')">学生学情</div>
+  </div>
+
+  <div class="main">
+    <!-- ========== 校级学情 ========== -->
+    <div id="view-school">
+      <div class="breadcrumb"><a href="#">首页</a> / <a href="#">学情中心</a> / 校级学情</div>
+      <div class="view-tabs">
+        <div class="view-tab active">综合任务学情</div>
+        <div class="view-tab">知识掌握学情</div>
+        <div class="view-tab">考试学情</div>
+      </div>
+      <div class="filter-bar">
+        <select class="filter-select"><option>年级：全部</option><option>高一</option><option>高二</option></select>
+        <select class="filter-select"><option>班级：全部</option></select>
+        <select class="filter-select"><option>学科：全部</option><option>数学</option><option>语文</option></select>
+        <select class="filter-select"><option>2026-06-17 ~ 2026-06-24</option></select>
+        <div class="filter-type-tabs">
+          <div class="filter-type-tab">全部</div>
+          <div class="filter-type-tab active">课堂互动</div>
+          <div class="filter-type-tab">任务作业</div>
+        </div>
+        <button class="btn-export">导出数据</button>
+      </div>
+
+      <!-- 概览卡片（唯一） -->
+      <div class="summary-card-unified">
+        <div class="metric-row">
+          <div class="metric-item">
+            <div class="metric-label">互动频次</div>
+            <div class="metric-main">5.1<span class="metric-unit">次/课</span></div>
+            <div class="metric-aux">累计互动 218 次</div>
+            <div class="metric-compare">年级平均 4.6 次/课</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">课堂参与率</div>
+            <div class="metric-main">91<span class="metric-unit">%</span></div>
+            <div class="metric-aux">&nbsp;</div>
+            <div class="metric-compare">年级平均 88%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">知识检测正确率</div>
+            <div class="metric-main">78<span class="metric-unit">%</span></div>
+            <div class="metric-aux">&nbsp;</div>
+            <div class="metric-compare">年级平均 74%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teacher comparison -->
+      <div class="chart-section">
+        <div class="chart-header">
+          <div class="chart-title">教师互动频次对比</div>
+          <div class="chart-tabs"><div class="chart-tab active">按频次</div><div class="chart-tab">按工具</div></div>
+        </div>
+        <div id="teacher-bars"></div>
+        <div style="display:flex;gap:10px;margin-top:8px;font-size:11px;color:#999;" id="bar-legend"></div>
+      </div>
+
+      <!-- Class table -->
+      <div class="chart-section">
+        <div class="chart-header"><div class="chart-title">班级明细数据</div></div>
+        <table class="data-table">
+          <thead><tr><th>班级名称</th><th>知识检测正确率</th><th>课堂参与率</th><th>课堂互动频次</th><th>操作</th></tr></thead>
+          <tbody id="school-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== 班级学情 ========== -->
+    <div id="view-class" style="display:none;">
+      <div class="breadcrumb"><a href="#" onclick="showView('school');return false;">校级学情</a> / 班级学情</div>
+      <div class="view-tabs">
+        <div class="view-tab active">综合任务学情</div>
+        <div class="view-tab">知识掌握学情</div>
+        <div class="view-tab">考试学情</div>
+      </div>
+      <div class="filter-bar">
+        <select class="filter-select"><option>【班主任】高一(1)班</option><option>高一(2)班</option></select>
+        <select class="filter-select"><option>数学</option><option>语文</option></select>
+        <select class="filter-select"><option>2026-06-17 ~ 2026-06-24</option></select>
+        <div class="filter-type-tabs">
+          <div class="filter-type-tab">全部</div>
+          <div class="filter-type-tab active">课堂互动</div>
+          <div class="filter-type-tab">任务作业</div>
+        </div>
+      </div>
+
+      <!-- 概览卡片（唯一） -->
+      <div class="summary-card-unified">
+        <div class="metric-row">
+          <div class="metric-item">
+            <div class="metric-label">互动频次</div>
+            <div class="metric-main">6.2<span class="metric-unit">次/课</span></div>
+            <div class="metric-aux">累计互动 56 次</div>
+            <div class="metric-compare">年级平均 5.1 次/课</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">课堂参与率</div>
+            <div class="metric-main">93<span class="metric-unit">%</span></div>
+            <div class="metric-aux">&nbsp;</div>
+            <div class="metric-compare">年级平均 91%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">知识检测正确率</div>
+            <div class="metric-main">82<span class="metric-unit">%</span></div>
+            <div class="metric-aux">&nbsp;</div>
+            <div class="metric-compare">年级平均 78%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="chart-section">
+        <div class="chart-header"><div class="chart-title">重点关注学生</div><span class="link">查看全部 ›</span></div>
+        <div id="alerts"></div>
+      </div>
+
+      <!-- Session log -->
+      <div class="chart-section">
+        <div class="chart-header"><div class="chart-title">课堂互动日志</div></div>
+        <table class="data-table">
+          <thead><tr><th>日期</th><th>课节</th><th>互动次数</th><th>参与率</th><th>正确率</th><th>操作</th></tr></thead>
+          <tbody id="session-log"></tbody>
+        </table>
+        <div id="session-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f0;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong style="font-size:13px;">课时详情 — 6月24日 第3节 (8:40)</strong><span class="link" onclick="document.getElementById('session-detail').style.display='none'">关闭</span></div>
+          <div id="timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 学生学情 ========== -->
+    <div id="view-student" style="display:none;">
+      <div class="breadcrumb"><a href="#" onclick="showView('school');return false;">校级学情</a> / <a href="#" onclick="showView('class');return false;">班级学情</a> / 学生详情</div>
+
+      <div class="stu-header">
+        <div class="stu-avatar">林</div>
+        <div class="stu-info"><h2>G201的学情主页</h2><p>高一(1)班 · 林雅琪 · 数学</p></div>
+        <div class="stu-stats">
+          <div class="stu-stat"><div class="stu-stat-val">76%</div><div class="stu-stat-lbl">正确率</div></div>
+          <div class="stu-stat"><div class="stu-stat-val">88%</div><div class="stu-stat-lbl">参与率</div></div>
+          <div class="stu-stat"><div class="stu-stat-val">+42</div><div class="stu-stat-lbl">爱学值(本月)</div></div>
+          <div class="stu-stat"><div class="stu-stat-val">第8名</div><div class="stu-stat-lbl">综合排名</div></div>
+        </div>
+      </div>
+
+      <div class="view-tabs">
+        <div class="view-tab active">综合任务学情</div>
+        <div class="view-tab">知识掌握学情</div>
+        <div class="view-tab">考试学情</div>
+      </div>
+
+      <div class="filter-bar">
+        <select class="filter-select"><option>数学</option><option>语文</option></select>
+        <select class="filter-select"><option>2026-06-03 ~ 2026-06-24</option></select>
+        <div class="filter-type-tabs">
+          <div class="filter-type-tab">全部</div>
+          <div class="filter-type-tab active">课堂互动</div>
+          <div class="filter-type-tab">任务作业</div>
+        </div>
+      </div>
+
+      <!-- 学生概览卡片 -->
+      <div class="summary-card-unified">
+        <div class="metric-row">
+          <div class="metric-item">
+            <div class="metric-label">互动频次</div>
+            <div class="metric-main">5.8<span class="metric-unit">次/课</span></div>
+            <div class="metric-aux">累计参与 18 次</div>
+            <div class="metric-compare">班级平均 6.2 次/课</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">课堂参与率</div>
+            <div class="metric-main">88<span class="metric-unit">%</span></div>
+            <div class="metric-aux">&nbsp;</div>
+            <div class="metric-compare">班级平均 93%</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">知识检测正确率</div>
+            <div class="metric-main">76<span class="metric-unit">%</span></div>
+            <div class="metric-aux">&nbsp;</div>
+            <div class="metric-compare">班级平均 82%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 课堂互动日志（学生视角） -->
+      <div class="chart-section">
+        <div class="chart-header"><div class="chart-title">课堂互动日志</div></div>
+        <table class="data-table">
+          <thead><tr><th>日期</th><th>课节</th><th>参与互动</th><th>个人正确率</th><th>操作</th></tr></thead>
+          <tbody id="stu-session-log"></tbody>
+        </table>
+        <div id="stu-session-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f0;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong style="font-size:13px;">个人课时详情 — 6月24日 第3节 (8:40)</strong><span class="link" onclick="document.getElementById('stu-session-detail').style.display='none'">关闭</span></div>
+          <div id="stu-timeline"></div>
+        </div>
+      </div>
+
+      <!-- Progress curve -->
+      <div class="chart-section">
+        <div class="chart-header"><div class="chart-title">参与率趋势</div><div class="chart-tabs"><div class="chart-tab active">近4周</div><div class="chart-tab">近1学期</div></div></div>
+        <div class="line-legend"><span style="color:#1890ff;">— 个人参与率</span><span style="color:#bbb;">--- 班级平均</span></div>
+        <div class="line-chart">
+          <svg viewBox="0 0 400 120" preserveAspectRatio="none">
+            <polyline points="0,50 100,44 200,38 300,34 400,30" fill="none" stroke="#1890ff" stroke-width="2"/>
+            <polyline points="0,35 100,32 200,28 300,26 400,22" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="4"/>
+          </svg>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#bbb;"><span>第1周</span><span>第2周</span><span>第3周</span><span>第4周</span></div>
+      </div>
+
+      <!-- Knowledge mastery -->
+      <div class="chart-section">
+        <div class="chart-header"><div class="chart-title">知识掌握分析（按正确率从低到高）</div></div>
+        <table class="data-table">
+          <thead><tr><th>知识点</th><th>正确率</th><th></th><th>作答次数</th><th>最近结果</th><th>操作</th></tr></thead>
+          <tbody id="kp-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Data
+const teachers = [
+  { name: '张老师', freq: 6.8, segs: [2.1, 1.5, 1.2, 0.8, 1.2] },
+  { name: '李老师', freq: 5.2, segs: [1.8, 1.2, 1.0, 0.5, 0.7] },
+  { name: '王老师', freq: 4.5, segs: [0.8, 1.5, 0.5, 1.0, 0.7] },
+  { name: '赵老师', freq: 3.8, segs: [1.5, 0.5, 0.8, 0.5, 0.5] },
+  { name: '陈老师', freq: 3.2, segs: [0.5, 1.2, 0.2, 0.8, 0.5] },
+  { name: '刘老师', freq: 2.5, segs: [1.0, 0.8, 0.2, 0.3, 0.2] },
+];
+const segColors = ['#1890ff','#52c41a','#faad14','#722ed1','#eb2f96'];
+const segNames = ['知识检测','开放检验','课堂激活','探索操作','教师工具'];
+const classes = [
+  { name: '高一(1)班', acc: 85, part: 96, freq: 6.2 },
+  { name: '高一(2)班', acc: 79, part: 93, freq: 5.8 },
+  { name: '高一(3)班', acc: 76, part: 91, freq: 5.1 },
+  { name: '高一(4)班', acc: 72, part: 88, freq: 4.5 },
+  { name: '高一(5)班', acc: 68, part: 85, freq: 3.9 },
+];
+const alerts = [
+  { n: '孙铭远', r: '近2周课堂参与率仅32%', t: 'danger' },
+  { n: '付博', r: '连续3课时正确率下降：72%→65%→51%', t: 'danger' },
+  { n: '罗思涵', r: '近1周零主动互动行为', t: 'danger' },
+  { n: '马天宇', r: '近2周参与率48%', t: 'warn' },
+];
+const sessions = [
+  { d: '06-24', p: '第3节', time: '8:40', n: 9, part: '95%', acc: '82%' },
+  { d: '06-23', p: '第1节', time: '8:00', n: 7, part: '91%', acc: '76%' },
+  { d: '06-22', p: '第3节', time: '8:40', n: 8, part: '93%', acc: '79%' },
+  { d: '06-20', p: '第2节', time: '8:50', n: 6, part: '89%', acc: '74%' },
+];
+
+// 课时详情 — 展示所有互动类型
+const timeline = [
+  { t: '8:42', type: '随堂测', cat: '知识检测', c: '#1890ff',
+    desc: ['5题', '参与 43/45', '正确率 82%'] },
+  { t: '8:50', type: '互动题(客观)', cat: '知识检测', c: '#1890ff',
+    desc: ['2题', '参与 44/45', '正确率 76%'] },
+  { t: '8:55', type: '互动题(主观)', cat: '知识检测', c: '#1890ff',
+    desc: ['1题', '参与 42/45', '自批正确率 68%'] },
+  { t: '9:00', type: '课中选择题', cat: '开放检验', c: '#52c41a',
+    desc: ['参与 44/45 (98%)', '正确率 72%（已补录）'] },
+  { t: '9:05', type: '拍照上墙', cat: '开放检验', c: '#52c41a',
+    desc: ['参与 42/45 (93%)', '上墙 5人'] },
+  { t: '9:10', type: '抢答', cat: '课堂激活', c: '#faad14',
+    desc: ['参与 35/45 (78%)', '中签：李明辉、王雨萱、张浩', '幸运星：王雨萱'] },
+  { t: '9:13', type: '随机点名', cat: '课堂激活', c: '#faad14',
+    desc: ['赵思远'] },
+  { t: '9:18', type: 'NB实验', cat: '探索操作', c: '#722ed1',
+    desc: ['参与 45/45', '互动时长 6分钟'] },
+  { t: '9:25', type: '智能体对话', cat: '探索操作', c: '#722ed1',
+    desc: ['参与 43/45', '平均对话 4.2轮'] },
+  { t: '9:32', type: '互动课件', cat: '探索操作', c: '#722ed1',
+    desc: ['参与 45/45', '互动时长 5分钟'] },
+  { t: '9:38', type: '小组讨论', cat: '探索操作', c: '#722ed1',
+    desc: ['成果提交 38人', '上墙展讲 6人'] },
+  { t: '9:45', type: '小程序', cat: '探索操作', c: '#722ed1',
+    desc: ['参与 45/45', '互动时长 4分钟'] },
+];
+
+// 学生互动日志（按课时聚合）
+const stuSessions = [
+  { d: '06-24', p: '第3节', time: '8:40', partCount: '8/9', acc: '80%' },
+  { d: '06-23', p: '第1节', time: '8:00', partCount: '6/7', acc: '71%' },
+  { d: '06-22', p: '第3节', time: '8:40', partCount: '7/8', acc: '75%' },
+  { d: '06-20', p: '第2节', time: '8:50', partCount: '5/6', acc: '67%' },
+];
+
+// 学生课时详情（按行为类型合并展示个人表现，体现多次发布）
+const stuTimeline = [
+  { type: '知识检测', c: '#1890ff', summary: '共3次 · 8题 · 正确率 75%',
+    desc: ['随堂测 5题：答对4题，正确率 80%', '互动题(客观) 2题：答对1题，正确率 50%', '互动题(主观) 1题：已提交，自批正确'] },
+  { type: '开放检验', c: '#52c41a', summary: '共4次 · 参与4/4次',
+    desc: ['课中选择题 ×2：第1次 选B（正确）；第2次 选A（未补录）', '拍照上墙 ×2：第1次 已提交，被选中上墙；第2次 已提交，未上墙'] },
+  { type: '课堂激活', c: '#faad14', summary: '共4次 · 参与抢答2/2次',
+    desc: ['抢答 ×2：第1次 已参与，未中签；第2次 已参与，中签', '随机点名 ×2：第1次 未被点到；第2次 被点名'] },
+  { type: '探索操作', c: '#722ed1', summary: '共5次 · 全部参与',
+    desc: ['NB实验 ×1：已参与，时长6分钟', '智能体对话 ×1：5轮对话', '互动课件 ×1：已参与，时长5分钟', '小组讨论 ×1：已提交成果，未上墙展讲', '小程序 ×1：已参与，时长4分钟'] },
+];
+
+const kps = [
+  { n: '一元二次方程-求根公式', a: 33, cnt: 6, last: '✗', cl: '#f44336' },
+  { n: '函数图像-平移变换', a: 50, cnt: 4, last: '✓', cl: '#ff9800' },
+  { n: '不等式-解集表示', a: 60, cnt: 5, last: '✗', cl: '#ffeb3b' },
+  { n: '三角函数-诱导公式', a: 67, cnt: 3, last: '✓', cl: '#ffeb3b' },
+  { n: '数列-等差通项', a: 80, cnt: 8, last: '✓', cl: '#8bc34a' },
+  { n: '集合-交并补', a: 90, cnt: 7, last: '✓', cl: '#4caf50' },
+  { n: '函数-定义域', a: 100, cnt: 5, last: '✓', cl: '#4caf50' },
+];
+
+// Render
+function init() {
+  // Teacher bars
+  const maxF = Math.max(...teachers.map(t=>t.freq));
+  document.getElementById('teacher-bars').innerHTML = teachers.map(t => {
+    const bars = t.segs.map((s,i) => `<div class="hbar-fill" style="width:${(s/maxF)*100}%;background:${segColors[i]}" title="${segNames[i]}:${s}"></div>`).join('');
+    return `<div class="hbar"><div class="hbar-label">${t.name}</div><div class="hbar-track">${bars}</div><div class="hbar-value">${t.freq}次/课</div></div>`;
+  }).join('');
+  document.getElementById('bar-legend').innerHTML = segNames.map((n,i)=>`<span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${segColors[i]};margin-right:3px;vertical-align:middle;"></span>${n}</span>`).join('');
+
+  // School table (no trend column)
+  document.getElementById('school-table').innerHTML = classes.map(c => {
+    const cl = c.acc>=85?'#4caf50':c.acc>=60?'#faad14':'#f44336';
+    return `<tr><td><strong>${c.name}</strong></td><td style="color:${cl};font-weight:600">${c.acc}%</td><td>${c.part}%</td><td>${c.freq}次/课</td><td><span class="link" onclick="showView('class')">查看详情</span></td></tr>`;
+  }).join('');
+
+  // Alerts
+  document.getElementById('alerts').innerHTML = alerts.map(a => `<div class="alert-card ${a.t}"><div class="alert-avatar">${a.n[0]}</div><div class="alert-text"><span class="alert-name">${a.n}</span> <span class="tag tag-${a.t==='danger'?'red':'orange'}">${a.t==='danger'?'高风险':'关注'}</span><br><span style="color:#999">${a.r}</span></div></div>`).join('');
+
+  // Session log (with start time)
+  document.getElementById('session-log').innerHTML = sessions.map(s => `<tr><td>${s.d}</td><td>${s.p} <span style="color:#999;font-size:11px;">(${s.time})</span></td><td>${s.n}次</td><td>${s.part}</td><td>${s.acc}</td><td><span class="link" onclick="showDetail()">查看详情</span></td></tr>`).join('');
+
+  // Timeline - all interaction types with aux data
+  document.getElementById('timeline').innerHTML = timeline.map(t => {
+    const descHtml = t.desc.map(d => `<span>${d}</span>`).join('');
+    return `<div class="tl-item"><div class="tl-time">${t.t}</div><div class="tl-dot" style="background:${t.c}"></div><div class="tl-body"><div class="tl-title">${t.type} <span class="tag" style="background:${t.c}15;color:${t.c}">${t.cat}</span></div><div class="tl-desc">${descHtml}</div></div></div>`;
+  }).join('');
+
+  // KP table
+  document.getElementById('kp-table').innerHTML = kps.map(k => `<tr><td>${k.n}</td><td style="color:${k.cl};font-weight:600">${k.a}%</td><td><span class="kp-track"><span class="kp-fill" style="width:${k.a}%;background:${k.cl}"></span></span></td><td>${k.cnt}次</td><td>${k.last==='✓'?'<span style="color:#52c41a">✓正确</span>':'<span style="color:#f44336">✗错误</span>'}</td><td><span class="link">查看错题</span></td></tr>`).join('');
+
+  // Student session log
+  document.getElementById('stu-session-log').innerHTML = stuSessions.map(s => `<tr><td>${s.d}</td><td>${s.p} <span style="color:#999;font-size:11px;">(${s.time})</span></td><td>${s.partCount}次</td><td>${s.acc}</td><td><span class="link" onclick="showStuDetail()">查看详情</span></td></tr>`).join('');
+
+  // Student timeline (grouped by category, with summary)
+  document.getElementById('stu-timeline').innerHTML = stuTimeline.map(t => {
+    const descHtml = t.desc.map(d => `<div style="margin-top:3px;color:#666;font-size:12px;padding-left:8px;border-left:2px solid #f0f0f0;">· ${d}</div>`).join('');
+    return `<div class="tl-item" style="align-items:flex-start;"><div class="tl-dot" style="background:${t.c};margin-top:6px;"></div><div class="tl-body"><div class="tl-title">${t.type} <span class="tag" style="background:${t.c}15;color:${t.c}">${t.summary}</span></div>${descHtml}</div></div>`;
+  }).join('');
+}
+
+function showView(v) {
+  ['school','class','student'].forEach(id => document.getElementById('view-'+id).style.display = id===v?'block':'none');
+  document.querySelectorAll('.nav-item').forEach((el,i) => el.classList.toggle('active', i===['school','class','student'].indexOf(v)));
+}
+function showDetail() { document.getElementById('session-detail').style.display='block'; }
+function showStuDetail() { document.getElementById('stu-session-detail').style.display='block'; }
+
+init();
+</script>
+</body>
+</html>

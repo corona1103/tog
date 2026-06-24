@@ -2046,6 +2046,35 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Student points animation */
+.points-anim {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: linear-gradient(135deg, #ff9800, #f44336);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255,152,0,0.4);
+  animation: pointsPop 1.8s ease forwards;
+  z-index: 100;
+  pointer-events: none;
+}
+.points-anim.high {
+  background: linear-gradient(135deg, #ffd700, #ff9800);
+  font-size: 14px;
+  padding: 5px 12px;
+}
+@keyframes pointsPop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  15% { opacity: 1; transform: translateY(0) scale(1.1); }
+  30% { transform: translateY(0) scale(1); }
+  75% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
 /* Step indicator */
 .step-bar {
   display: flex;
@@ -4239,6 +4268,8 @@ function photoNavNext() {
 function photoSingleWall() {
   state.photoOnWallIdx = state.photoSelectedIdx;
   render();
+  // Points animation: student selected for wall display → +2
+  setTimeout(() => showPointsAnim(2, '上墙'), 300);
 }
 
 function photoToggleStar(idx) {
@@ -4300,11 +4331,30 @@ function studentSubmitChoice() {
 function studentSubmitQuiz() {
   state.studentAnswer = 'submitted';
   renderStudent();
+  // Points animation: quiz submitted + graded → simulate batch award (e.g. 5 correct + bonus = 7)
+  setTimeout(() => showPointsAnim(7, '随堂测'), 500);
 }
 
 function studentTakePhoto() {
   state.studentAnswer = 'submitted';
   renderStudent();
+  // Points animation: photo submitted → +1
+  setTimeout(() => showPointsAnim(1, '提交'), 300);
+}
+
+// ======= Points Animation =======
+function showPointsAnim(points, label) {
+  const container = document.getElementById('studentContent');
+  if (!container) return;
+  // Remove existing animation if any
+  const existing = container.querySelector('.points-anim');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'points-anim' + (points >= 3 ? ' high' : '');
+  el.textContent = `+${points} ⭐ ${label || ''}`;
+  container.style.position = 'relative';
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 1900);
 }
 
 // ======= Render =======
@@ -4598,7 +4648,7 @@ function renderBsSummary() {
       </div>`;
     });
     contentHtml = `<div class="summary-list">${listHtml}</div>
-      <div class="summary-note">仅展示班级前10名 · 每位同学可在个人端查看自己的排名</div>`;
+      <div class="summary-note">仅展示本节课前10名，未上榜同学请继续加油</div>`;
   } else {
     let groupHtml = '';
     summaryGroups.forEach((g, i) => {
@@ -4623,6 +4673,7 @@ function renderBsSummary() {
     : `<button class="summary-tab active" onclick="switchSummaryTab('personal')">个人排行</button>`;
 
   return `<div class="summary-overlay fade-in">
+    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.8);margin-bottom:6px;">随堂测：2次 · 拍照上墙：1次 · 互动题：3次 · 全班平均爱学值：<b>28</b></div>
     <div class="summary-tabs">
       ${tabsHtml}
     </div>
@@ -4637,16 +4688,45 @@ function renderTeacherSummary(content) {
   if (classHasGroups) {
     tabsHtml += `<button class="config-opt ${tabGroup}" onclick="switchSummaryTab('group')" style="flex:1;padding:6px;font-size:10px;border-radius:6px;border:1px solid #ddd;background:${state.summaryTab==='group'?'#4fc3f7':'#fff'};color:${state.summaryTab==='group'?'#fff':'#555'};cursor:pointer;">小组排行</button>`;
   }
+
+  // 排行列表内容（与大屏一致）
+  let listHtml = '';
+  if (state.summaryTab === 'personal') {
+    summaryTop10.forEach((s, i) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span style="color:#999;font-size:9px;">${i+1}</span>`;
+      const barW = Math.round(s.score / summaryTop10[0].score * 100);
+      listHtml += `<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="width:18px;text-align:center;font-size:11px;">${medal}</span>
+        <span style="flex:1;font-size:10px;color:#333;">${s.name}</span>
+        <div style="width:60px;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${barW}%;background:linear-gradient(90deg,#4fc3f7,#1976d2);border-radius:3px;"></div></div>
+        <span style="font-size:9px;color:#1976d2;width:40px;text-align:right;">${s.score}</span>
+      </div>`;
+    });
+  } else {
+    summaryGroups.forEach((g, i) => {
+      const barW = Math.round(g.score / summaryGroups[0].score * 100);
+      const medal = i === 0 ? '🏆' : (i+1);
+      const memberNames = g.members.join('、');
+      listHtml += `<div style="display:flex;align-items:center;gap:4px;padding:3px 0;">
+        <span style="width:18px;text-align:center;font-size:11px;">${medal}</span>
+        <span style="font-size:10px;color:#333;border-left:2px solid ${g.color};padding-left:4px;">${g.name}</span>
+        <span style="font-size:9px;color:#1976d2;margin-left:auto;">${g.score}</span>
+      </div>
+      <div style="margin-left:22px;margin-bottom:4px;font-size:8px;color:#999;">${memberNames}</div>`;
+    });
+  }
+
   content.innerHTML = `<div class="teacher-control-panel fade-in" style="padding:12px 14px;gap:6px;align-items:stretch;">
     <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:4px;">🏆 排行榜单</div>
-    <div style="display:flex;gap:6px;margin-bottom:8px;">
-      ${tabsHtml}
-    </div>
-    <div style="background:#f8f9fa;border-radius:8px;padding:10px;font-size:10px;color:#555;line-height:1.8;">
-      <div><b>本节课互动数据</b></div>
+    <div style="background:#f8f9fa;border-radius:8px;padding:8px 10px;font-size:9px;color:#555;line-height:1.6;margin-bottom:6px;">
       <div>随堂测：2次 · 拍照上墙：1次 · 互动题：3次</div>
       <div>全班平均爱学值：<b style="color:#1976d2;">28</b></div>
-      <div>最高爱学值：<b style="color:#e65100;">58</b>（林雅琪）</div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:6px;">
+      ${tabsHtml}
+    </div>
+    <div style="max-height:200px;overflow-y:auto;padding:4px 0;">
+      ${listHtml}
     </div>
     <button onclick="endSummary()" style="width:100%;margin-top:8px;padding:8px;border-radius:6px;background:#666;color:#fff;border:none;font-size:11px;cursor:pointer;">关闭榜单</button>
   </div>`;
@@ -4663,15 +4743,19 @@ function renderStudentSummary(content) {
         <span style="font-size:11px;color:#e65100;">本节爱学值</span>
         <span style="font-size:22px;font-weight:700;color:#e65100;">+24</span>
       </div>
-      <div style="font-size:9px;color:#999;margin-top:4px;">随堂测满分+5 · 互动作答+2×3 · 拍照上墙+2 · 提交+1×5</div>
+      <div style="font-size:9px;color:#666;margin-top:6px;line-height:1.6;">
+        <div style="font-weight:600;color:#555;margin-bottom:2px;">⭐ 高光时刻</div>
+        <div>随堂测 · 答对5题 · <b style="color:#e65100;">+7</b></div>
+        <div>抢答 · 中签2次 · <b style="color:#e65100;">+5</b></div>
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <div style="flex:1;background:#e3f2fd;border-radius:8px;padding:8px;text-align:center;">
-        <div style="font-size:9px;color:#1565c0;">我的班级排名</div>
-        <div style="font-size:16px;font-weight:700;color:#1565c0;">第5名</div>
+      <div style="flex:1;background:#e3f2fd;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:9px;color:#1565c0;margin-bottom:4px;">我的班级排名</div>
+        <div style="font-size:12px;font-weight:600;color:#1565c0;">恭喜你本节课获得第5名 🎉</div>
       </div>
-      <div style="flex:1;background:#e8f5e9;border-radius:8px;padding:8px;text-align:center;">
-        <div style="font-size:9px;color:#2e7d32;">我的小组排名</div>
+      <div style="flex:1;background:#e8f5e9;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:9px;color:#2e7d32;margin-bottom:4px;">我的小组排名</div>
         <div style="font-size:16px;font-weight:700;color:#2e7d32;">第2名</div>
       </div>
     </div>
@@ -5051,6 +5135,12 @@ function publishResultAnswer() {
     state.correctAnswer = state.selectedAnswers.join('');
   }
   render();
+  // Points animation: student got it right → +1
+  const selected = state.studentAnswer || 'B';
+  const isCorrect = state.allCorrect || state.selectedAnswers.includes(selected);
+  if (isCorrect) {
+    setTimeout(() => showPointsAnim(1, '答对'), 300);
+  }
 }
 
 function setAllCorrect() {
@@ -5953,8 +6043,13 @@ function interactEnd() {
 function interactStudentSubmit() {
   state.interactStudentDone = true;
   state.interactSubmitted++;
-  if (Math.random() < 0.7) state.interactCorrect++;
+  const correct = Math.random() < 0.7;
+  if (correct) state.interactCorrect++;
   render();
+  // Points animation: interactive question answered correctly → +1
+  if (correct) {
+    setTimeout(() => showPointsAnim(1, '答对'), 400);
+  }
 }
 
 function switchInteractQType(type) {
