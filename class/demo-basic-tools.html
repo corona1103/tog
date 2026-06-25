@@ -1730,6 +1730,20 @@ body {
   color: #f44336;
 }
 
+/* Choice bottom action bar */
+.choice-bottom-bar {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 8px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* Replay wall panel inside data detail */
 .replay-wall-panel {
   flex: 1;
@@ -3966,9 +3980,18 @@ function toggleDataDetail() {
   const isHidden = panel.classList.contains('hidden');
   document.getElementById('teacherToolboxDropdown').classList.add('hidden');
   if (isHidden) {
-    renderDataPanel();
-    panel.classList.remove('hidden');
+    // During active choice interaction, show live choice panel
+    if (state.scene === 'choice' && (state.phase === 'active' || state.phase === 'result' || state.phase === 'answer')) {
+      renderChoiceDataPanel();
+    } else {
+      renderDataPanel();
+      panel.classList.remove('hidden');
+    }
   } else {
+    // Don't allow closing during active choice interaction
+    if (state.scene === 'choice' && (state.phase === 'active' || state.phase === 'result' || state.phase === 'answer')) {
+      return;
+    }
     panel.classList.add('hidden');
   }
 }
@@ -4257,6 +4280,7 @@ function endInteraction() {
   clearIntervals();
   state.quizFullscreen = false;
   state.phase = 'idle';
+  document.getElementById('teacherDataPanel').classList.add('hidden');
   resetState();
   render();
 }
@@ -5617,7 +5641,13 @@ function renderTeacher() {
   } else if (isTeacherConfig) {
     renderTeacherConfig(content);
   } else if (state.scene === 'choice') {
-    renderTeacherChoice(content);
+    // 课中选择题: entire interaction happens in data detail panel
+    content.innerHTML = `<div class="courseware-preview">
+      <div style="font-size:24px;margin-bottom:8px;">📐</div>
+      <div>第3章 函数的基本性质</div>
+      <div class="slide-num">第 3/12 页</div>
+    </div>`;
+    renderChoiceDataPanel();
   } else if (state.scene === 'interact') {
     renderTeacherInteract(content);
   } else if (state.scene === 'quiz') {
@@ -5680,57 +5710,144 @@ function renderTeacherConfig(content) {
   </div>`;
 }
 
-function renderTeacherChoice(content) {
-  if (state.phase === 'active' || state.phase === 'result' || state.phase === 'answer') {
-    if (state.answerPublished) {
-      const ansText = state.allCorrect ? '全部正确' : state.selectedAnswers.join(',');
-      const rateText = state.allCorrect ? '100%' : '58%';
-      content.innerHTML = `<div class="teacher-control-panel fade-in">
-        <div class="panel-title">✓ 答案已公布（${ansText}）</div>
-        <div class="panel-stats">
-          <div>正确率 <span class="num">${rateText}</span></div>
-        </div>
-        <div class="panel-actions">
-          <button class="ctrl-btn danger" onclick="endInteraction()">确定关闭</button>
-        </div>
+function renderChoiceDataPanel() {
+  const panel = document.getElementById('teacherDataPanel');
+  panel.classList.remove('hidden');
+
+  const labels = state.choiceType === 'judge' ? ['对', '错'] : 'ABCDEFGHIJ'.slice(0, state.choiceOptionCount).split('');
+  const answered = state.phase === 'active' ? state.answered : state.total;
+  const isActive = state.phase === 'active';
+
+  // Simulated student data
+  const allStudents = [
+    {name:'张明',answer:'A'},{name:'李红',answer:'B'},{name:'王五',answer:'B'},
+    {name:'赵六',answer:'A'},{name:'孙七',answer:'B'},{name:'刘明',answer:'C'},
+    {name:'周八',answer:'B'},{name:'郑十',answer:'A'},{name:'钱博西',answer:'B'},
+    {name:'何芳',answer:'D'},{name:'赵容',answer:'B'},{name:'周子喧',answer:'A'},
+    {name:'林雅琪',answer:'B'},{name:'马天宇',answer:'C'},{name:'罗思涵',answer:'B'},
+    {name:'宋雨桐',answer:'A'},{name:'付博',answer:'B'},{name:'邹琪',answer:'D'},
+    {name:'陈浩然',answer:'B'},{name:'杨雨萱',answer:'A'},{name:'黄子轩',answer:'B'},
+    {name:'吴宣杰',answer:'B'},{name:'冯敏妍',answer:'C'},{name:'李茹',answer:'B'},
+    {name:'王嘉琪',answer:'A'},{name:'张文博',answer:'B'},{name:'刘思雨',answer:'B'},
+    {name:'何思远',answer:'B'},{name:'赵吾行',answer:'A'},{name:'周斑',answer:'B'},
+    {name:'孙棣',answer:'B'},{name:'何梦影',answer:'C'},{name:'王文志',answer:'B'},
+    {name:'李建东',answer:'A'},{name:'赵小璐',answer:'B'},{name:'周铎',answer:'D'},
+    {name:'王民瑞',answer:'B'},{name:'周会玲',answer:'B'},{name:'赵玉芝',answer:'A'},
+    {name:'赵轩海',answer:'B'},{name:'王敦强',answer:'C'},{name:'赵绚海',answer:'B'},
+    {name:'李丽颖',answer:'B'}
+  ];
+  const showStudents = allStudents.slice(0, Math.min(answered, allStudents.length));
+
+  // --- 选项作答分布统计 (按选项统计人数) ---
+  const optCounts = {};
+  labels.forEach(l => optCounts[l] = 0);
+  showStudents.forEach(s => { if (optCounts[s.answer] !== undefined) optCounts[s.answer]++; });
+  const totalAnswered = showStudents.length;
+
+  const distHtml = labels.map(lbl => {
+    const count = optCounts[lbl] || 0;
+    const pct = totalAnswered > 0 ? Math.round(count / totalAnswered * 100) : 0;
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+      <span style="width:16px;font-size:11px;font-weight:600;color:#333;">${lbl}</span>
+      <div style="flex:1;height:14px;background:#f0f0f0;border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:#4fc3f7;border-radius:3px;min-width:${count > 0 ? '4px' : '0'};transition:width 0.3s;"></div>
+      </div>
+      <span style="font-size:10px;color:#666;width:36px;text-align:right;">${count}人</span>
+    </div>`;
+  }).join('');
+
+  // --- 学生作答明细 ---
+  let detailHtml = '';
+  if (state.answerPublished) {
+    // 发布答案后：按作答分组展示
+    const correctAns = state.allCorrect ? null : state.selectedAnswers;
+    // Group students by answer
+    const groups = {};
+    showStudents.forEach(s => {
+      if (!groups[s.answer]) groups[s.answer] = [];
+      groups[s.answer].push(s.name);
+    });
+    // Correct group first
+    let groupItems = '';
+    if (state.allCorrect) {
+      groupItems += `<div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;color:#4caf50;">✓ 全部正确 · ${totalAnswered}人</div>
+        <div style="font-size:10px;color:#666;line-height:1.6;margin-top:2px;">${showStudents.map(s=>s.name).join('、')}</div>
       </div>`;
     } else {
-      // Data detail: answer distribution + set answer + actions
-      const labels = state.choiceType === 'judge' ? ['对', '错'] : 'ABCDEFGHIJ'.slice(0, state.choiceOptionCount).split('');
-      const answered = state.phase === 'active' ? state.answered : state.total;
-      // Simulated distribution
-      const distData = labels.map((lbl, i) => {
-        const pcts = state.choiceType === 'judge' ? [65, 35] : [12, 58, 18, 12, 0, 0, 0, 0, 0, 0];
-        return { lbl, pct: pcts[i] || 0 };
+      // Sort: correct answers first, then wrong answers
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        const aCorrect = correctAns.includes(a);
+        const bCorrect = correctAns.includes(b);
+        if (aCorrect && !bCorrect) return -1;
+        if (!aCorrect && bCorrect) return 1;
+        return 0;
       });
-      const distBars = distData.map(d => {
-        const sel = state.selectedAnswers.includes(d.lbl) ? 'selected' : '';
-        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-          <button class="t-answer-opt ${sel}" onclick="toggleAnswerOption('${d.lbl}');renderTeacher()" style="width:24px;height:24px;font-size:11px;padding:0;">${d.lbl}</button>
-          <div style="flex:1;height:14px;background:#f0f0f0;border-radius:3px;overflow:hidden;">
-            <div style="height:100%;width:${d.pct}%;background:${sel ? '#1890ff' : '#bae7ff'};border-radius:3px;transition:all 0.2s;"></div>
-          </div>
-          <span style="font-size:10px;color:#666;width:30px;text-align:right;">${d.pct}%</span>
+      sortedKeys.forEach(ans => {
+        const names = groups[ans];
+        const isCorrect = correctAns.includes(ans);
+        const color = isCorrect ? '#4caf50' : '#666';
+        const prefix = isCorrect ? '✓ 正确' : '作答';
+        groupItems += `<div style="margin-bottom:6px;">
+          <div style="font-size:11px;font-weight:500;color:${color};">${prefix} ${ans}，${names.length}人</div>
+          <div style="font-size:10px;color:#888;line-height:1.5;margin-top:1px;">${names.join('、')}</div>
         </div>`;
-      }).join('');
-
-      const isActive = state.phase === 'active';
-      const canPublish = state.selectedAnswers.length > 0;
-      content.innerHTML = `<div class="teacher-control-panel fade-in" style="gap:8px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="panel-title" style="margin:0;">课中选择题 · ${state.choiceType === 'single' ? '单选' : state.choiceType === 'multi' ? '多选' : '判断'}</div>
-          <div style="font-size:10px;color:#888;">${isActive ? '⏱ <span id="t-timer">' + formatTime(state.timer) + '</span> · ' : ''}已答 <span id="t-count">${answered}</span>/${state.total}</div>
-        </div>
-        <div style="font-size:10px;color:#999;margin-bottom:2px;">作答分布（点选设置正确答案）</div>
-        <div>${distBars}</div>
-        <div class="panel-actions">
-          <button class="ctrl-btn primary" onclick="publishResultAnswer()" ${canPublish ? '' : 'disabled'}>发布答案</button>
-          <button class="ctrl-btn success" onclick="setAllCorrect()" style="font-size:11px;">以上都对</button>
-          ${isActive ? '<button class="ctrl-btn danger" onclick="endTimer()">截止作答</button>' : '<button class="ctrl-btn" style="background:#eee;color:#999;border:1px solid #ddd;" onclick="endInteraction()">结束互动</button>'}
-        </div>
-      </div>`;
+      });
     }
+    detailHtml = groupItems;
+  } else {
+    // 未发布：逐人展示
+    let studentRows = showStudents.map(s => `<div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;">
+      <span style="flex:1;font-size:11px;color:#333;">${s.name}</span>
+      <span style="font-size:11px;color:#1890ff;font-weight:500;">${s.answer}</span>
+    </div>`).join('');
+    if (answered > showStudents.length) {
+      studentRows += `<div style="text-align:center;font-size:9px;color:#bbb;padding:6px 0;">共 ${answered} 人已作答</div>`;
+    }
+    detailHtml = studentRows;
   }
+
+  // --- 底部操作栏 ---
+  let bottomBar = '';
+  if (state.answerPublished) {
+    const ansText = state.allCorrect ? '全部正确' : state.selectedAnswers.join(',');
+    bottomBar = `<div class="choice-bottom-bar">
+      <span style="font-size:11px;color:#4caf50;font-weight:500;">✓ 已公布答案（${ansText}）</span>
+      <button class="ctrl-btn danger" onclick="endInteraction()" style="font-size:11px;padding:6px 14px;">结束互动</button>
+    </div>`;
+  } else {
+    const selHtml = labels.map(lbl => {
+      const sel = state.selectedAnswers.includes(lbl);
+      return `<button class="t-answer-opt ${sel ? 'selected' : ''}" onclick="toggleAnswerOption('${lbl}');renderChoiceDataPanel()" style="width:28px;height:28px;font-size:12px;padding:0;">${lbl}</button>`;
+    }).join('');
+    const canPublish = state.selectedAnswers.length > 0;
+    bottomBar = `<div class="choice-bottom-bar">
+      <div style="display:flex;gap:4px;align-items:center;">${selHtml}</div>
+      <button class="ctrl-btn primary" onclick="publishResultAnswer()" ${canPublish ? '' : 'disabled'} style="font-size:11px;padding:6px 12px;">发布答案</button>
+      ${isActive ? '<button class="ctrl-btn danger" onclick="endTimer()" style="font-size:11px;padding:6px 10px;">截止</button>' : '<button class="ctrl-btn" style="background:#eee;color:#999;border:1px solid #ddd;font-size:11px;padding:6px 10px;" onclick="endInteraction()">结束</button>'}
+    </div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="data-panel-header">
+      <button class="data-panel-back" onclick="renderDataPanel()">‹ 返回</button>
+      <h4>📋 选择题</h4>
+      <button class="data-panel-close" onclick="endInteraction()">✕</button>
+    </div>
+    <div class="data-detail-summary">
+      <span>${isActive ? '⏱ <span id="t-timer">' + formatTime(state.timer) + '</span>' : '已截止'}</span>
+      <span>已答 <span id="t-count">${answered}</span>/${state.total}</span>
+    </div>
+    <div style="padding:8px 0 4px;border-bottom:1px solid #eee;">
+      <div style="font-size:10px;color:#999;margin-bottom:4px;">选项分布</div>
+      ${distHtml}
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:8px 0;min-height:0;">
+      <div style="font-size:10px;color:#999;margin-bottom:4px;">${state.answerPublished ? '作答详情' : '学生作答'}</div>
+      ${detailHtml}
+    </div>
+    ${bottomBar}
+  `;
 }
 
 function renderTeacherQuiz(content) {
