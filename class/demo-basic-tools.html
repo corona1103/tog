@@ -5151,6 +5151,7 @@ function toggleAnswerOption(opt) {
 function publishResultAnswer() {
   if (state.selectedAnswers.length === 0 && !state.allCorrect) return;
   state.answerPublished = true;
+  state.phase = 'answer'; // 确保学生端能渲染公布结果页
   if (state.allCorrect) {
     state.correctAnswer = '全部正确';
   } else {
