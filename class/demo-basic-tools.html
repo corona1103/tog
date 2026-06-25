@@ -3636,6 +3636,8 @@ const state = {
   photoTab: 'done',     // 'done' | 'undone'
   photoStarred: [],     // 星标学生索引列表（用于多人上墙）
   photoMultiIdx: 0,     // 多人上墙时大屏当前展示的索引
+  photoConfigShow: false, // 拍照上墙发起倒计时弹窗
+  photoTimerDuration: 120, // 默认2分钟
   // interact (单个互动题)
   interactSubmitted: 0,
   interactCorrect: 0,
@@ -3699,6 +3701,7 @@ function resetState() {
   state.photoTab = 'done';
   state.photoStarred = [];
   state.photoMultiIdx = 0;
+  state.photoConfigShow = false;
   state.choiceType = 'single';
   state.choiceOptionCount = 4;
   state.choiceCountdown = 10;
@@ -3826,6 +3829,24 @@ function renderTeacherQuizConfig(content) {
       <button class="ctrl-btn primary" onclick="confirmQuizConfig()">发送随堂测</button>
     </div>
   </div>`;
+}
+
+// ======= Photo Config (duration selection) =======
+function selectPhotoDuration(val) {
+  state.photoTimerDuration = val;
+  render();
+}
+
+function cancelPhotoConfig() {
+  state.photoConfigShow = false;
+  state.scene = 'choice';
+  state.phase = 'idle';
+  render();
+}
+
+function confirmPhotoConfig() {
+  state.photoConfigShow = false;
+  launchInteraction();
 }
 
 // ======= Launch Interaction (quiz/photo) =======
@@ -4208,8 +4229,9 @@ function teacherLaunch(type) {
     updateTabs();
   } else if (type === 'photo') {
     state.scene = 'photo';
-    launchInteraction();
+    state.photoConfigShow = true;
     updateTabs();
+    render();
   } else if (type === 'homework') {
     state.scene = 'homework';
     state.phase = 'result';
@@ -5658,18 +5680,7 @@ function renderTeacherConfig(content) {
 }
 
 function renderTeacherChoice(content) {
-  if (state.phase === 'active') {
-    content.innerHTML = `<div class="teacher-control-panel fade-in">
-      <div class="panel-title">课中选择题 · ${state.choiceType === 'single' ? '单选' : state.choiceType === 'multi' ? '多选' : '判断'}</div>
-      <div class="panel-stats">
-        <div>⏱ <span id="t-timer">${formatTime(state.timer)}</span></div>
-        <div>已答 <span class="num" id="t-count">${state.answered}</span>/${state.total}</div>
-      </div>
-      <div class="panel-actions">
-        <button class="ctrl-btn danger" onclick="endTimer()">截止作答</button>
-      </div>
-    </div>`;
-  } else if (state.phase === 'result' || state.phase === 'answer') {
+  if (state.phase === 'active' || state.phase === 'result' || state.phase === 'answer') {
     if (state.answerPublished) {
       const ansText = state.allCorrect ? '全部正确' : state.selectedAnswers.join(',');
       const rateText = state.allCorrect ? '100%' : '58%';
@@ -5679,24 +5690,42 @@ function renderTeacherChoice(content) {
           <div>正确率 <span class="num">${rateText}</span></div>
         </div>
         <div class="panel-actions">
-          <button class="ctrl-btn danger" onclick="endInteraction()">确定关闭<span class="new-inline">新增</span></button>
+          <button class="ctrl-btn danger" onclick="endInteraction()">确定关闭</button>
         </div>
       </div>`;
     } else {
-      // Teacher can also set answer here
+      // Data detail: answer distribution + set answer + actions
       const labels = state.choiceType === 'judge' ? ['对', '错'] : 'ABCDEFGHIJ'.slice(0, state.choiceOptionCount).split('');
-      const optBtns = labels.map(lbl => {
-        const sel = state.selectedAnswers.includes(lbl) ? 'selected' : '';
-        return `<button class="t-answer-opt ${sel}" onclick="toggleAnswerOption('${lbl}');renderTeacher()">${lbl}</button>`;
+      const answered = state.phase === 'active' ? state.answered : state.total;
+      // Simulated distribution
+      const distData = labels.map((lbl, i) => {
+        const pcts = state.choiceType === 'judge' ? [65, 35] : [12, 58, 18, 12, 0, 0, 0, 0, 0, 0];
+        return { lbl, pct: pcts[i] || 0 };
+      });
+      const distBars = distData.map(d => {
+        const sel = state.selectedAnswers.includes(d.lbl) ? 'selected' : '';
+        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <button class="t-answer-opt ${sel}" onclick="toggleAnswerOption('${d.lbl}');renderTeacher()" style="width:24px;height:24px;font-size:11px;padding:0;">${d.lbl}</button>
+          <div style="flex:1;height:14px;background:#f0f0f0;border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${d.pct}%;background:${sel ? '#1890ff' : '#bae7ff'};border-radius:3px;transition:all 0.2s;"></div>
+          </div>
+          <span style="font-size:10px;color:#666;width:30px;text-align:right;">${d.pct}%</span>
+        </div>`;
       }).join('');
+
+      const isActive = state.phase === 'active';
       const canPublish = state.selectedAnswers.length > 0;
-      content.innerHTML = `<div class="teacher-control-panel fade-in">
-        <div class="panel-title">选择题已截止 · 设置正确答案</div>
-        <div class="t-answer-row">${optBtns}</div>
+      content.innerHTML = `<div class="teacher-control-panel fade-in" style="gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="panel-title" style="margin:0;">课中选择题 · ${state.choiceType === 'single' ? '单选' : state.choiceType === 'multi' ? '多选' : '判断'}</div>
+          <div style="font-size:10px;color:#888;">${isActive ? '⏱ <span id="t-timer">' + formatTime(state.timer) + '</span> · ' : ''}已答 <span id="t-count">${answered}</span>/${state.total}</div>
+        </div>
+        <div style="font-size:10px;color:#999;margin-bottom:2px;">作答分布（点选设置正确答案）</div>
+        <div>${distBars}</div>
         <div class="panel-actions">
-          <button class="ctrl-btn primary" onclick="publishResultAnswer()" ${canPublish ? '' : 'disabled'}>发布答案<span class="new-inline">新增</span></button>
+          <button class="ctrl-btn primary" onclick="publishResultAnswer()" ${canPublish ? '' : 'disabled'}>发布答案</button>
           <button class="ctrl-btn success" onclick="setAllCorrect()" style="font-size:11px;">以上都对</button>
-          <button class="ctrl-btn" style="background:#eee;color:#999;border:1px solid #ddd;" onclick="endInteraction()">结束互动</button>
+          ${isActive ? '<button class="ctrl-btn danger" onclick="endTimer()">截止作答</button>' : '<button class="ctrl-btn" style="background:#eee;color:#999;border:1px solid #ddd;" onclick="endInteraction()">结束互动</button>'}
         </div>
       </div>`;
     }
@@ -5763,6 +5792,28 @@ function renderTeacherQuiz(content) {
 }
 
 function renderTeacherPhoto(content) {
+  if (state.photoConfigShow) {
+    const options = [
+      { val: 60, label: '1 分钟' },
+      { val: 120, label: '2 分钟' },
+      { val: 180, label: '3 分钟' },
+      { val: 0, label: '不限时' }
+    ];
+    let optsHtml = options.map(o => `
+      <div class="tqc-opt ${state.photoTimerDuration === o.val ? 'selected' : ''}" onclick="selectPhotoDuration(${o.val})">
+        <div class="radio"></div>
+        <span>${o.label}</span>
+      </div>`).join('');
+    content.innerHTML = `<div class="teacher-quiz-config fade-in">
+      <div class="tqc-title">设置拍照时长</div>
+      <div class="tqc-options">${optsHtml}</div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="ctrl-btn" style="background:#eee;color:#666;" onclick="cancelPhotoConfig()">取消</button>
+        <button class="ctrl-btn primary" onclick="confirmPhotoConfig()">发起拍照上墙</button>
+      </div>
+    </div>`;
+    return;
+  }
   if (state.phase === 'active' || state.phase === 'result') {
     const doneCount = state.photosReceived;
     const undoneCount = state.total - doneCount;
