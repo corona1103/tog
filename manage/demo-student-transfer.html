@@ -212,6 +212,41 @@ tr:hover td { background: #fafafa; }
 .ring-chart { width: 120px; height: 120px; border-radius: 50%; border: 12px solid var(--primary); position: relative; display: flex; align-items: center; justify-content: center; }
 .ring-chart span { font-size: 20px; font-weight: 600; color: var(--primary); }
 
+/* Student Analytics Page */
+.sa-header { background: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
+.sa-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #36cfc9); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.sa-info h3 { font-size: 16px; font-weight: 500; }
+.sa-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.sa-filter { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+.sa-filter-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.sa-filter-item { display: flex; align-items: center; gap: 8px; }
+.sa-filter-item label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.sa-filter-item select { height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; }
+.sa-notice { background: #FFF8E1; border: 1px solid #FFE082; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.6; }
+.sa-notice-icon { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+.sa-notice-text { flex: 1; color: var(--text-secondary); }
+.sa-notice-text strong { color: var(--text-primary); font-weight: 500; }
+.sa-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.sa-metric-card { background: #fff; border-radius: 8px; padding: 16px 20px; }
+.sa-metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.sa-metric-value { font-size: 26px; font-weight: 700; color: var(--text-primary); }
+.sa-metric-unit { font-size: 12px; color: var(--text-muted); margin-left: 2px; }
+.sa-metric-compare { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+.sa-metric-compare .up { color: var(--success); }
+.sa-metric-compare .down { color: var(--danger); }
+.sa-detail-section { background: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; }
+.sa-detail-title { font-size: 14px; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.sa-table { width: 100%; border-collapse: collapse; }
+.sa-table th { text-align: left; padding: 10px 12px; font-size: 12px; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+.sa-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+.sa-table tr:hover td { background: #fafafa; }
+.sa-progress { width: 80px; height: 6px; background: #f0f0f0; border-radius: 3px; display: inline-block; vertical-align: middle; overflow: hidden; }
+.sa-progress-fill { height: 100%; border-radius: 3px; }
+.sa-trend-chart { height: 160px; position: relative; }
+.sa-trend-chart svg { width: 100%; height: 100%; }
+.sa-legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.sa-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
 /* Batch operations */
 .batch-action-bar { display: none; align-items: center; gap: 12px; padding: 12px 16px; background: var(--primary-light); border-radius: 8px; margin-bottom: 12px; animation: fadeIn 0.2s ease; }
 .batch-action-bar.show { display: flex; }
@@ -493,48 +528,189 @@ tr.row-selected:hover { background: #B2EBF2 !important; }
 
       <!-- ========== PAGE 7: 学生学情 ========== -->
       <div class="page" id="page-student-analytics">
-        <div class="section-title">学生学情概览</div>
-
-        <div class="filter-area">
-          <div class="field">
-            <label>学生</label>
-            <select><option>张三（2024001）</option></select>
-          </div>
-          <div class="field">
-            <label>时间范围</label>
-            <select><option>近30天</option><option>近7天</option><option>本学期</option></select>
-          </div>
-          <div class="field">
-            <label>班级</label>
-            <select style="min-width:200px;" disabled>
-              <option>全部班级（含已转出）</option>
-            </select>
-            <span style="font-size:12px; color:var(--text-muted); margin-left:4px;">默认展示所选时间段内所有班级的综合学情</span>
-          </div>
-          <div class="field">
-            <label>学科</label>
-            <select><option>全部</option><option>数学</option><option>语文</option><option>英语</option></select>
+        <!-- Student header -->
+        <div class="sa-header">
+          <div class="sa-avatar">张</div>
+          <div class="sa-info">
+            <h3>张三的学情详情</h3>
+            <p>学号：2024001 · 当前班级：高一(2)班 · 入班时间：2026-05-06</p>
           </div>
         </div>
 
-        <div style="display:flex; gap:24px; margin-bottom:24px;">
-          <div style="background:#fff; border-radius:8px; padding:24px; text-align:center;">
-            <div class="ring-chart"><span>78%</span></div>
-            <p style="margin-top:12px; color:var(--text-secondary);">综合正确率</p>
-          </div>
-          <div style="flex:1; background:#fff; border-radius:8px; padding:24px;">
-            <h4 style="margin-bottom:16px;">学情概述</h4>
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;">
-              <div class="summary-card"><div class="num">42</div><div class="label">已完成作业</div></div>
-              <div class="summary-card"><div class="num">3</div><div class="label">未完成作业</div></div>
-              <div class="summary-card"><div class="num">85%</div><div class="label">提交率</div></div>
+        <!-- Filter area -->
+        <div class="sa-filter">
+          <div class="sa-filter-row">
+            <div class="sa-filter-item">
+              <label>时间范围</label>
+              <select id="sa-time-range" onchange="updateStudentAnalytics()">
+                <option value="semester">本学期（2026.03.01 - 2026.06.30）</option>
+                <option value="month">近30天</option>
+                <option value="week">近7天</option>
+              </select>
+            </div>
+            <div class="sa-filter-item">
+              <label>学科</label>
+              <select id="sa-subject">
+                <option>数学</option>
+                <option>语文</option>
+                <option>英语</option>
+              </select>
             </div>
           </div>
+            <div class="sa-filter-item">
+              <label>所属班级</label>
+              <select id="sa-class-select" onchange="switchSaClass(this.value)">
+                <option value="classB">高一(2)班</option>
+                <option value="classA">高一(1)班</option>
+              </select>
+            </div>
         </div>
 
-        <div class="placeholder-block">
-          <p>📊 详细学情趋势图表区域（简化展示）</p>
-          <p style="margin-top:8px; font-size:12px;">选择不同班级可查看该学生在对应班级的历史学情数据</p>
+        <!-- Cross-class notice -->
+        <div class="sa-notice" id="sa-cross-class-notice">
+          <span class="sa-notice-icon">&#9432;</span>
+          <div class="sa-notice-text">
+            <strong>跨班数据提示：</strong>所选时间段内存在班级变动。当前展示 <strong id="sa-notice-class">高一(2)班</strong> 期间（<strong id="sa-notice-period" style="color:#F44336;">2026.05.06 - 2026.06.30</strong>）的学情数据及该班同期均值对比。可<strong>切换班级</strong>查看其他时段数据。
+          </div>
+        </div>
+
+        <!-- Metric cards -->
+        <div class="sa-metrics" id="sa-metrics">
+          <div class="sa-metric-card">
+            <div class="sa-metric-label">知识检测正确率</div>
+            <div class="sa-metric-value">82<span class="sa-metric-unit">%</span></div>
+            <div class="sa-metric-compare">班级均值 78% <span class="up">+4%</span></div>
+          </div>
+          <div class="sa-metric-card">
+            <div class="sa-metric-label">课堂参与率</div>
+            <div class="sa-metric-value">91<span class="sa-metric-unit">%</span></div>
+            <div class="sa-metric-compare">班级均值 88% <span class="up">+3%</span></div>
+          </div>
+          <div class="sa-metric-card">
+            <div class="sa-metric-label">互动频次</div>
+            <div class="sa-metric-value">5.6<span class="sa-metric-unit">次/课</span></div>
+            <div class="sa-metric-compare">班级均值 5.2 次/课</div>
+          </div>
+          <div class="sa-metric-card">
+            <div class="sa-metric-label">答题数</div>
+            <div class="sa-metric-value">48<span class="sa-metric-unit">题</span></div>
+            <div class="sa-metric-compare">班级均值 52 题 <span class="down">-4</span></div>
+          </div>
+        </div>
+
+        <!-- Trend chart -->
+        <div class="sa-detail-section">
+          <div class="sa-detail-title">
+            <span>正确率趋势</span>
+            <div class="sa-legend">
+              <span><span class="sa-legend-dot" style="background:var(--primary);"></span>个人正确率</span>
+              <span><span class="sa-legend-dot" style="background:#ccc;"></span>班级均值</span>
+            </div>
+          </div>
+          <div class="sa-trend-chart" id="sa-trend-chart">
+            <svg viewBox="0 0 480 140" preserveAspectRatio="none">
+              <!-- Grid lines -->
+              <line x1="0" y1="28" x2="480" y2="28" stroke="#f5f5f5" stroke-width="1"/>
+              <line x1="0" y1="56" x2="480" y2="56" stroke="#f5f5f5" stroke-width="1"/>
+              <line x1="0" y1="84" x2="480" y2="84" stroke="#f5f5f5" stroke-width="1"/>
+              <line x1="0" y1="112" x2="480" y2="112" stroke="#f5f5f5" stroke-width="1"/>
+              <!-- Class avg (dashed) -->
+              <polyline points="0,62 60,60 120,58 180,56 240,54 300,52 360,50 420,48 480,46" fill="none" stroke="#ccc" stroke-width="1.5" stroke-dasharray="4"/>
+              <!-- Personal (solid) -->
+              <polyline points="0,78 60,70 120,64 180,58 240,52 300,48 360,44 420,40 480,36" fill="none" stroke="#00BCD4" stroke-width="2"/>
+              <!-- Dots -->
+              <circle cx="0" cy="78" r="3" fill="#00BCD4"/>
+              <circle cx="60" cy="70" r="3" fill="#00BCD4"/>
+              <circle cx="120" cy="64" r="3" fill="#00BCD4"/>
+              <circle cx="180" cy="58" r="3" fill="#00BCD4"/>
+              <circle cx="240" cy="52" r="3" fill="#00BCD4"/>
+              <circle cx="300" cy="48" r="3" fill="#00BCD4"/>
+              <circle cx="360" cy="44" r="3" fill="#00BCD4"/>
+              <circle cx="420" cy="40" r="3" fill="#00BCD4"/>
+              <circle cx="480" cy="36" r="3" fill="#00BCD4"/>
+            </svg>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:4px;">
+            <span>5月第1周</span><span>5月第2周</span><span>5月第3周</span><span>5月第4周</span><span>6月第1周</span><span>6月第2周</span><span>6月第3周</span><span>6月第4周</span>
+          </div>
+        </div>
+
+        <!-- Knowledge mastery table -->
+        <div class="sa-detail-section">
+          <div class="sa-detail-title"><span>知识点掌握情况</span></div>
+          <table class="sa-table">
+            <thead>
+              <tr><th>知识点</th><th>正确率</th><th>掌握度</th><th>答题次数</th><th>班级均值</th><th>对比</th></tr>
+            </thead>
+            <tbody id="sa-kp-table">
+              <tr>
+                <td>一元二次方程-求根公式</td>
+                <td style="color:#F44336; font-weight:600;">40%</td>
+                <td><span class="sa-progress"><span class="sa-progress-fill" style="width:40%; background:#F44336;"></span></span></td>
+                <td>5次</td>
+                <td>62%</td>
+                <td><span style="color:#F44336;">-22%</span></td>
+              </tr>
+              <tr>
+                <td>函数图像-平移变换</td>
+                <td style="color:#FF9800; font-weight:600;">58%</td>
+                <td><span class="sa-progress"><span class="sa-progress-fill" style="width:58%; background:#FF9800;"></span></span></td>
+                <td>6次</td>
+                <td>65%</td>
+                <td><span style="color:#F44336;">-7%</span></td>
+              </tr>
+              <tr>
+                <td>三角函数-诱导公式</td>
+                <td style="color:#FF9800; font-weight:600;">67%</td>
+                <td><span class="sa-progress"><span class="sa-progress-fill" style="width:67%; background:#FF9800;"></span></span></td>
+                <td>3次</td>
+                <td>70%</td>
+                <td><span style="color:#F44336;">-3%</span></td>
+              </tr>
+              <tr>
+                <td>不等式-解集表示</td>
+                <td style="color:#4CAF50; font-weight:600;">80%</td>
+                <td><span class="sa-progress"><span class="sa-progress-fill" style="width:80%; background:#4CAF50;"></span></span></td>
+                <td>5次</td>
+                <td>75%</td>
+                <td><span style="color:#4CAF50;">+5%</span></td>
+              </tr>
+              <tr>
+                <td>数列-等差通项</td>
+                <td style="color:#4CAF50; font-weight:600;">88%</td>
+                <td><span class="sa-progress"><span class="sa-progress-fill" style="width:88%; background:#4CAF50;"></span></span></td>
+                <td>8次</td>
+                <td>82%</td>
+                <td><span style="color:#4CAF50;">+6%</span></td>
+              </tr>
+              <tr>
+                <td>集合-交并补</td>
+                <td style="color:#4CAF50; font-weight:600;">93%</td>
+                <td><span class="sa-progress"><span class="sa-progress-fill" style="width:93%; background:#4CAF50;"></span></span></td>
+                <td>7次</td>
+                <td>85%</td>
+                <td><span style="color:#4CAF50;">+8%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Session log -->
+        <div class="sa-detail-section">
+          <div class="sa-detail-title"><span>课堂互动明细</span></div>
+          <table class="sa-table">
+            <thead>
+              <tr><th>日期</th><th>课节</th><th>参与互动</th><th>个人正确率</th><th>班级正确率</th></tr>
+            </thead>
+            <tbody id="sa-session-table">
+              <tr><td>06-26</td><td>第2节</td><td>7/8次</td><td style="font-weight:500;">85%</td><td>79%</td></tr>
+              <tr><td>06-25</td><td>第3节</td><td>6/7次</td><td style="font-weight:500;">80%</td><td>76%</td></tr>
+              <tr><td>06-24</td><td>第1节</td><td>8/9次</td><td style="font-weight:500;">83%</td><td>78%</td></tr>
+              <tr><td>06-23</td><td>第3节</td><td>5/6次</td><td style="font-weight:500;">78%</td><td>80%</td></tr>
+              <tr><td>06-20</td><td>第2节</td><td>7/7次</td><td style="font-weight:500;">86%</td><td>77%</td></tr>
+              <tr><td>06-19</td><td>第1节</td><td>6/8次</td><td style="font-weight:500;">75%</td><td>74%</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -1051,6 +1227,98 @@ function executeBatchDisable() {
   closeModal('modal-batch-disable');
   exitBatchMode();
   showToast('批量禁用成功！已禁用 ' + count + ' 名学生，并自动退出所有班级', 'success');
+}
+
+// ==================== STUDENT ANALYTICS ====================
+const saClassData = {
+  classA: {
+    name: '高一(1)班',
+    period: '2026.03.01 - 2026.05.05',
+    metrics: {
+      accuracy: { value: 72, classAvg: 76, diff: -4 },
+      participation: { value: 85, classAvg: 90, diff: -5 },
+      frequency: { value: 4.8, classAvg: 5.4, unit: '次/课' },
+      questions: { value: 65, classAvg: 70, diff: -5 }
+    },
+    otherClass: { name: '高一(2)班', key: 'classB', period: '2026.05.06 - 2026.06.30' }
+  },
+  classB: {
+    name: '高一(2)班',
+    period: '2026.05.06 - 2026.06.30',
+    metrics: {
+      accuracy: { value: 82, classAvg: 78, diff: 4 },
+      participation: { value: 91, classAvg: 88, diff: 3 },
+      frequency: { value: 5.6, classAvg: 5.2, unit: '次/课' },
+      questions: { value: 48, classAvg: 52, diff: -4 }
+    },
+    otherClass: { name: '高一(1)班', key: 'classA', period: '2026.03.01 - 2026.05.05' }
+  }
+};
+
+let currentSaClass = 'classB';
+
+function switchSaClass(classKey) {
+  currentSaClass = classKey;
+  const data = saClassData[classKey];
+
+  // Sync dropdown
+  document.getElementById('sa-class-select').value = classKey;
+
+  // Update notice
+  const notice = document.getElementById('sa-cross-class-notice');
+  const timeRange = document.getElementById('sa-time-range');
+  if (timeRange.value === 'semester') {
+    notice.style.display = 'flex';
+    document.getElementById('sa-notice-class').textContent = data.name;
+    document.getElementById('sa-notice-period').textContent = data.period;
+  } else {
+    notice.style.display = 'none';
+  }
+
+  // Update metrics
+  const m = data.metrics;
+  const metricsHtml = `
+    <div class="sa-metric-card">
+      <div class="sa-metric-label">知识检测正确率</div>
+      <div class="sa-metric-value">${m.accuracy.value}<span class="sa-metric-unit">%</span></div>
+      <div class="sa-metric-compare">班级均值 ${m.accuracy.classAvg}% <span class="${m.accuracy.diff >= 0 ? 'up' : 'down'}">${m.accuracy.diff >= 0 ? '+' : ''}${m.accuracy.diff}%</span></div>
+    </div>
+    <div class="sa-metric-card">
+      <div class="sa-metric-label">课堂参与率</div>
+      <div class="sa-metric-value">${m.participation.value}<span class="sa-metric-unit">%</span></div>
+      <div class="sa-metric-compare">班级均值 ${m.participation.classAvg}% <span class="${m.participation.diff >= 0 ? 'up' : 'down'}">${m.participation.diff >= 0 ? '+' : ''}${m.participation.diff}%</span></div>
+    </div>
+    <div class="sa-metric-card">
+      <div class="sa-metric-label">互动频次</div>
+      <div class="sa-metric-value">${m.frequency.value}<span class="sa-metric-unit">${m.frequency.unit}</span></div>
+      <div class="sa-metric-compare">班级均值 ${m.frequency.classAvg} ${m.frequency.unit}</div>
+    </div>
+    <div class="sa-metric-card">
+      <div class="sa-metric-label">答题数</div>
+      <div class="sa-metric-value">${m.questions.value}<span class="sa-metric-unit">题</span></div>
+      <div class="sa-metric-compare">班级均值 ${m.questions.classAvg} 题 <span class="${m.questions.diff >= 0 ? 'up' : 'down'}">${m.questions.diff >= 0 ? '+' : ''}${m.questions.diff}</span></div>
+    </div>
+  `;
+  document.getElementById('sa-metrics').innerHTML = metricsHtml;
+}
+
+function updateStudentAnalytics() {
+  const timeRange = document.getElementById('sa-time-range').value;
+  const notice = document.getElementById('sa-cross-class-notice');
+  const classSelect = document.getElementById('sa-class-select');
+
+  if (timeRange === 'semester') {
+    // Show class select and notice (cross-class scenario)
+    classSelect.closest('.sa-filter-item').style.display = 'flex';
+    notice.style.display = 'flex';
+    switchSaClass(currentSaClass);
+  } else {
+    // Short time range, only current class, no cross-class
+    classSelect.closest('.sa-filter-item').style.display = 'none';
+    notice.style.display = 'none';
+    // Reset to current class data
+    switchSaClass('classB');
+  }
 }
 
 // ==================== NAVIGATION ====================
