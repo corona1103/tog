@@ -226,6 +226,7 @@ tr:hover td { background: #fafafa; }
 .sa-notice-icon { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
 .sa-notice-text { flex: 1; color: var(--text-secondary); }
 .sa-notice-text strong { color: var(--text-primary); font-weight: 500; }
+.tag-walk { display: inline-block; background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; border-radius: 3px; padding: 0 4px; font-size: 11px; font-weight: 600; line-height: 16px; margin-right: 2px; vertical-align: middle; }
 .sa-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
 .sa-metric-card { background: #fff; border-radius: 8px; padding: 16px 20px; }
 .sa-metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
@@ -560,8 +561,14 @@ tr.row-selected:hover { background: #B2EBF2 !important; }
             <div class="sa-filter-item">
               <label>所属班级</label>
               <select id="sa-class-select" onchange="switchSaClass(this.value)">
-                <option value="classB">高一(2)班</option>
-                <option value="classA">高一(1)班</option>
+                <optgroup label="行政班">
+                  <option value="classB">高一(2)班</option>
+                  <option value="classA">高一(1)班</option>
+                </optgroup>
+                <optgroup label="走班">
+                  <option value="walkMath">走-数学尖子班</option>
+                  <option value="walkPhysics">走-物理尖子班</option>
+                </optgroup>
               </select>
             </div>
         </div>
@@ -569,8 +576,8 @@ tr.row-selected:hover { background: #B2EBF2 !important; }
         <!-- Cross-class notice -->
         <div class="sa-notice" id="sa-cross-class-notice">
           <span class="sa-notice-icon">&#9432;</span>
-          <div class="sa-notice-text">
-            <strong>跨班数据提示：</strong>所选时间段内存在班级变动。当前展示 <strong id="sa-notice-class">高一(2)班</strong> 期间（<strong id="sa-notice-period" style="color:#F44336;">2026.05.06 - 2026.06.30</strong>）的学情数据及该班同期均值对比。可<strong>切换班级</strong>查看其他时段数据。
+          <div class="sa-notice-text" id="sa-notice-text">
+            <strong>跨班数据提示：</strong>所选时间段内存在多个班级。当前展示 <strong id="sa-notice-class">高一(2)班</strong> 期间（<strong id="sa-notice-period" style="color:#F44336;">2026.05.06 - 2026.06.30</strong>）的学情数据及该班同期均值对比。可<strong>切换班级</strong>查看其他时段数据。
           </div>
         </div>
 
@@ -1233,6 +1240,7 @@ function executeBatchDisable() {
 const saClassData = {
   classA: {
     name: '高一(1)班',
+    isWalk: false,
     period: '2026.03.01 - 2026.05.05',
     metrics: {
       accuracy: { value: 72, classAvg: 76, diff: -4 },
@@ -1244,6 +1252,7 @@ const saClassData = {
   },
   classB: {
     name: '高一(2)班',
+    isWalk: false,
     period: '2026.05.06 - 2026.06.30',
     metrics: {
       accuracy: { value: 82, classAvg: 78, diff: 4 },
@@ -1252,6 +1261,32 @@ const saClassData = {
       questions: { value: 48, classAvg: 52, diff: -4 }
     },
     otherClass: { name: '高一(1)班', key: 'classA', period: '2026.03.01 - 2026.05.05' }
+  },
+  walkMath: {
+    name: '数学尖子班',
+    displayName: '走-数学尖子班',
+    isWalk: true,
+    period: '2026.03.01 - 2026.06.30',
+    metrics: {
+      accuracy: { value: 88, classAvg: 85, diff: 3 },
+      participation: { value: 94, classAvg: 92, diff: 2 },
+      frequency: { value: 6.2, classAvg: 5.8, unit: '次/课' },
+      questions: { value: 72, classAvg: 68, diff: 4 }
+    },
+    otherClass: { name: '高一(2)班', key: 'classB', period: '2026.05.06 - 2026.06.30' }
+  },
+  walkPhysics: {
+    name: '物理尖子班',
+    displayName: '走-物理尖子班',
+    isWalk: true,
+    period: '2026.03.01 - 2026.06.30',
+    metrics: {
+      accuracy: { value: 79, classAvg: 81, diff: -2 },
+      participation: { value: 89, classAvg: 87, diff: 2 },
+      frequency: { value: 5.1, classAvg: 5.0, unit: '次/课' },
+      questions: { value: 60, classAvg: 63, diff: -3 }
+    },
+    otherClass: { name: '高一(2)班', key: 'classB', period: '2026.05.06 - 2026.06.30' }
   }
 };
 
@@ -1266,11 +1301,15 @@ function switchSaClass(classKey) {
 
   // Update notice
   const notice = document.getElementById('sa-cross-class-notice');
+  const noticeText = document.getElementById('sa-notice-text');
   const timeRange = document.getElementById('sa-time-range');
   if (timeRange.value === 'semester') {
     notice.style.display = 'flex';
-    document.getElementById('sa-notice-class').textContent = data.name;
-    document.getElementById('sa-notice-period').textContent = data.period;
+    const displayName = data.isWalk
+      ? `<span class="tag-walk">走</span>${data.name}`
+      : data.name;
+    const classLabel = data.isWalk ? '走班' : '班级';
+    noticeText.innerHTML = `<strong>跨班数据提示：</strong>所选时间段内存在多个班级。当前展示 <strong id="sa-notice-class">${displayName}</strong> 期间（<strong id="sa-notice-period" style="color:#F44336;">${data.period}</strong>）的学情数据及该${classLabel}同期均值对比。可<strong>切换班级</strong>查看其他时段数据。`;
   } else {
     notice.style.display = 'none';
   }
