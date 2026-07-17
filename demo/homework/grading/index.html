@@ -1,0 +1,2931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>赋分批改功能 Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #1a1a1a; }
+
+  /* Nav */
+  .nav { background: #1a56db; color: white; padding: 0 24px; display: flex; align-items: center; height: 52px; gap: 32px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .nav-logo { font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
+  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.15s; color: rgba(255,255,255,0.8); }
+  .nav-tab:hover { background: rgba(255,255,255,0.15); color: white; }
+  .nav-tab.active { background: rgba(255,255,255,0.2); color: white; font-weight: 600; }
+  .nav-badge { display: inline-flex; align-items: center; justify-content: center; background: #ef4444; color: white; font-size: 11px; font-weight: 700; border-radius: 10px; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; }
+
+  /* Panels */
+  .panel { display: none; padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 15px; font-weight: 600; color: #111; }
+  .card-sub { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: #1a56db; color: white; }
+  .btn-primary:hover { background: #1447c0; }
+  .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+  .btn-secondary:hover { background: #e5e7eb; }
+  .btn-success { background: #10b981; color: white; }
+  .btn-success:hover { background: #059669; }
+  .btn-sm { padding: 5px 12px; font-size: 13px; }
+  .btn-ghost { background: transparent; color: #1a56db; padding: 4px 8px; font-size: 13px; }
+  .btn-ghost:hover { background: #eff6ff; }
+  .btn-danger-ghost { background: transparent; color: #ef4444; padding: 4px 8px; font-size: 13px; }
+
+  /* Tags */
+  .tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .tag-blue { background: #eff6ff; color: #1a56db; }
+  .tag-green { background: #f0fdf4; color: #16a34a; }
+  .tag-orange { background: #fff7ed; color: #ea580c; }
+  .tag-gray { background: #f3f4f6; color: #6b7280; }
+  .tag-red { background: #fef2f2; color: #dc2626; }
+  .tag-purple { background: #f5f3ff; color: #7c3aed; }
+
+  /* ─────────────────────────── PANEL 1: 出卷分值配置 ─────────────────────────── */
+  .score-header { background: linear-gradient(135deg, #1a56db 0%, #2563eb 100%); border-radius: 12px; padding: 20px 24px; color: white; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .total-score-display { font-size: 36px; font-weight: 800; }
+  .total-score-label { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+  .ai-hint { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400e; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+
+  .question-config-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 12px; }
+  .question-config-row:last-child { border-bottom: none; }
+  .q-num { width: 28px; height: 28px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #374151; flex-shrink: 0; }
+  .q-info { flex: 1; }
+  .q-title { font-size: 14px; color: #111; }
+  .q-type-tag { margin-left: 8px; }
+  .q-content { font-size: 12px; color: #9ca3af; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
+  .score-input-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-input { width: 64px; padding: 6px 10px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; font-weight: 600; text-align: center; color: #111; transition: border-color 0.15s; }
+  .score-input:focus { outline: none; border-color: #1a56db; }
+  .score-unit { font-size: 13px; color: #6b7280; }
+  .ai-badge { font-size: 11px; color: #7c3aed; background: #f5f3ff; padding: 2px 7px; border-radius: 10px; }
+
+  .half-score-section { background: #f8fafc; border-radius: 8px; padding: 12px 16px; margin-top: 8px; }
+  .half-score-title { font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 8px; }
+  .radio-group { display: flex; flex-direction: column; gap: 6px; }
+  .radio-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; cursor: pointer; }
+  .radio-item input { accent-color: #1a56db; }
+
+  .expand-btn { color: #1a56db; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; }
+  .expand-icon { transition: transform 0.2s; display: inline-block; }
+  .expanded .expand-icon { transform: rotate(180deg); }
+
+  .rubric-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e5e7eb; }
+  .rubric-point { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+  .rubric-point:last-of-type { border-bottom: none; }
+  .rubric-point-input { flex: 1; padding: 6px 10px; border: 1.5px solid #e5e7eb; border-radius: 6px; font-size: 13px; }
+  .rubric-point-input:focus { outline: none; border-color: #1a56db; }
+  .rubric-score-input { width: 56px; padding: 5px 8px; border: 1.5px solid #e5e7eb; border-radius: 6px; font-size: 14px; font-weight: 600; text-align: center; }
+  .rubric-score-input:focus { outline: none; border-color: #1a56db; }
+  .rubric-total { font-size: 13px; color: #6b7280; margin-top: 8px; }
+  .rubric-total span { color: #1a56db; font-weight: 600; }
+
+  .batch-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .batch-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 1.5px solid #e5e7eb; background: white; cursor: pointer; transition: all 0.15s; color: #374151; }
+  .batch-btn:hover { border-color: #1a56db; color: #1a56db; background: #eff6ff; }
+  .batch-btn.active { border-color: #1a56db; color: #1a56db; background: #eff6ff; font-weight: 600; }
+
+  /* ─────────────────────────── PANEL 2: 老师补批 ─────────────────────────── */
+  .grading-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+  .student-list { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .student-list-header { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+  .student-list-title { font-size: 14px; font-weight: 600; }
+  .student-list-count { font-size: 12px; color: #6b7280; }
+  .student-item { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background 0.1s; display: flex; align-items: center; justify-content: space-between; }
+  .student-item:hover { background: #f8fafc; }
+  .student-item.active { background: #eff6ff; }
+  .student-name { font-size: 14px; font-weight: 500; }
+  .student-status { font-size: 12px; }
+  .student-score { font-size: 13px; font-weight: 600; color: #1a56db; }
+  .pending-dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; margin-right: 4px; }
+
+  .grading-main { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .grading-student-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+  .grading-student-name { font-size: 18px; font-weight: 700; }
+  .grading-progress { font-size: 13px; color: #6b7280; }
+  .grading-total-score { font-size: 24px; font-weight: 800; color: #1a56db; }
+  .grading-total-label { font-size: 12px; color: #6b7280; text-align: center; margin-top: 2px; }
+
+  .question-grading-block { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-bottom: 12px; transition: border-color 0.15s; }
+  .question-grading-block.graded { border-color: #10b981; background: #f0fdf4; }
+  .question-grading-block.pending { border-color: #f59e0b; background: #fffbeb; }
+  .q-grading-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .q-grading-title { font-size: 14px; font-weight: 600; }
+  .q-grading-answer { font-size: 13px; color: #374151; background: #f8fafc; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.6; }
+  .q-grading-answer-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+
+  .rubric-grading-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+  .rubric-grading-item:last-child { border-bottom: none; }
+  .rubric-grading-label { font-size: 14px; color: #374151; flex: 1; }
+  .rubric-grading-max { font-size: 13px; color: #9ca3af; margin-right: 12px; }
+  .score-selector { display: flex; gap: 4px; align-items: center; }
+  .score-option { min-width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid #e5e7eb; background: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.1s; display: flex; align-items: center; justify-content: center; color: #374151; }
+  .score-option:hover { border-color: #1a56db; color: #1a56db; }
+  .score-option.selected { background: #1a56db; border-color: #1a56db; color: white; }
+  .score-option.full-mark { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
+  .score-option.full-mark.selected { background: #16a34a; border-color: #16a34a; color: white; }
+
+  .quick-score-btns { display: flex; gap: 6px; margin-top: 8px; }
+  .quick-btn { padding: 6px 12px; border-radius: 6px; border: 1.5px solid #e5e7eb; background: white; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .quick-btn:hover { border-color: #1a56db; color: #1a56db; }
+  .quick-btn.full { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
+  .quick-btn.full:hover { background: #16a34a; color: white; }
+  .quick-btn.zero { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+  .quick-btn.zero:hover { background: #ef4444; color: white; }
+
+  .comment-input { width: 100%; padding: 8px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; resize: none; font-family: inherit; margin-top: 10px; }
+  .comment-input:focus { outline: none; border-color: #1a56db; }
+  .comment-hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+  .grading-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 16px; border-top: 1px solid #f3f4f6; }
+  .grading-score-summary { font-size: 14px; color: #374151; }
+  .grading-score-summary strong { color: #1a56db; font-size: 18px; }
+
+  /* ─────────────────────────── PANEL 3: 分值分析 ─────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-card { background: white; border-radius: 12px; padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .stat-value { font-size: 32px; font-weight: 800; color: #111; }
+  .stat-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .stat-change { font-size: 12px; margin-top: 8px; }
+  .stat-up { color: #16a34a; }
+  .stat-down { color: #dc2626; }
+
+  .distribution-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 0 4px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.3s; }
+  .bar-label { font-size: 12px; color: #6b7280; }
+  .bar-count { font-size: 12px; font-weight: 600; }
+  .bar-range { font-size: 11px; color: #9ca3af; }
+
+  .question-analysis-table { width: 100%; border-collapse: collapse; }
+  .question-analysis-table th { text-align: left; padding: 10px 12px; font-size: 13px; color: #6b7280; font-weight: 500; border-bottom: 2px solid #f3f4f6; background: #f8fafc; }
+  .question-analysis-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+  .question-analysis-table tr:hover td { background: #f8fafc; }
+  .rate-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .rate-bar { height: 8px; border-radius: 4px; flex: 1; background: #e5e7eb; overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .rate-fill.high { background: #10b981; }
+  .rate-fill.mid { background: #f59e0b; }
+  .rate-fill.low { background: #ef4444; }
+  .rate-text { font-size: 13px; font-weight: 600; width: 36px; text-align: right; }
+  .rate-high { color: #10b981; }
+  .rate-mid { color: #f59e0b; }
+  .rate-low { color: #ef4444; }
+
+  .knowledge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .knowledge-item { border-radius: 10px; padding: 14px 16px; }
+  .knowledge-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .knowledge-rate { font-size: 22px; font-weight: 800; }
+  .knowledge-sub { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .k-excellent { background: #dcfce7; color: #15803d; }
+  .k-good { background: #dbeafe; color: #1d4ed8; }
+  .k-mid { background: #fef9c3; color: #a16207; }
+  .k-weak { background: #fee2e2; color: #b91c1c; }
+
+  .student-rank-table { width: 100%; border-collapse: collapse; }
+  .student-rank-table th { text-align: left; padding: 10px 12px; font-size: 13px; color: #6b7280; font-weight: 500; border-bottom: 2px solid #f3f4f6; }
+  .student-rank-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+  .rank-num { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .rank-1 { background: #fef08a; color: #854d0e; }
+  .rank-2 { background: #e5e7eb; color: #374151; }
+  .rank-3 { background: #fed7aa; color: #9a3412; }
+  .rank-other { background: #f3f4f6; color: #6b7280; }
+
+  /* Misc */
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .flex-center { display: flex; align-items: center; gap: 8px; }
+  .mt-4 { margin-top: 4px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .text-muted { color: #9ca3af; font-size: 13px; }
+  .divider { height: 1px; background: #f3f4f6; margin: 16px 0; }
+  .section-title { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-icon { width: 20px; height: 20px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #111; color: white; padding: 10px 18px; border-radius: 10px; font-size: 14px; opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 999; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .grading-layout { grid-template-columns: 1fr; }
+    .knowledge-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ─────────────────────────── PANEL 4: 作业任务 ─────────────────────────── */
+  .hw-page { padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .hw-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .hw-page-title { font-size: 20px; font-weight: 700; color: #111; }
+  .hw-new-btns { display: flex; gap: 10px; }
+  .hw-filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .hw-filter-input { padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; color: #374151; background: white; width: 180px; }
+  .hw-filter-input:focus { outline: none; border-color: #0ea5e9; }
+  .hw-filter-select { padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; color: #374151; background: white; cursor: pointer; }
+  .hw-filter-select:focus { outline: none; border-color: #0ea5e9; }
+  .btn-cyan { background: #0ea5e9; color: white; }
+  .btn-cyan:hover { background: #0284c7; }
+  .btn-cyan-outline { background: white; color: #0ea5e9; border: 1.5px solid #0ea5e9; }
+  .btn-cyan-outline:hover { background: #f0f9ff; }
+
+  .hw-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .hw-card { background: white; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); cursor: pointer; transition: box-shadow 0.15s, transform 0.1s; border: 1.5px solid transparent; }
+  .hw-card:hover { box-shadow: 0 4px 16px rgba(14,165,233,0.13); border-color: #bae6fd; transform: translateY(-1px); }
+  .hw-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .hw-card-name { font-size: 16px; font-weight: 700; color: #111; margin-left: 4px; }
+  .hw-card-meta { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+  .hw-card-time { font-size: 12px; color: #9ca3af; margin-bottom: 14px; }
+  .hw-card-stats { display: flex; gap: 24px; align-items: center; }
+  .hw-stat-item { display: flex; flex-direction: column; gap: 2px; }
+  .hw-stat-label { font-size: 12px; color: #9ca3af; }
+  .hw-stat-val { font-size: 15px; font-weight: 700; color: #111; }
+  .hw-card-more { margin-left: auto; color: #9ca3af; font-size: 18px; padding: 4px; }
+  .tag-cyan { background: #e0f2fe; color: #0369a1; }
+  .tag-teal { background: #ccfbf1; color: #0f766e; }
+
+  /* Drawer overlay */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: none; }
+  .drawer-overlay.open { display: block; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 780px; background: white; z-index: 201; box-shadow: -4px 0 24px rgba(0,0,0,0.12); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { padding: 20px 24px 0; border-bottom: 1px solid #f3f4f6; flex-shrink: 0; }
+  .drawer-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .drawer-title { font-size: 17px; font-weight: 700; color: #111; }
+  .drawer-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: #f3f4f6; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: #6b7280; }
+  .drawer-close:hover { background: #e5e7eb; }
+  .drawer-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .drawer-filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 0; padding-bottom: 14px; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* Drawer inner tabs */
+  .inner-tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; }
+  .inner-tab { padding: 8px 20px; font-size: 14px; font-weight: 500; color: #6b7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s; }
+  .inner-tab:hover { color: #0ea5e9; }
+  .inner-tab.active { color: #0ea5e9; border-bottom-color: #0ea5e9; font-weight: 600; }
+  .inner-panel { display: none; padding-top: 16px; }
+  .inner-panel.active { display: block; }
+
+  /* Drawer tables */
+  .hw-table { width: 100%; border-collapse: collapse; }
+  .hw-table th { text-align: left; padding: 10px 12px; font-size: 13px; color: #6b7280; font-weight: 500; border-bottom: 2px solid #f3f4f6; background: #f8fafc; white-space: nowrap; }
+  .hw-table td { padding: 11px 12px; font-size: 14px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  .hw-table tr:last-child td { border-bottom: none; }
+  .hw-table tr:hover td { background: #f8fafc; }
+  .score-pill { display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .score-pill-blue { background: #dbeafe; color: #1d4ed8; }
+  .score-pill-green { background: #dcfce7; color: #15803d; }
+  .score-pill-orange { background: #ffedd5; color: #c2410c; }
+  .score-pill-gray { background: #f3f4f6; color: #6b7280; }
+  .pending-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #f59e0b; font-weight: 500; }
+  .done-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #16a34a; font-weight: 500; }
+  .ai-done-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #7c3aed; font-weight: 500; }
+  .self-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #0ea5e9; font-weight: 500; }
+  .link-btn { background: none; border: none; color: #0ea5e9; font-size: 13px; cursor: pointer; padding: 0; text-decoration: none; }
+  .link-btn:hover { text-decoration: underline; }
+  .hw-summary-bar { display: flex; gap: 20px; background: #f8fafc; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; flex-wrap: wrap; }
+  .hw-summary-item { display: flex; flex-direction: column; gap: 2px; }
+  .hw-summary-label { font-size: 12px; color: #9ca3af; }
+  .hw-summary-val { font-size: 18px; font-weight: 800; color: #111; }
+
+  /* ─────────────────────────── PANEL 5: 学生端效果 ─────────────────────────── */
+  .pad-shell { background: #e8eaf6; min-height: calc(100vh - 52px); padding: 24px 32px; display: flex; justify-content: center; align-items: flex-start; }
+  /* 16:9 横屏平板 */
+  .pad-device { width: 100%; max-width: 1200px; aspect-ratio: 16/9; background: #eef2f8; border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.18); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+  /* 顶部状态栏 */
+  .pad-status-bar { background: #eef2f8; padding: 6px 20px 4px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: #374151; flex-shrink: 0; }
+  .pad-status-icons { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  /* 标题栏 */
+  .pad-header { background: #eef2f8; padding: 4px 16px 0; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .pad-back-btn { font-size: 13px; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .pad-hw-title { font-size: 13px; color: #374151; flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 主体：左侧题号栏 + 右侧内容 */
+  .pad-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  /* 左侧纵向题号导航 */
+  .pad-q-nav { background: #eef2f8; padding: 8px 16px; display: flex; flex-direction: row; gap: 10px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; align-items: center; }
+  .pad-q-nav::-webkit-scrollbar { display: none; }
+  .pad-q-bubble { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; cursor: pointer; flex-shrink: 0; border: 2.5px solid transparent; transition: all 0.15s; }
+  .pad-q-bubble.unanswered { background: white; color: #374151; border-color: #e5e7eb; }
+  .pad-q-bubble.answered { background: #bbf7d0; color: #15803d; border-color: #86efac; }
+  .pad-q-bubble.correct { background: #bbf7d0; color: #15803d; border-color: #86efac; }
+  .pad-q-bubble.wrong { background: #fecaca; color: #b91c1c; border-color: #fca5a5; }
+  .pad-q-bubble.partial { background: #fecaca; color: #b91c1c; border-color: #fca5a5; }
+  .pad-q-bubble.active { border-color: #0ea5e9; box-shadow: 0 0 0 2px #bae6fd; }
+  .pad-q-bubble.current { border-color: #374151; background: white; font-weight: 700; }
+  .pad-q-bubble.self-pending { background: #fef9c3; color: #a16207; border-color: #fde047; }
+  .pad-q-bubble.needs-score { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+  /* 右侧内容区 */
+  .pad-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+  .pad-content { flex: 1; background: white; border-radius: 14px 14px 0 0; margin: 6px 8px 0; padding: 16px 20px; overflow-y: auto; }
+  .pad-q-label { display: inline-flex; align-items: center; padding: 3px 10px; background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 600; border-radius: 6px; margin-bottom: 12px; }
+  .pad-q-header { position: sticky; top: 0; z-index: 20; background: white; display: flex; align-items: center; gap: 8px; padding: 10px 20px; margin: -16px -20px 10px; border-bottom: 1px solid #f3f4f6; flex-wrap: wrap; }
+  .pad-q-body { font-size: 14px; color: #111; line-height: 1.7; margin-bottom: 12px; }
+  .pad-subq { font-size: 14px; color: #374151; margin: 12px 0 6px; font-weight: 500; }
+  .pad-photo-zone { border: 2px dashed #93c5fd; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: #f0f9ff; cursor: pointer; margin-bottom: 12px; }
+  .pad-photo-icon { width: 44px; height: 44px; background: #bae6fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .pad-photo-label { font-size: 13px; color: #0ea5e9; font-weight: 500; }
+  .pad-choice-item { padding: 14px 16px; border-radius: 10px; border: 1.5px solid #e5e7eb; margin-bottom: 8px; font-size: 14px; color: #374151; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 10px; }
+  .pad-choice-item:hover { border-color: #0ea5e9; background: #f0f9ff; }
+  .pad-choice-item.selected { border-color: #0ea5e9; background: #e0f2fe; color: #0369a1; }
+  .pad-choice-item.correct-choice { border-color: #16a34a; background: #dcfce7; color: #15803d; }
+  .pad-choice-item.wrong-choice { border-color: #dc2626; background: #fef2f2; color: #b91c1c; }
+  .pad-ai-result { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; }
+  .pad-ai-correct { background: #dcfce7; border: 1.5px solid #86efac; }
+  .pad-ai-wrong { background: #fef2f2; border: 1.5px solid #fca5a5; }
+  .pad-ai-pending { background: #fef9c3; border: 1.5px solid #fde047; }
+  .pad-ai-label { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .pad-ai-correct .pad-ai-label { color: #15803d; }
+  .pad-ai-wrong .pad-ai-label { color: #b91c1c; }
+  .pad-ai-pending .pad-ai-label { color: #a16207; }
+  .pad-ai-edit { font-size: 12px; color: #6b7280; margin-left: auto; cursor: pointer; text-decoration: underline; }
+  .pad-my-answer { margin-top: 10px; }
+  .pad-my-answer-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .pad-photo-preview { width: 90px; height: 90px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 1.5px solid #e5e7eb; }
+  .pad-answer-area { background: #f8fafc; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 12px; font-size: 14px; color: #374151; line-height: 1.7; }
+  .pad-ref-answer { background: #f0fdf4; border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+  .pad-ref-label { font-size: 12px; color: #16a34a; font-weight: 600; margin-bottom: 4px; }
+  .pad-ref-text { font-size: 13px; color: #374151; line-height: 1.7; }
+  .pad-self-score-bar { background: #fffbeb; border: 1.5px solid #fde047; border-radius: 12px; padding: 14px 16px; margin-top: 12px; }
+  /* self-score floating bottom panel */
+  .ss-float-panel { position: absolute; bottom: 52px; left: 0; right: 0; background: white; border-top: 1.5px solid #e5e7eb; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 50; flex-wrap: wrap; }
+  .ss-float-prompt { font-size: 14px; color: #374151; flex: 1; min-width: 180px; }
+  .ss-float-btn { padding: 10px 28px; border-radius: 24px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+  .ss-float-correct { background: #16a34a; color: white; }
+  .ss-float-correct:hover { background: #15803d; }
+  .ss-float-wrong { background: #ef4444; color: white; }
+  .ss-float-wrong:hover { background: #dc2626; }
+  /* section labels + nav */
+  .ss-section { margin-bottom: 16px; }
+  .ss-section-label { font-size: 14px; color: #374151; font-weight: 500; margin-bottom: 8px; }
+  .ss-section-label.ss-active { color: #0ea5e9; }
+  .ss-nav-bubble { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid #e5e7eb; background: white; color: #6b7280; transition: all 0.15s; }
+  .ss-nav-bubble.ss-nav-pending { background: #fef9c3; border-color: #fde047; color: #92400e; }
+  .ss-nav-bubble.ss-nav-correct { background: #dcfce7; border-color: #86efac; color: #15803d; }
+  .ss-nav-bubble.ss-nav-wrong { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+  .ss-nav-bubble.ss-nav-active { border-color: #0ea5e9; box-shadow: 0 0 0 2px #bae6fd; }
+  /* vertical nav bubbles in compound self-score */
+  .ss-vnav-bubble { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.18s; user-select: none; }
+  .ss-vnav-idle { background: #f3f4f6; color: #6b7280; border: 2px solid transparent; }
+  .ss-vnav-idle:hover { background: #e0f2fe; color: #0369a1; }
+  .ss-vnav-active { background: white; color: #0ea5e9; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 3px #bae6fd; }
+  .ss-vnav-correct { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+  .ss-vnav-wrong { background: #fef2f2; color: #b91c1c; border: 2px solid #fca5a5; }
+  .ss-vnav-partial { background: #fef9c3; color: #a16207; border: 2px solid #fde047; }
+  .ss-scored-chip { display:inline-flex; align-items:center; padding:3px 10px; background:#dbeafe; color:#1d4ed8; border-radius:8px; font-size:12px; font-weight:600; margin-bottom:8px; }
+  .pad-self-score-title { font-size: 13px; color: #92400e; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .pad-self-score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pad-self-score-desc { font-size: 13px; color: #374151; flex: 1; }
+  .pad-self-score-btns { display: flex; gap: 6px; }
+  .pad-self-btn { padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .pad-self-btn-correct { background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; }
+  .pad-self-btn-correct:hover, .pad-self-btn-correct.active { background: #16a34a; color: white; }
+  .pad-self-btn-wrong { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fca5a5; }
+  .pad-self-btn-wrong:hover, .pad-self-btn-wrong.active { background: #dc2626; color: white; }
+  .pad-self-score-input-wrap { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #fde047; }
+  .pad-self-score-input { width: 72px; padding: 8px 10px; border: 1.5px solid #fcd34d; border-radius: 8px; font-size: 18px; font-weight: 700; text-align: center; color: #111; }
+  .pad-self-score-input:focus { outline: none; border-color: #f59e0b; }
+  .pad-footer { display: flex; gap: 12px; padding: 14px 24px; background: white; border-top: 1px solid #f3f4f6; flex-shrink: 0; }
+  .pad-btn-prev { flex: 1; padding: 14px; border-radius: 14px; border: 1.5px solid #e5e7eb; background: white; font-size: 16px; font-weight: 600; color: #0ea5e9; cursor: pointer; }
+  .pad-btn-next { flex: 1; padding: 14px; border-radius: 14px; border: none; background: #0ea5e9; font-size: 16px; font-weight: 600; color: white; cursor: pointer; }
+  .pad-btn-submit { flex: 1; padding: 14px; border-radius: 14px; border: none; background: #0ea5e9; font-size: 16px; font-weight: 600; color: white; cursor: pointer; }
+  .pad-left-tools { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; }
+  .pad-tool-btn { width: 56px; background: rgba(255,255,255,0.9); border-radius: 12px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 11px; color: #374151; }
+  .pad-view-mode-btns { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .pad-mode-btn { padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid #e5e7eb; background: white; color: #374151; transition: all 0.15s; }
+  .pad-mode-btn.active { border-color: #0ea5e9; background: #e0f2fe; color: #0369a1; font-weight: 600; }
+  .pad-subq-score-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e5e7eb; font-size: 13px; }
+  .pad-subq-score-row:last-child { border-bottom: none; }
+  .pad-score-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
+
+  /* ── Q4 改判弹窗 ── */
+  .revise-modal-overlay {
+    position: absolute; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.55);
+    display: none; flex-direction: column;
+    border-radius: 20px; overflow: hidden;
+  }
+  .revise-modal-overlay.open { display: flex; }
+  .revise-modal-topbar {
+    background: rgba(255,255,255,0.97);
+    padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; gap: 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .revise-modal-title { font-size: 14px; font-weight: 700; color: #111; display: flex; align-items: center; gap: 6px; }
+  .revise-modal-score-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; }
+  .revise-modal-score-input {
+    width: 44px; padding: 4px 6px; border: 2px solid #0ea5e9; border-radius: 8px;
+    font-size: 16px; font-weight: 700; text-align: center; color: #111;
+    background: #f0f9ff;
+  }
+  .revise-modal-score-input:focus { outline: none; border-color: #0369a1; }
+  .revise-modal-save-btn {
+    padding: 6px 20px; border-radius: 20px; border: none;
+    background: #0ea5e9; color: white; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .revise-modal-save-btn:hover { background: #0369a1; }
+  .revise-modal-body {
+    flex: 1; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;
+    background: #1e293b;
+  }
+  .revise-modal-img-wrap {
+    position: relative; width: 88%; max-height: 100%; aspect-ratio: 4/3;
+    background: white; border-radius: 4px; overflow: hidden;
+  }
+  .revise-mock-photo {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; padding: 20px 28px; gap: 12px;
+    font-family: 'STKaiti', 'KaiTi', serif; position: relative;
+    background: #fafaf8;
+  }
+  .revise-mock-line { font-size: 15px; color: #1a1a1a; line-height: 1.8; }
+  /* 批注标记 */
+  .revise-annot {
+    position: absolute; border: 2.5px solid #ef4444; border-radius: 50%;
+    pointer-events: none;
+  }
+  .revise-annot-check {
+    position: absolute; font-size: 22px; color: #16a34a; font-weight: 900;
+    pointer-events: none;
+  }
+  .revise-hint-bubble {
+    position: absolute; background: white; border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.22); padding: 10px 14px;
+    font-size: 12px; color: #374151; min-width: 140px;
+  }
+  .revise-hint-bubble-title { font-weight: 600; color: #111; margin-bottom: 6px; font-size: 12px; }
+
+  /* ── 题目详情表格增强 ── */
+  .rate-chip { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+  .rate-high { background: #dcfce7; color: #15803d; }
+  .rate-mid  { background: #fef9c3; color: #a16207; }
+  .rate-low  { background: #fee2e2; color: #b91c1c; }
+  .avg-denom { font-size: 12px; color: #9ca3af; font-weight: 400; }
+
+  .sortable { user-select: none; }
+  .sort-icon { font-size: 11px; color: #9ca3af; margin-left: 3px; }
+  .sort-icon.asc  { color: #0ea5e9; }
+  .sort-icon.desc { color: #0ea5e9; }
+
+  /* tooltip on th */
+  .th-tooltip-wrap { position: relative; display: inline-block; vertical-align: middle; margin-left: 3px; }
+  .th-tooltip-icon { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: #e5e7eb; color: #6b7280; font-size: 10px; font-weight: 700; cursor: default; }
+  .th-tooltip-box { display: none; position: absolute; top: 22px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #f9fafb; font-size: 12px; font-weight: 400; padding: 8px 12px; border-radius: 8px; white-space: nowrap; z-index: 300; line-height: 1.7; box-shadow: 0 4px 12px rgba(0,0,0,0.2); pointer-events: none; }
+  .th-tooltip-wrap:hover .th-tooltip-box { display: block; }
+
+  /* expand row btn */
+  .expand-row-btn { display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: #f0f9ff; border: 1.5px solid #bae6fd; color: #0369a1; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; padding: 2px 6px; transition: all 0.15s; line-height: 1; }
+  .expand-row-btn:hover { background: #0ea5e9; color: white; border-color: #0ea5e9; }
+  .expand-row-btn.active { background: #0ea5e9; color: white; border-color: #0ea5e9; }
+
+  /* popover card */
+  .drill-popover { position: fixed; z-index: 9999; background: white; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.13); padding: 14px 16px; min-width: 220px; max-width: 340px; }
+  .drill-popover-title { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 10px; }
+  .drill-popover-grid { display: grid; gap: 4px 20px; }
+  .drill-popover-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .drill-popover-grid.cols-1 { grid-template-columns: 1fr; }
+  .drill-popover-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+  .drill-popover-row:last-child { border-bottom: none; }
+  .drill-popover-row .label { color: #6b7280; white-space: nowrap; }
+  .drill-popover-row .vals { display: flex; gap: 8px; align-items: center; }
+  .drill-popover-close { position: absolute; top: 8px; right: 10px; font-size: 16px; color: #9ca3af; cursor: pointer; line-height: 1; background: none; border: none; padding: 0; }
+  .drill-popover-close:hover { color: #374151; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">教学助手</div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('config')">出卷配置</div>
+    <div class="nav-tab" onclick="switchTab('homework')">作业任务</div>
+    <div class="nav-tab" onclick="switchTab('grading')">老师批改 <span class="nav-badge" id="pending-count">4</span></div>
+    <div class="nav-tab" onclick="switchTab('analysis')">成绩分析</div>
+    <div class="nav-tab" onclick="switchTab('student')">学生端效果</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 4：作业任务（老师端）
+═══════════════════════════════════════════ -->
+<div class="panel" id="panel-homework">
+  <div class="hw-page">
+    <div class="hw-page-header">
+      <div class="hw-page-title">作业任务</div>
+      <div class="hw-new-btns">
+        <button class="btn btn-cyan-outline btn-sm" onclick="showToast('跳转到自定义作业创建')">自定义作业任务</button>
+        <button class="btn btn-cyan btn-sm" onclick="showToast('跳转到题库组卷')">题库组卷任务</button>
+        <button class="btn btn-secondary btn-sm" onclick="showToast('跳转到云盘选择')">云盘选择任务</button>
+      </div>
+    </div>
+    <div class="hw-filter-bar">
+      <input class="hw-filter-input" placeholder="请输入作业名称" />
+      <select class="hw-filter-select"><option>请选择班级</option><option selected>产品自测-高一</option><option>yuj产品自测-高二</option></select>
+      <select class="hw-filter-select"><option>请选择作业状态</option><option selected>进行中</option><option>已结束</option><option>未发布</option></select>
+      <button class="btn btn-cyan btn-sm">查询</button>
+      <button class="btn btn-secondary btn-sm">重置</button>
+    </div>
+
+    <div class="hw-grid">
+      <!-- 卡片1：有赋分、有待批 -->
+      <div class="hw-card" onclick="openDrawer('hw1')">
+        <div class="hw-card-top">
+          <span class="tag tag-cyan" style="font-size:12px;padding:3px 9px;">电子</span>
+          <span class="tag tag-teal" style="font-size:12px;padding:3px 9px;">进行中</span>
+          <span class="hw-card-name">7月14日物理作业</span>
+          <div class="hw-card-more">···</div>
+        </div>
+        <div class="hw-card-meta">产品自测-高一 · 全部学生</div>
+        <div class="hw-card-time">2026-07-14 17:56 — 2026-07-14 23:59</div>
+        <div class="hw-card-stats">
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">正确率</div>
+            <div class="hw-stat-val">52%</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">提交情况</div>
+            <div class="hw-stat-val">3/5</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">待批改</div>
+            <div class="hw-stat-val" style="color:#f59e0b;">2</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">班级平均分</div>
+            <div class="hw-stat-val" style="color:#0ea5e9;">68<span style="font-size:12px;color:#9ca3af;font-weight:400;">/100</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 卡片2：纯客观题，全部自动批改 -->
+      <div class="hw-card" onclick="openDrawer('hw2')">
+        <div class="hw-card-top">
+          <span class="tag tag-cyan" style="font-size:12px;padding:3px 9px;">电子</span>
+          <span class="tag tag-teal" style="font-size:12px;padding:3px 9px;">进行中</span>
+          <span class="hw-card-name">各种复合实验题型&作答测试</span>
+          <div class="hw-card-more">···</div>
+        </div>
+        <div class="hw-card-meta">产品自测-高一 · 全部学生</div>
+        <div class="hw-card-time">2026-07-14 14:38 — 2026-07-14 23:59</div>
+        <div class="hw-card-stats">
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">正确率</div>
+            <div class="hw-stat-val">0%</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">提交情况</div>
+            <div class="hw-stat-val">0/5</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">待批改</div>
+            <div class="hw-stat-val">0</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">班级平均分</div>
+            <div class="hw-stat-val" style="color:#9ca3af;">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 卡片3 -->
+      <div class="hw-card" onclick="openDrawer('hw1')">
+        <div class="hw-card-top">
+          <span class="tag tag-cyan" style="font-size:12px;padding:3px 9px;">电子</span>
+          <span class="tag tag-teal" style="font-size:12px;padding:3px 9px;">进行中</span>
+          <span class="hw-card-name">其他简单题型</span>
+          <div class="hw-card-more">···</div>
+        </div>
+        <div class="hw-card-meta">产品自测-高一 · 全部学生</div>
+        <div class="hw-card-time">2026-07-14 17:56 — 2026-07-14 23:59</div>
+        <div class="hw-card-stats">
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">正确率</div>
+            <div class="hw-stat-val">40%</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">提交情况</div>
+            <div class="hw-stat-val">1/5</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">待批改</div>
+            <div class="hw-stat-val">0</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">班级平均分</div>
+            <div class="hw-stat-val" style="color:#9ca3af;">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 卡片4 -->
+      <div class="hw-card" onclick="openDrawer('hw2')">
+        <div class="hw-card-top">
+          <span class="tag tag-cyan" style="font-size:12px;padding:3px 9px;">电子</span>
+          <span class="tag" style="background:#fef3c7;color:#b45309;font-size:12px;padding:3px 9px;">已结束</span>
+          <span class="hw-card-name">第一次数学周测</span>
+          <div class="hw-card-more">···</div>
+        </div>
+        <div class="hw-card-meta">yuj产品自测-高二 · 全部学生</div>
+        <div class="hw-card-time">2026-07-10 08:00 — 2026-07-12 23:59</div>
+        <div class="hw-card-stats">
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">正确率</div>
+            <div class="hw-stat-val">73%</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">提交情况</div>
+            <div class="hw-stat-val">28/30</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">待批改</div>
+            <div class="hw-stat-val">0</div>
+          </div>
+          <div class="hw-stat-item">
+            <div class="hw-stat-label">班级平均分</div>
+            <div class="hw-stat-val" style="color:#0ea5e9;">82<span style="font-size:12px;color:#9ca3af;font-weight:400;">/100</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 任务详情 Drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="task-drawer">
+  <div class="drawer-header">
+    <div class="drawer-title-row">
+      <div class="drawer-title">任务详情</div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-meta">
+      <span class="tag tag-gray" style="font-size:13px;">7月14日物理作业</span>
+      <span class="tag tag-cyan" style="font-size:12px;">电子作业</span>
+      <span class="tag tag-teal" style="font-size:12px;">允许晚交</span>
+      <span style="font-size:13px;color:#6b7280;">07.14 23:59 公布答案</span>
+    </div>
+    <div class="drawer-filter-row">
+      <span style="font-size:13px;color:#6b7280;">班级</span>
+      <select class="hw-filter-select" style="width:180px;font-size:13px;padding:5px 10px;">
+        <option>产品自测-高一 · 全部学生</option>
+      </select>
+      <span style="font-size:13px;color:#6b7280;margin-left:8px;">分组</span>
+      <select class="hw-filter-select" style="font-size:13px;padding:5px 10px;">
+        <option>全部分组</option>
+        <option>A组</option>
+        <option>B组</option>
+      </select>
+    </div>
+    <!-- 作业维度汇总数据（tab 公共区域） -->
+    <div class="hw-summary-bar" style="margin:12px 0 0;border-radius:8px;">
+      <div class="hw-summary-item">
+        <div class="hw-summary-label">提交情况</div>
+        <div class="hw-summary-val">3<span style="font-size:14px;color:#9ca3af;font-weight:400;">/5人</span></div>
+      </div>
+      <div class="hw-summary-item">
+        <div class="hw-summary-label">班级平均分</div>
+        <div class="hw-summary-val" style="color:#0ea5e9;">68.3<span style="font-size:14px;color:#9ca3af;font-weight:400;">/100分</span></div>
+      </div>
+      <div class="hw-summary-item">
+        <div class="hw-summary-label">整体得分率</div>
+        <div class="hw-summary-val" style="color:#f59e0b;">68%</div>
+      </div>
+    </div>
+    <div class="inner-tabs" style="margin-top:12px;">
+      <div class="inner-tab" id="dtab-question" onclick="switchDrawerTab('question')">题目详情</div>
+      <div class="inner-tab active" id="dtab-student" onclick="switchDrawerTab('student')">学生详情</div>
+    </div>
+  </div>
+  <div class="drawer-body">
+
+    <!-- 题目详情 tab -->
+    <div class="inner-panel" id="dpanel-question">
+      <div class="drawer-filter-row" style="margin-bottom:14px;">
+        <span style="font-size:13px;color:#6b7280;">正确率筛选</span>
+        <input type="number" placeholder="0" style="width:64px;padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+        <span style="color:#9ca3af;">—</span>
+        <input type="number" placeholder="100" style="width:64px;padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;">
+        <span style="font-size:13px;color:#9ca3af;">%</span>
+        <button class="btn btn-cyan btn-sm">查询</button>
+      </div>
+      <table class="hw-table" id="question-detail-table">
+        <thead>
+          <tr>
+            <th class="sortable" onclick="sortTable('num')" style="cursor:pointer;white-space:nowrap;width:52px;">
+              题号 <span class="sort-icon" id="sort-num">↕</span>
+            </th>
+            <th style="width:84px;">题型</th>
+            <th class="sortable" onclick="sortTable('correct')" style="cursor:pointer;white-space:nowrap;">
+              正确率
+              <span class="th-tooltip-wrap">
+                <span class="th-tooltip-icon">?</span>
+                <span class="th-tooltip-box">
+                  单选 / 判断：答对人数 / 提交人数<br>
+                  多选：全部选对才算对<br>
+                  解答：得满分才算对<br>
+                  多空填空 / 完型填空 / 复合题：<br>
+                  含多个小题，点击展开查看各小题正确率
+                </span>
+              </span>
+              <span class="sort-icon" id="sort-correct">↕</span>
+            </th>
+            <th class="sortable" onclick="sortTable('rate')" style="cursor:pointer;white-space:nowrap;">
+              得分率 <span class="sort-icon" id="sort-rate">↕</span>
+            </th>
+            <th class="sortable" onclick="sortTable('avg')" style="cursor:pointer;white-space:nowrap;">
+              平均得分 <span class="sort-icon" id="sort-avg">↕</span>
+            </th>
+            <th style="width:60px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="question-tbody">
+
+          <!-- 1. 单选 -->
+          <tr data-num="1" data-correct="80" data-rate="80" data-avg="1.6">
+            <td><strong>1</strong></td>
+            <td><span class="tag tag-blue">单选</span></td>
+            <td><span class="rate-chip rate-high">80%</span></td>
+            <td><span class="rate-chip rate-high">80%</span></td>
+            <td>1.6<span class="avg-denom">/2分</span></td>
+            <td><button class="link-btn">详情</button></td>
+          </tr>
+
+          <!-- 2. 多选 -->
+          <tr data-num="2" data-correct="25" data-rate="68" data-avg="2.7">
+            <td><strong>2</strong></td>
+            <td><span class="tag tag-orange">多选</span></td>
+            <td><span class="rate-chip rate-low">25%</span></td>
+            <td><span class="rate-chip rate-mid">68%</span></td>
+            <td>2.7<span class="avg-denom">/4分</span></td>
+            <td><button class="link-btn">详情</button></td>
+          </tr>
+
+          <!-- 3. 解答（主观） -->
+          <tr data-num="3" data-correct="20" data-rate="48" data-avg="4.8">
+            <td><strong>3</strong></td>
+            <td><span class="tag tag-purple">解答</span></td>
+            <td><span class="rate-chip rate-low">20%</span></td>
+            <td><span class="rate-chip rate-low">48%</span></td>
+            <td>4.8<span class="avg-denom">/10分</span></td>
+            <td><button class="link-btn">详情</button></td>
+          </tr>
+
+          <!-- 4. 多空填空（popover 下钻，仅正确率） -->
+          <tr data-num="4" data-correct="-" data-rate="61" data-avg="7.3" id="row-4">
+            <td><strong>4</strong></td>
+            <td><span class="tag" style="background:#e0f2fe;color:#0369a1;">多空填空</span></td>
+            <td>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q4')">＋ 展开</button>
+            </td>
+            <td><span class="rate-chip rate-mid">61%</span></td>
+            <td>7.3<span class="avg-denom">/12分</span></td>
+            <td><button class="link-btn">详情</button></td>
+          </tr>
+
+          <!-- 5. 完型填空（popover 下钻，仅正确率） -->
+          <tr data-num="5" data-correct="-" data-rate="55" data-avg="8.3" id="row-5">
+            <td><strong>5</strong></td>
+            <td><span class="tag" style="background:#fce7f3;color:#9d174d;">完型填空</span></td>
+            <td>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q5')">＋ 展开</button>
+            </td>
+            <td><span class="rate-chip rate-mid">55%</span></td>
+            <td>8.3<span class="avg-denom">/15分</span></td>
+            <td><button class="link-btn">详情</button></td>
+          </tr>
+
+          <!-- 6. 复合题（正确率/得分率分别展开） -->
+          <tr data-num="6" data-correct="-" data-rate="46" data-avg="9.2" id="row-6">
+            <td><strong>6</strong></td>
+            <td><span class="tag" style="background:#f3e8ff;color:#7e22ce;">复合题</span></td>
+            <td>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q6-correct')">＋ 展开</button>
+            </td>
+            <td>
+              <span class="rate-chip rate-low">46%</span>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q6-rate')" style="margin-left:6px;">＋</button>
+            </td>
+            <td>9.2<span class="avg-denom">/20分</span></td>
+            <td><button class="link-btn">详情</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 学生详情 tab -->
+    <div class="inner-panel active" id="dpanel-student">
+      <table class="hw-table" id="student-table">
+        <thead>
+          <tr>
+            <th>学生姓名</th>
+            <th class="sortable" onclick="sortStudentBy('submit')" style="cursor:pointer;white-space:nowrap;">
+              提交情况 <span class="sort-icon" id="sort-submit">↕</span>
+            </th>
+            <th class="sortable" onclick="sortStudentBy('correct')" style="cursor:pointer;white-space:nowrap;">
+              整题正确率 <span class="sort-icon" id="sort-scorrect">↕</span>
+            </th>
+            <th class="sortable" onclick="sortStudentBy('score')" style="cursor:pointer;white-space:nowrap;">
+              得分 <span class="sort-icon" id="sort-score">↕</span>
+            </th>
+            <th>批改状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="student-tbody">
+          <tr data-submit-order="0" data-submit-time="0" data-correct="-1" data-score="-1">
+            <td><strong>G111</strong></td>
+            <td><span style="color:#9ca3af;font-size:13px;">未提交</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td>—</td>
+          </tr>
+          <tr data-submit-order="0" data-submit-time="0" data-correct="-1" data-score="-1">
+            <td><strong>高一学生</strong></td>
+            <td><span style="color:#9ca3af;font-size:13px;">未提交</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td>—</td>
+          </tr>
+          <tr data-submit-order="1" data-submit-time="42" data-correct="25" data-score="-1">
+            <td><strong>yj002</strong></td>
+            <td>
+              <span class="tag" style="background:#fef3c7;color:#b45309;font-size:12px;padding:2px 8px;">补交</span>
+              <span style="font-size:12px;color:#9ca3af;margin-left:4px;">42min</span>
+            </td>
+            <td><span class="rate-chip rate-low">25%</span> <span style="font-size:12px;color:#6b7280;">1/8题</span></td>
+            <td><span style="font-size:14px;font-weight:600;">—</span><span class="avg-denom">/100分</span></td>
+            <td><span class="pending-badge">⚑ 6题待批改</span></td>
+            <td><button class="link-btn">查看详情</button></td>
+          </tr>
+          <tr data-submit-order="2" data-submit-time="35" data-correct="50" data-score="-1">
+            <td><strong>yj001</strong></td>
+            <td>
+              <span class="done-badge">✓ 按时提交</span>
+              <span style="font-size:12px;color:#9ca3af;margin-left:4px;">35min</span>
+            </td>
+            <td><span class="rate-chip rate-mid">50%</span> <span style="font-size:12px;color:#6b7280;">4/8题</span></td>
+            <td><span style="font-size:14px;font-weight:600;">—</span><span class="avg-denom">/100分</span></td>
+            <td><span class="pending-badge">⚑ 6题待批改</span></td>
+            <td><button class="link-btn">查看详情</button></td>
+          </tr>
+          <tr data-submit-order="2" data-submit-time="28" data-correct="75" data-score="78">
+            <td><strong>鱼4</strong></td>
+            <td>
+              <span class="done-badge">✓ 按时提交</span>
+              <span style="font-size:12px;color:#9ca3af;margin-left:4px;">28min</span>
+            </td>
+            <td><span class="rate-chip rate-high">75%</span> <span style="font-size:12px;color:#6b7280;">6/8题</span></td>
+            <td><strong style="font-size:15px;">78</strong><span class="avg-denom">/100分</span></td>
+            <td><span style="color:#9ca3af;font-size:13px;">—</span></td>
+            <td><button class="link-btn">查看详情</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+  </div>
+  <div style="padding:14px 24px;border-top:1px solid #f3f4f6;flex-shrink:0;">
+    <button class="btn btn-cyan" id="drawer-action-btn" style="width:100%;justify-content:center;padding:12px;" onclick="drawerActionClick()">快速批改</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 1：出卷分值配置
+═══════════════════════════════════════════ -->
+<div class="panel active" id="panel-config">
+  <div class="score-header">
+    <div>
+      <div style="font-size:13px;opacity:0.8;margin-bottom:4px;">高二数学 · 第3次周测</div>
+      <div class="total-score-display" id="total-score">100</div>
+      <div class="total-score-label">当前总分（已自动配置）</div>
+    </div>
+    <div style="text-align:right;">
+      <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:white;margin-bottom:8px;" onclick="applyAllAI()">⚡ 一键应用 AI 建议</button>
+      <div style="font-size:12px;opacity:0.7;margin-top:4px;">AI 已为所有题目配置默认分值</div>
+    </div>
+  </div>
+
+  <div class="ai-hint">
+    <span>✨</span>
+    <span>AI 已根据题型自动配置分值建议：单选 2分、多选 4分、主观题按知识点配置。你可以直接使用或修改。</span>
+  </div>
+
+  <!-- 客观题 -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">客观题分值配置</div>
+        <div class="card-sub">第 1-20 题 · 共 20 题</div>
+      </div>
+      <div class="batch-controls">
+        <button class="batch-btn" onclick="setBatch('single', 2)">单选全改 2分</button>
+        <button class="batch-btn" onclick="setBatch('single', 3)">单选全改 3分</button>
+        <button class="batch-btn" onclick="setBatch('multi', 4)">多选全改 4分</button>
+      </div>
+    </div>
+
+    <!-- 单选题示例 -->
+    <div class="question-config-row">
+      <div class="q-num">1</div>
+      <div class="q-info">
+        <div class="q-title">已知函数 f(x) = 2sin(ωx+φ)，下列说法正确的是 <span class="tag tag-blue q-type-tag">单选</span></div>
+        <div class="q-content">A. 周期为π  B. 振幅为2  C. 相位移为π/2  D. 最大值为1</div>
+      </div>
+      <div class="score-input-wrap">
+        <span class="ai-badge">AI 建议</span>
+        <input class="score-input" type="number" value="2" min="0" max="20" oninput="updateTotal()" id="q1-score">
+        <span class="score-unit">分</span>
+      </div>
+    </div>
+
+    <!-- 单选题示例2 -->
+    <div class="question-config-row">
+      <div class="q-num">2</div>
+      <div class="q-info">
+        <div class="q-title">以下哪个是二次函数的图象？<span class="tag tag-blue q-type-tag">单选</span></div>
+        <div class="q-content">A. y=2x  B. y=x²  C. y=1/x  D. y=2x+1</div>
+      </div>
+      <div class="score-input-wrap">
+        <span class="ai-badge">AI 建议</span>
+        <input class="score-input" type="number" value="2" min="0" max="20" oninput="updateTotal()" id="q2-score">
+        <span class="score-unit">分</span>
+      </div>
+    </div>
+
+    <!-- 多选题展开示例 -->
+    <div class="question-config-row" style="flex-direction:column;align-items:flex-start;">
+      <div style="display:flex;align-items:center;gap:12px;width:100%;">
+        <div class="q-num">8</div>
+        <div class="q-info">
+          <div class="q-title">下列函数中，哪些是奇函数？<span class="tag tag-orange q-type-tag">多选</span></div>
+          <div class="q-content">A. f(x)=x³  B. f(x)=x²  C. f(x)=sinx  D. f(x)=cosx</div>
+        </div>
+        <div class="score-input-wrap">
+          <span class="ai-badge">AI 建议</span>
+          <input class="score-input" type="number" value="4" min="0" max="20" oninput="updateTotal()" id="q8-score">
+          <span class="score-unit">分</span>
+        </div>
+        <button class="expand-btn" id="multi-expand-btn" onclick="toggleMultiConfig()">
+          半对规则 <span class="expand-icon">▼</span>
+        </button>
+      </div>
+      <div id="multi-config" style="display:none;width:100%;padding-left:40px;margin-top:8px;">
+        <div class="half-score-section">
+          <div class="half-score-title">多选题半对策略</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="multi-rule" value="zero"> 全对才得分（严格）</label>
+            <label class="radio-item"><input type="radio" name="multi-rule" value="partial" checked> 按选对数量给分（选对1个得1分）<span class="ai-badge" style="margin-left:8px;">AI 推荐</span></label>
+            <label class="radio-item"><input type="radio" name="multi-rule" value="threshold"> 选对 ≥ 2 个才给分</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-muted mt-8" style="padding:8px 0 0 0;">…其余 17 道客观题已按 AI 建议配置，点击各题可修改</div>
+  </div>
+
+  <!-- 主观题 -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">主观题分值配置</div>
+        <div class="card-sub">第 21-23 题 · 解答题</div>
+      </div>
+    </div>
+
+    <!-- 主观题：简单模式 -->
+    <div class="question-config-row" style="flex-direction:column;align-items:flex-start;">
+      <div style="display:flex;align-items:center;gap:12px;width:100%;">
+        <div class="q-num" style="background:#fef3c7;color:#92400e;">21</div>
+        <div class="q-info">
+          <div class="q-title">求函数 f(x) = x² - 4x + 3 的最小值及对应的 x 值 <span class="tag tag-purple q-type-tag">主观</span></div>
+          <div class="q-content">解答题，满分 10 分</div>
+        </div>
+        <div class="score-input-wrap">
+          <span class="ai-badge">AI 建议</span>
+          <input class="score-input" type="number" value="10" min="0" max="30" oninput="updateTotal()" id="q21-score">
+          <span class="score-unit">分</span>
+        </div>
+        <button class="expand-btn" id="rubric-expand-btn" onclick="toggleRubric()">
+          详细评分点 <span class="expand-icon">▼</span>
+        </button>
+      </div>
+      <div id="rubric-section" style="display:none;width:100%;padding-left:40px;margin-top:8px;">
+        <div class="rubric-section">
+          <div style="font-size:13px;color:#374151;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+            <span>✨ AI 建议的评分点（可编辑）</span>
+            <button class="btn-ghost btn" onclick="addRubricPoint()">+ 添加评分点</button>
+          </div>
+          <div id="rubric-points">
+            <div class="rubric-point">
+              <input class="rubric-point-input" type="text" value="配方或求导，找到对称轴 x=2" placeholder="评分点描述">
+              <input class="rubric-score-input" type="number" value="4" min="0" max="10">
+              <span class="score-unit">分</span>
+              <button class="btn-danger-ghost btn btn-sm" onclick="this.closest('.rubric-point').remove();updateRubricTotal()">✕</button>
+            </div>
+            <div class="rubric-point">
+              <input class="rubric-point-input" type="text" value="代入计算最小值 f(2) = -1" placeholder="评分点描述">
+              <input class="rubric-score-input" type="number" value="3" min="0" max="10">
+              <span class="score-unit">分</span>
+              <button class="btn-danger-ghost btn btn-sm" onclick="this.closest('.rubric-point').remove();updateRubricTotal()">✕</button>
+            </div>
+            <div class="rubric-point">
+              <input class="rubric-point-input" type="text" value="写出最终答案，格式规范" placeholder="评分点描述">
+              <input class="rubric-score-input" type="number" value="3" min="0" max="10">
+              <span class="score-unit">分</span>
+              <button class="btn-danger-ghost btn btn-sm" onclick="this.closest('.rubric-point').remove();updateRubricTotal()">✕</button>
+            </div>
+          </div>
+          <div class="rubric-total">评分点合计：<span id="rubric-total-score">10</span> 分（需等于题目总分）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主观题2 -->
+    <div class="question-config-row">
+      <div class="q-num" style="background:#fef3c7;color:#92400e;">22</div>
+      <div class="q-info">
+        <div class="q-title">已知等差数列 {aₙ}，a₃=7，a₇=15，求通项公式 <span class="tag tag-purple q-type-tag">主观</span></div>
+        <div class="q-content">解答题</div>
+      </div>
+      <div class="score-input-wrap">
+        <span class="ai-badge">AI 建议</span>
+        <input class="score-input" type="number" value="12" min="0" max="30" oninput="updateTotal()" id="q22-score">
+        <span class="score-unit">分</span>
+      </div>
+    </div>
+
+    <div class="question-config-row">
+      <div class="q-num" style="background:#fef3c7;color:#92400e;">23</div>
+      <div class="q-info">
+        <div class="q-title">求曲线 y=x³-3x 的极值点坐标 <span class="tag tag-purple q-type-tag">主观</span></div>
+        <div class="q-content">解答题</div>
+      </div>
+      <div class="score-input-wrap">
+        <span class="ai-badge">AI 建议</span>
+        <input class="score-input" type="number" value="14" min="0" max="30" oninput="updateTotal()" id="q23-score">
+        <span class="score-unit">分</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
+    <button class="btn btn-secondary" onclick="showToast('已保存为草稿')">保存草稿</button>
+    <button class="btn btn-primary" onclick="showToast('✓ 分值配置已发布，作业开始收集');setTimeout(()=>switchTab('grading'),1500)">确认发布作业</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PANEL 2：老师补批赋分
+═══════════════════════════════════════════ -->
+<div class="panel" id="panel-grading">
+  <div style="margin-bottom:16px;" class="flex-between">
+    <div>
+      <div style="font-size:16px;font-weight:700;">待批改任务</div>
+      <div class="text-muted mt-4">高二数学 · 第3次周测 · 共 6 名学生</div>
+    </div>
+    <div class="flex-center">
+      <span class="tag tag-orange">4 题待批</span>
+      <span class="tag tag-blue">2 条申诉</span>
+    </div>
+  </div>
+
+  <div class="grading-layout">
+    <!-- 学生列表 -->
+    <div class="student-list">
+      <div class="student-list-header">
+        <div class="student-list-title">学生列表</div>
+        <div class="student-list-count">6 人</div>
+      </div>
+      <div class="student-item active" onclick="selectStudent(this, '李明', '83/100', 'graded')">
+        <div>
+          <div class="student-name">李明</div>
+          <div style="font-size:12px;color:#16a34a;margin-top:2px;">✓ 已批完</div>
+        </div>
+        <div class="student-score">83/100</div>
+      </div>
+      <div class="student-item" onclick="selectStudent(this, '王晓雯', '待批改', 'pending')">
+        <div>
+          <div class="student-name">王晓雯</div>
+          <div style="font-size:12px;color:#f59e0b;margin-top:2px;"><span class="pending-dot"></span>第21题待批</div>
+        </div>
+        <div class="student-score" style="color:#f59e0b;">—</div>
+      </div>
+      <div class="student-item" onclick="selectStudent(this, '张伟', '待批改', 'pending')">
+        <div>
+          <div class="student-name">张伟</div>
+          <div style="font-size:12px;color:#f59e0b;margin-top:2px;"><span class="pending-dot"></span>第21,22题待批</div>
+        </div>
+        <div class="student-score" style="color:#f59e0b;">—</div>
+      </div>
+      <div class="student-item" onclick="selectStudent(this, '陈思琪', '申诉', 'appeal')">
+        <div>
+          <div class="student-name">陈思琪</div>
+          <div style="font-size:12px;color:#1a56db;margin-top:2px;">⚑ 改判申诉</div>
+        </div>
+        <div class="student-score" style="color:#1a56db;">71/100</div>
+      </div>
+      <div class="student-item" onclick="selectStudent(this, '刘阳', '79/100', 'graded')">
+        <div>
+          <div class="student-name">刘阳</div>
+          <div style="font-size:12px;color:#16a34a;margin-top:2px;">✓ 已批完</div>
+        </div>
+        <div class="student-score">79/100</div>
+      </div>
+      <div class="student-item" onclick="selectStudent(this, '赵小雨', '待批改', 'pending')">
+        <div>
+          <div class="student-name">赵小雨</div>
+          <div style="font-size:12px;color:#f59e0b;margin-top:2px;"><span class="pending-dot"></span>第23题待批</div>
+        </div>
+        <div class="student-score" style="color:#f59e0b;">—</div>
+      </div>
+    </div>
+
+    <!-- 批改主区域 -->
+    <div class="grading-main" id="grading-main">
+      <div class="grading-student-header">
+        <div>
+          <div class="grading-student-name" id="current-student-name">李明</div>
+          <div class="grading-progress text-muted">1/6 学生</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="grading-total-score" id="current-score">83</div>
+          <div class="grading-total-label">/ 100 分</div>
+        </div>
+      </div>
+
+      <!-- 已批改题目（示意） -->
+      <div class="question-grading-block graded" id="block-graded">
+        <div class="q-grading-header">
+          <div class="flex-center">
+            <span class="q-grading-title">第 21 题 · 解答题（10分）</span>
+            <span class="tag tag-green">已批改 · 8/10分</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="regrade()">重新批改</button>
+        </div>
+        <div class="q-grading-answer">
+          <div class="q-grading-answer-label">学生作答</div>
+          设 f(x) = x² - 4x + 3 = (x-2)² - 1<br>
+          ∴ 当 x=2 时，f(x) 取最小值 -1<br>
+          最小值为 <strong>f(2) = -1</strong>
+        </div>
+        <div style="display:flex;gap:16px;">
+          <div style="flex:1;">评分点 1：配方/求对称轴 <strong>4/4 分</strong></div>
+          <div style="flex:1;">评分点 2：代入计算 <strong>1/3 分</strong> <span style="color:#ef4444;font-size:12px;">（计算过程省略）</span></div>
+          <div style="flex:1;">评分点 3：答案规范 <strong>3/3 分</strong></div>
+        </div>
+      </div>
+
+      <!-- 待批改题目 -->
+      <div class="question-grading-block pending" id="block-pending" style="display:none;">
+        <div class="q-grading-header">
+          <div class="flex-center">
+            <span class="q-grading-title">第 21 题 · 解答题（10分）</span>
+            <span class="tag tag-orange">待批改</span>
+          </div>
+        </div>
+        <div class="q-grading-answer">
+          <div class="q-grading-answer-label">学生作答</div>
+          对 f(x) = x² - 4x + 3 求导：f'(x) = 2x - 4<br>
+          令 f'(x) = 0，得 x = 2<br>
+          f(2) = 4 - 8 + 3 = <strong>-1</strong>，为最小值
+        </div>
+
+        <div>
+          <div class="quick-score-btns" style="margin-bottom:12px;">
+            <button class="quick-btn full" onclick="giveFullScore()">✓ 满分（10分）</button>
+            <button class="quick-btn zero" onclick="giveZeroScore()">✕ 0分</button>
+          </div>
+
+          <div class="rubric-grading-item">
+            <div class="rubric-grading-label">评分点 1：找到对称轴 x=2（配方 or 求导）</div>
+            <div class="rubric-grading-max">/ 4分</div>
+            <div class="score-selector" id="rubric1-selector">
+              <button class="score-option" onclick="selectScore(this,'rubric1',0)">0</button>
+              <button class="score-option" onclick="selectScore(this,'rubric1',2)">2</button>
+              <button class="score-option full-mark selected" onclick="selectScore(this,'rubric1',4)">4</button>
+            </div>
+          </div>
+          <div class="rubric-grading-item">
+            <div class="rubric-grading-label">评分点 2：代入计算最小值 f(2)=-1</div>
+            <div class="rubric-grading-max">/ 3分</div>
+            <div class="score-selector" id="rubric2-selector">
+              <button class="score-option" onclick="selectScore(this,'rubric2',0)">0</button>
+              <button class="score-option selected" onclick="selectScore(this,'rubric2',2)">2</button>
+              <button class="score-option full-mark" onclick="selectScore(this,'rubric2',3)">3</button>
+            </div>
+          </div>
+          <div class="rubric-grading-item">
+            <div class="rubric-grading-label">评分点 3：答案表述规范完整</div>
+            <div class="rubric-grading-max">/ 3分</div>
+            <div class="score-selector" id="rubric3-selector">
+              <button class="score-option" onclick="selectScore(this,'rubric3',0)">0</button>
+              <button class="score-option" onclick="selectScore(this,'rubric3',1)">1</button>
+              <button class="score-option" onclick="selectScore(this,'rubric3',2)">2</button>
+              <button class="score-option full-mark selected" onclick="selectScore(this,'rubric3',3)">3</button>
+            </div>
+          </div>
+        </div>
+
+        <textarea class="comment-input" rows="2" placeholder="评语（选填）：如"求导方法正确，注意补充验证最小值""></textarea>
+        <div class="comment-hint">评语将展示给学生</div>
+      </div>
+
+      <!-- 申诉区域 -->
+      <div class="question-grading-block" id="block-appeal" style="display:none;border-color:#1a56db;background:#eff6ff;">
+        <div class="q-grading-header">
+          <div class="flex-center">
+            <span class="q-grading-title">第 22 题 · 申诉</span>
+            <span class="tag tag-blue">改判申诉</span>
+          </div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">学生申诉理由</div>
+          <div style="font-size:14px;color:#374151;">"我已经写出了通项公式 aₙ = 2n+1，但系统判0分，应该给分。"</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div style="background:white;border-radius:8px;padding:12px;">
+            <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">当前得分</div>
+            <div style="font-size:24px;font-weight:800;color:#ef4444;">6/12</div>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;">
+            <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">调整为</div>
+            <input type="number" value="10" min="0" max="12" style="font-size:24px;font-weight:800;color:#1a56db;border:none;width:80px;background:transparent;" id="appeal-new-score">
+            <span style="font-size:14px;color:#6b7280;">/ 12</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-success" onclick="approveAppeal()">✓ 通过申诉，更新分数</button>
+          <button class="btn btn-secondary" onclick="rejectAppeal()">✕ 驳回</button>
+        </div>
+      </div>
+
+      <div class="grading-footer" id="grading-footer">
+        <div class="grading-score-summary">本次批改得分：<strong id="grading-subtotal">8</strong> / 10 分</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary" onclick="prevStudent()">← 上一题</button>
+          <button class="btn btn-primary" onclick="submitGrading()">提交批改 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PANEL 3：整卷成绩分析
+═══════════════════════════════════════════ -->
+<div class="panel" id="panel-analysis">
+  <div class="flex-between" style="margin-bottom:16px;">
+    <div>
+      <div style="font-size:16px;font-weight:700;">成绩分析报告</div>
+      <div class="text-muted mt-4">高二（3）班 · 第3次数学周测 · 42人参与</div>
+    </div>
+    <button class="btn btn-secondary" onclick="showToast('📊 报告已导出为 PDF')">导出报告</button>
+  </div>
+
+  <!-- 统计卡片 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">72.4</div>
+      <div class="stat-label">班级平均分</div>
+      <div class="stat-change stat-down">↓ 3.2 分（上次 75.6）</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">95</div>
+      <div class="stat-label">最高分</div>
+      <div class="stat-change stat-up" style="color:#9ca3af;">张晓萱</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">42%</div>
+      <div class="stat-label">及格率（≥60分）</div>
+      <div class="stat-change stat-down">↓ 8% 较上次</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">12%</div>
+      <div class="stat-label">优秀率（≥90分）</div>
+      <div class="stat-change stat-up">↑ 2%</div>
+    </div>
+  </div>
+
+  <!-- 成绩分布 -->
+  <div class="card">
+    <div class="section-title">分数段分布</div>
+    <div class="distribution-chart">
+      <div class="bar-wrap">
+        <div class="bar-count">2</div>
+        <div class="bar" style="height:20px;background:#dcfce7;"></div>
+        <div class="bar-range">90-100</div>
+        <div class="bar-label" style="color:#16a34a;">优秀</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-count">5</div>
+        <div class="bar" style="height:50px;background:#dbeafe;"></div>
+        <div class="bar-range">80-89</div>
+        <div class="bar-label" style="color:#1d4ed8;">良好</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-count">12</div>
+        <div class="bar" style="height:100px;background:#fef9c3;"></div>
+        <div class="bar-range">70-79</div>
+        <div class="bar-label" style="color:#a16207;">中等</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-count">11</div>
+        <div class="bar" style="height:90px;background:#fed7aa;"></div>
+        <div class="bar-range">60-69</div>
+        <div class="bar-label" style="color:#c2410c;">及格</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-count">9</div>
+        <div class="bar" style="height:80px;background:#fee2e2;"></div>
+        <div class="bar-range">50-59</div>
+        <div class="bar-label" style="color:#b91c1c;">不及格</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-count">3</div>
+        <div class="bar" style="height:30px;background:#fecaca;"></div>
+        <div class="bar-range">&lt;50</div>
+        <div class="bar-label" style="color:#991b1b;">待加油</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 题目难度分析 -->
+  <div class="card">
+    <div class="section-title">题目难度分析（得分率）</div>
+    <table class="question-analysis-table">
+      <thead>
+        <tr>
+          <th>题目</th>
+          <th>题型</th>
+          <th>满分</th>
+          <th>班级平均</th>
+          <th>得分率</th>
+          <th>难度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>第21题</strong></td>
+          <td><span class="tag tag-purple">主观</span></td>
+          <td>10</td>
+          <td>5.8</td>
+          <td>
+            <div class="rate-bar-wrap">
+              <div class="rate-bar"><div class="rate-fill mid" style="width:58%;"></div></div>
+              <div class="rate-text rate-mid">58%</div>
+            </div>
+          </td>
+          <td><span class="tag tag-orange">中等</span></td>
+        </tr>
+        <tr>
+          <td><strong>第22题</strong></td>
+          <td><span class="tag tag-purple">主观</span></td>
+          <td>12</td>
+          <td>4.3</td>
+          <td>
+            <div class="rate-bar-wrap">
+              <div class="rate-bar"><div class="rate-fill low" style="width:36%;"></div></div>
+              <div class="rate-text rate-low">36%</div>
+            </div>
+          </td>
+          <td><span class="tag tag-red">较难</span></td>
+        </tr>
+        <tr>
+          <td><strong>第8题</strong></td>
+          <td><span class="tag tag-orange">多选</span></td>
+          <td>4</td>
+          <td>1.6</td>
+          <td>
+            <div class="rate-bar-wrap">
+              <div class="rate-bar"><div class="rate-fill low" style="width:40%;"></div></div>
+              <div class="rate-text rate-low">40%</div>
+            </div>
+          </td>
+          <td><span class="tag tag-red">较难</span></td>
+        </tr>
+        <tr>
+          <td><strong>第23题</strong></td>
+          <td><span class="tag tag-purple">主观</span></td>
+          <td>14</td>
+          <td>9.5</td>
+          <td>
+            <div class="rate-bar-wrap">
+              <div class="rate-bar"><div class="rate-fill high" style="width:68%;"></div></div>
+              <div class="rate-text rate-high">68%</div>
+            </div>
+          </td>
+          <td><span class="tag tag-green">容易</span></td>
+        </tr>
+        <tr>
+          <td><strong>第1-7题</strong></td>
+          <td><span class="tag tag-blue">单选</span></td>
+          <td>14</td>
+          <td>11.2</td>
+          <td>
+            <div class="rate-bar-wrap">
+              <div class="rate-bar"><div class="rate-fill high" style="width:80%;"></div></div>
+              <div class="rate-text rate-high">80%</div>
+            </div>
+          </td>
+          <td><span class="tag tag-green">容易</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px 12px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;border:1px solid #fcd34d;">
+      ⚠️ <strong>注意：</strong>第22题（等差数列通项公式）得分率仅36%，建议下节课重点讲解，安排专项练习。
+    </div>
+  </div>
+
+  <!-- 知识点掌握 -->
+  <div class="card">
+    <div class="section-title">知识点掌握情况</div>
+    <div class="knowledge-grid">
+      <div class="knowledge-item k-excellent">
+        <div class="knowledge-name">导数基础</div>
+        <div class="knowledge-rate">85%</div>
+        <div class="knowledge-sub">掌握良好</div>
+      </div>
+      <div class="knowledge-item k-good">
+        <div class="knowledge-name">二次函数</div>
+        <div class="knowledge-rate">72%</div>
+        <div class="knowledge-sub">基本掌握</div>
+      </div>
+      <div class="knowledge-item k-mid">
+        <div class="knowledge-name">极值问题</div>
+        <div class="knowledge-rate">62%</div>
+        <div class="knowledge-sub">需要强化</div>
+      </div>
+      <div class="knowledge-item k-weak">
+        <div class="knowledge-name">数列通项公式</div>
+        <div class="knowledge-rate">38%</div>
+        <div class="knowledge-sub">薄弱，重点补</div>
+      </div>
+      <div class="knowledge-item k-mid">
+        <div class="knowledge-name">奇偶函数判断</div>
+        <div class="knowledge-rate">55%</div>
+        <div class="knowledge-sub">需要强化</div>
+      </div>
+      <div class="knowledge-item k-good">
+        <div class="knowledge-name">三角函数性质</div>
+        <div class="knowledge-rate">74%</div>
+        <div class="knowledge-sub">基本掌握</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 学生排名 -->
+  <div class="card">
+    <div class="section-title flex-between" style="display:flex;">
+      <span>学生成绩排名</span>
+      <span class="text-muted" style="font-size:13px;font-weight:400;">仅展示前5名</span>
+    </div>
+    <table class="student-rank-table">
+      <thead>
+        <tr>
+          <th>排名</th>
+          <th>姓名</th>
+          <th>总分</th>
+          <th>客观题</th>
+          <th>主观题</th>
+          <th>较上次</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="rank-num rank-1">1</span></td>
+          <td>张晓萱</td>
+          <td><strong>95</strong></td>
+          <td>46/46</td>
+          <td>49/54</td>
+          <td><span class="stat-up">↑ 4</span></td>
+        </tr>
+        <tr>
+          <td><span class="rank-num rank-2">2</span></td>
+          <td>李明</td>
+          <td><strong>88</strong></td>
+          <td>42/46</td>
+          <td>46/54</td>
+          <td><span class="stat-up">↑ 2</span></td>
+        </tr>
+        <tr>
+          <td><span class="rank-num rank-3">3</span></td>
+          <td>陈思远</td>
+          <td><strong>85</strong></td>
+          <td>40/46</td>
+          <td>45/54</td>
+          <td><span class="stat-down">↓ 1</span></td>
+        </tr>
+        <tr>
+          <td><span class="rank-num rank-other">4</span></td>
+          <td>王晓雯</td>
+          <td><strong>81</strong></td>
+          <td>38/46</td>
+          <td>43/54</td>
+          <td><span class="stat-up">↑ 6</span></td>
+        </tr>
+        <tr>
+          <td><span class="rank-num rank-other">5</span></td>
+          <td>刘阳</td>
+          <td><strong>79</strong></td>
+          <td>36/46</td>
+          <td>43/54</td>
+          <td><span class="stat-down">↓ 3</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 5：学生端效果（平板模拟）
+═══════════════════════════════════════════ -->
+<div class="panel" id="panel-student">
+  <div style="background:#e8eaf6;padding:16px 0 8px;border-bottom:1px solid #d1d5db;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+    <span style="font-size:13px;color:#6b7280;align-self:center;">场景切换：</span>
+    <button class="pad-mode-btn active" id="smode-answering" onclick="setPadMode('answering')">作答中</button>
+    <button class="pad-mode-btn" id="smode-ai-result" onclick="setPadMode('ai-result')">提交后·AI批改结果</button>
+    <button class="pad-mode-btn" id="smode-self-score" onclick="setPadMode('self-score')">主观题自批打分</button>
+  </div>
+  <div class="pad-shell">
+    <div class="pad-device">
+      <!-- Q4 改判弹窗（覆盖整个 pad-device） -->
+      <div id="q4-revise-modal" class="revise-modal-overlay">
+        <div class="revise-modal-topbar">
+          <div class="revise-modal-title">
+            <span style="font-size:12px;color:#6b7280;font-weight:400;">进入改判</span>
+            <span style="width:1px;height:14px;background:#d1d5db;display:inline-block;margin:0 4px;"></span>
+            <span style="font-size:13px;color:#f59e0b;">✏ 编辑中</span>
+          </div>
+          <div class="revise-modal-score-row">
+            <span>AI估算得分</span>
+            <input class="revise-modal-score-input" type="number" id="q4-revise-score-input" min="0" max="4" value="4">
+            <span style="color:#6b7280;">/ 4 分</span>
+          </div>
+          <button class="revise-modal-save-btn" onclick="q4S1ConfirmRevise()">保存</button>
+        </div>
+        <div class="revise-modal-body">
+          <!-- 模拟作答图片区域（带批注标记） -->
+          <div class="revise-modal-img-wrap">
+            <div class="revise-mock-photo">
+              <div class="revise-mock-line" style="font-weight:700;font-size:16px;">（1）求最大利润</div>
+              <div class="revise-mock-line">设涨价 x 元，则售价 = 60 + x，销量 = 100 − 3x</div>
+              <div class="revise-mock-line">利润 W = (20 + x)(100 − 3x)</div>
+              <div class="revise-mock-line" style="padding-left:24px;">= 2000 − 60x + 100x − 3x²</div>
+              <div class="revise-mock-line" style="padding-left:24px;">= −3x² + 40x + 2000</div>
+              <div class="revise-mock-line">顶点 x₀ = 40 / (2×3) = 20/3 ≈ 6.67</div>
+              <div class="revise-mock-line">∵ 0 ≤ x ≤ 10，∴ x = 20/3 时 W 最大</div>
+              <div class="revise-mock-line" style="font-weight:700;">W<sub>max</sub> ≈ 2133 元</div>
+              <!-- 绿勾批注 -->
+              <span class="revise-annot-check" style="top:48px;right:32px;">✓</span>
+              <!-- 红圈批注（某处笔误） -->
+              <span class="revise-annot" style="width:38px;height:24px;top:128px;left:210px;"></span>
+              <!-- 提示气泡 -->
+              <div class="revise-hint-bubble" style="top:164px;right:16px;">
+                <div class="revise-hint-bubble-title">点击批注可手动批改</div>
+                <div style="color:#6b7280;font-size:11px;margin-bottom:8px;">每题仅可修正一次，请谨慎操作</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pad-status-bar">
+        <span>10:43</span>
+        <div class="pad-status-icons">
+          <span>🔵</span><span>WiFi</span><span>100%</span><span>🔋</span>
+        </div>
+      </div>
+      <div class="pad-header">
+        <div class="pad-back-btn">‹</div>
+        <div class="pad-hw-title">7月14日物理作业 · 共6题</div>
+      </div>
+      <div class="pad-body">
+        <div style="display:flex;align-items:center;background:#eef2f8;flex-shrink:0;">
+          <div class="pad-q-nav" id="pad-q-nav" style="flex:1;min-width:0;">
+            <!-- bubbles injected by JS -->
+          </div>
+          <div id="pad-total-score" style="flex-shrink:0;padding:0 16px 0 4px;display:flex;flex-direction:column;align-items:flex-end;gap:1px;">
+            <span style="font-size:10px;color:#9ca3af;white-space:nowrap;">总分合计</span>
+            <span id="pad-total-score-val" style="font-size:16px;font-weight:700;color:#0ea5e9;white-space:nowrap;">—<span style="font-size:12px;color:#9ca3af;font-weight:400;">/100分</span></span>
+          </div>
+        </div>
+        <div class="pad-main">
+
+      <!-- 作答中 -->
+      <div id="pad-mode-answering" class="pad-content">
+        <!-- Q1 -->
+        <div class="pad-q-page" id="pad-qpage-answering-1">
+          <div class="pad-q-header"><span class="pad-q-label" style="margin:0;">单选题 · 第1题</span></div>
+          <div class="pad-q-body">下列函数中，在 x=0 处连续但不可导的是？</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">A</span>&nbsp; y = x²</div>
+          <div class="pad-choice-item selected" onclick="toggleChoice(this)"><span style="font-weight:600;color:#0ea5e9;">B</span>&nbsp; y = x³</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">C</span>&nbsp; y = |x|</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">D</span>&nbsp; y = sin x</div>
+        </div>
+        <!-- Q2 -->
+        <div class="pad-q-page" id="pad-qpage-answering-2" style="display:none;">
+          <div class="pad-q-header"><span class="pad-q-label" style="margin:0;">多选题 · 第2题</span></div>
+          <div class="pad-q-body">下列关于导数的说法，正确的有？（多选）</div>
+          <div class="pad-choice-item selected" onclick="toggleChoice(this)"><span style="font-weight:600;color:#0ea5e9;">A</span>&nbsp; 可导必连续</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">B</span>&nbsp; 连续必可导</div>
+          <div class="pad-choice-item selected" onclick="toggleChoice(this)"><span style="font-weight:600;color:#0ea5e9;">C</span>&nbsp; 极值点处导数为零或不存在</div>
+          <div class="pad-choice-item selected" onclick="toggleChoice(this)"><span style="font-weight:600;color:#0ea5e9;">D</span>&nbsp; 导数为零则为极值点</div>
+        </div>
+        <!-- Q3 -->
+        <div class="pad-q-page" id="pad-qpage-answering-3" style="display:none;">
+          <div class="pad-q-header"><span class="pad-q-label" style="margin:0;">完型填空 · 第3题</span></div>
+          <div class="pad-q-body">根据语境，在下列空格处填入最恰当的词汇。</div>
+          <div style="background:#f8fafc;border-radius:10px;padding:14px;font-size:14px;line-height:2.2;color:#374151;">
+            The results were surprising; __(1)__, the team decided to continue.<br>
+            __(2)__ the difficulties, they remained optimistic.<br>
+            She studied hard; __(3)__, she passed the exam.
+          </div>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#6b7280;font-size:13px;width:32px;">空1</span><div class="pad-answer-area" style="flex:1;padding:6px 10px;">however</div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#6b7280;font-size:13px;width:32px;">空2</span><div class="pad-answer-area" style="flex:1;padding:6px 10px;">Despite</div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#6b7280;font-size:13px;width:32px;">空3</span><div class="pad-answer-area" style="flex:1;padding:6px 10px;">therefore</div></div>
+          </div>
+        </div>
+        <!-- Q4 -->
+        <div class="pad-q-page" id="pad-qpage-answering-4" style="display:none;">
+          <div class="pad-q-header"><span class="pad-q-label" style="margin:0;">解答题 · 第4题</span></div>
+          <div class="pad-q-body">已知函数 f(x) = x³ − 3x，求 f(x) 的极大值与极小值。</div>
+          <div class="pad-photo-zone" onclick="showToast('调用摄像头拍照作答')">
+            <div class="pad-photo-icon">📷</div>
+            <div class="pad-photo-label">拍照作答</div>
+            <div style="font-size:12px;color:#9ca3af;">点击拍照上传解题过程</div>
+          </div>
+        </div>
+        <!-- Q5: 原有复合题内容 -->
+        <div class="pad-q-page" id="pad-qpage-answering-5" style="display:none;">
+          <div class="pad-q-header"><span class="pad-q-label" style="margin:0;">复合题 · 第5题</span></div>
+          <div class="pad-q-body">某商店购进一批商品，每件成本 40 元。若按每件 60 元出售，每天可卖出 100 件。若每涨价 2 元，销量就减少 6 件。</div>
+          <div class="pad-subq">（1）若每件商品的售价在 60 元基础上最多可涨 10 元，求最大利润是多少？</div>
+          <div class="pad-photo-zone" onclick="showToast('调用摄像头拍照作答')">
+            <div class="pad-photo-icon">📷</div><div class="pad-photo-label">拍照作答</div>
+            <div style="font-size:12px;color:#9ca3af;">点击拍照上传解题过程</div>
+          </div>
+          <div class="pad-subq">（2）若要使每天的利润不低于 2000 元，每件商品的售价最高是多少？</div>
+          <div class="pad-photo-zone" onclick="showToast('调用摄像头拍照作答')">
+            <div class="pad-photo-icon">📷</div><div class="pad-photo-label">拍照作答</div>
+            <div style="font-size:12px;color:#9ca3af;">点击拍照上传解题过程</div>
+          </div>
+          <div class="pad-subq">（3）下列关于利润函数的说法，正确的是？</div>
+          <div class="pad-choice-item selected" onclick="toggleChoice(this)"><span style="font-weight:600;color:#0ea5e9;">B</span> 当涨价 5 元时，每天利润达到最大值</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">A</span> 利润函数是关于涨价幅度的线性函数</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">C</span> 若不涨价，每天利润为 1600 元</div>
+          <div class="pad-choice-item" onclick="toggleChoice(this)"><span style="font-weight:600;">D</span> 涨价越多，利润越大</div>
+        </div>
+        <!-- Q6 -->
+        <div class="pad-q-page" id="pad-qpage-answering-6" style="display:none;">
+          <div class="pad-q-header"><span class="pad-q-label" style="margin:0;">复合题 · 第6题</span></div>
+          <div class="pad-q-body">已知函数 f(x) = ax² + bx + c（a≠0），回答下列各问。</div>
+          <div class="pad-subq">（1）求 f(x) 的对称轴与顶点坐标</div>
+          <div class="pad-photo-zone" onclick="showToast('调用摄像头拍照作答')">
+            <div class="pad-photo-icon">📷</div><div class="pad-photo-label">拍照作答</div>
+            <div style="font-size:12px;color:#9ca3af;">点击拍照上传解题过程</div>
+          </div>
+          <div class="pad-subq">（2）求 f(x) 在区间 [0,1] 上的最大值与最小值</div>
+          <div class="pad-photo-zone" onclick="showToast('调用摄像头拍照作答')">
+            <div class="pad-photo-icon">📷</div><div class="pad-photo-label">拍照作答</div>
+            <div style="font-size:12px;color:#9ca3af;">点击拍照上传解题过程</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI批改结果 -->
+      <div id="pad-mode-ai-result" class="pad-content" style="display:none;">
+        <!-- Q1 -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-1">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;">单选题 · 第1题</span>
+            <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:700;">0 / 2 分</span>
+          </div>
+          <div class="pad-q-body" style="margin-bottom:8px;">下列函数中，在 x=0 处连续但不可导的是？</div>
+          <div class="pad-ai-result pad-ai-wrong">
+            <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
+              <div style="flex:1;">
+                <div class="pad-my-answer-label">我的选择</div>
+                <div class="pad-choice-item wrong-choice" style="margin-bottom:0;">A &nbsp; y = x²</div>
+              </div>
+              <div style="flex:1;">
+                <div class="pad-my-answer-label">正确答案</div>
+                <div class="pad-choice-item correct-choice" style="margin-bottom:0;">C &nbsp; y = |x|</div>
+              </div>
+            </div>
+            <div class="pad-subq-score-row" style="border-bottom:none;">
+              <span style="color:#374151;">本题得分</span>
+              <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;">0 / 2 分</span>
+            </div>
+            <div class="pad-ref-answer" style="margin-top:8px;">
+              <div class="pad-ref-label">答案解析</div>
+              <div class="pad-ref-text">y=|x| 在 x=0 处连续（左右极限均为0），但左导数为-1、右导数为1，不可导。</div>
+            </div>
+          </div>
+        </div>
+        <!-- Q2 -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-2" style="display:none;">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;">多选题 · 第2题</span>
+            <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:700;">4 / 6 分</span>
+          </div>
+          <div class="pad-q-body" style="margin-bottom:8px;">下列关于导数的说法，正确的有？（多选）</div>
+          <div class="pad-ai-result" style="background:#fef2f2;border:1.5px solid #fca5a5;">
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+              <div class="pad-choice-item correct-choice" style="margin-bottom:0;padding:8px 12px;">A &nbsp; 可导必连续 &nbsp;<span style="margin-left:auto;font-size:12px;">✓ 已选·正确</span></div>
+              <div class="pad-choice-item" style="margin-bottom:0;padding:8px 12px;border-color:#e5e7eb;">B &nbsp; 连续必可导 &nbsp;<span style="margin-left:auto;font-size:12px;color:#6b7280;">未选·正确（漏选）</span></div>
+              <div class="pad-choice-item correct-choice" style="margin-bottom:0;padding:8px 12px;">C &nbsp; 极值点处导数为零或不存在 &nbsp;<span style="margin-left:auto;font-size:12px;">✓ 已选·正确</span></div>
+              <div class="pad-choice-item wrong-choice" style="margin-bottom:0;padding:8px 12px;">D &nbsp; 导数为零则为极值点 &nbsp;<span style="margin-left:auto;font-size:12px;">✗ 已选·错误</span></div>
+            </div>
+            <div class="pad-subq-score-row" style="border-bottom:none;">
+              <span style="color:#374151;">本题得分</span>
+              <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;">4 / 6 分</span>
+            </div>
+            <div class="pad-ref-answer" style="margin-top:8px;">
+              <div class="pad-ref-label">答案解析</div>
+              <div class="pad-ref-text">正确答案为 A、C。B「连续必可导」是错误命题（如 y=|x|）；D「导数为零则为极值点」也是错误命题（如 y=x³ 在 x=0 处导数为0但非极值）。</div>
+            </div>
+          </div>
+        </div>
+        <!-- Q3 -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-3" style="display:none;">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;">完型填空 · 第3题</span>
+            <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:700;">13.5 / 15 分</span>
+          </div>
+          <div class="pad-q-body" style="margin-bottom:8px;">根据语境，在下列空格处填入最恰当的词汇。</div>
+          <div class="pad-ai-result pad-ai-correct">
+            <div class="pad-ai-label">🎉 答题优秀！</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
+              <div style="background:#f0fdf4;border-radius:8px;padding:6px 10px;font-size:12px;"><span style="color:#9ca3af;">空1</span> <span style="color:#15803d;font-weight:600;">however ✓</span></div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:6px 10px;font-size:12px;"><span style="color:#9ca3af;">空2</span> <span style="color:#15803d;font-weight:600;">although ✓</span></div>
+              <div style="background:#fef2f2;border-radius:8px;padding:6px 10px;font-size:12px;"><span style="color:#9ca3af;">空3</span> <span style="color:#b91c1c;font-weight:600;">despite ✗</span> <span style="color:#6b7280;font-size:11px;">→ despite of</span></div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:6px 10px;font-size:12px;"><span style="color:#9ca3af;">空4</span> <span style="color:#15803d;font-weight:600;">therefore ✓</span></div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:6px 10px;font-size:12px;"><span style="color:#9ca3af;">空5</span> <span style="color:#15803d;font-weight:600;">moreover ✓</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Q4: 复合题，AI全部批完 -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-4" style="display:none;">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;">复合题 · 第4题</span>
+            <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:700;">5 / 8 分</span>
+          </div>
+          <!-- 小问(1) AI批改 -->
+          <div class="pad-subq">（1）若每件商品的售价在 60 元基础上最多可涨 10 元，求最大利润是多少？</div>
+          <div class="pad-ai-result pad-ai-correct" id="q4-s1-result">
+            <div class="pad-my-answer" style="margin-bottom:10px;">
+              <!-- 标签行：左"我的作答"，右"AI估算得分 + 修正" -->
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;" id="q4-s1-score-row">
+                <div class="pad-my-answer-label" style="margin-bottom:0;">我的作答</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:#374151;">AI估算得分</span>
+                  <span class="pad-score-tag" style="background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;" id="q4-s1-score-tag">4 / 4 分</span>
+                  <button class="link-btn" id="q4-s1-revise-btn" style="font-size:12px;color:#0ea5e9;" onclick="q4S1StartRevise()">✏ 修正</button>
+                </div>
+              </div>
+              <div class="pad-photo-preview" style="background:#f0fdf4;border-color:#86efac;font-size:13px;color:#15803d;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;">
+                📷<br>作答图片<br><span style="font-size:20px;color:#16a34a;">✓</span>
+              </div>
+            </div>
+            <div class="pad-ref-answer" style="margin-top:8px;">
+              <div class="pad-ref-label">答案解析</div>
+              <div class="pad-ref-text">设涨价 x 元（0≤x≤10），利润 W=(20+x)(100-3x)，对称轴 x₀=20/3≈6.67，在区间内取最大值 W≈2133 元。</div>
+            </div>
+          </div>
+          <!-- 小问(2) 答错 -->
+          <div class="pad-subq">（2）下列关于利润函数的说法，正确的是？</div>
+          <div class="pad-ai-result pad-ai-wrong">
+            <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
+              <div style="flex:1;">
+                <div class="pad-my-answer-label">我的选择</div>
+                <div class="pad-choice-item wrong-choice" style="margin-bottom:0;">B &nbsp; 当涨价 5 元时，每天利润达到最大值</div>
+              </div>
+              <div style="flex:1;">
+                <div class="pad-my-answer-label">正确答案</div>
+                <div class="pad-choice-item correct-choice" style="margin-bottom:0;">C &nbsp; 若不涨价，每天利润为 2000 元</div>
+              </div>
+            </div>
+            <div class="pad-subq-score-row" style="border-bottom:none;">
+              <span style="color:#374151;">本问得分</span>
+              <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;">0 / 2 分</span>
+            </div>
+            <div class="pad-ref-answer" style="margin-top:8px;">
+              <div class="pad-ref-label">答案解析</div>
+              <div class="pad-ref-text">代入 x=0（不涨价）：W=(20)(100)=2000 元，故 C 正确。涨价 5 元时 W=(25)(90)=2250 元，但对称轴处利润更大，B 错误。</div>
+            </div>
+          </div>
+          <!-- 小问(3) 填空题：两个空，一客观一主观 -->
+          <div class="pad-subq">（3）当涨价 <u>&nbsp;&nbsp;&nbsp;&nbsp;</u> 元时，利润最大；此时利润最大的原因是 <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>。</div>
+          <div class="pad-ai-result pad-ai-partial">
+            <!-- 空1：数字类型，客观空，答对 -->
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+              <span style="flex-shrink:0;font-size:12px;color:#6b7280;margin-top:2px;min-width:28px;">空1</span>
+              <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:#dcfce7;border:1.5px solid #86efac;font-size:13px;font-weight:600;color:#15803d;">
+                    20/3 ≈ 6.67 元 <span style="font-size:15px;">✓</span>
+                  </span>
+                  <span style="font-size:11px;color:#9ca3af;">数字填空 · AI判题</span>
+                </div>
+              </div>
+            </div>
+            <!-- 空2：简答类型，主观空，答错（AI判） -->
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+              <span style="flex-shrink:0;font-size:12px;color:#6b7280;margin-top:2px;min-width:28px;">空2</span>
+              <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:#fef2f2;border:1.5px solid #fca5a5;font-size:13px;font-weight:600;color:#b91c1c;">
+                    因为对称轴在范围内，取最大 ✗
+                  </span>
+                  <span style="font-size:11px;color:#9ca3af;">简答填空 · AI判题</span>
+                </div>
+                <div style="font-size:11px;color:#9ca3af;padding-left:2px;">主观空由 AI 判定，不支持修正</div>
+              </div>
+            </div>
+            <!-- 合并小问得分，答案解析上方独占一行 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px dashed #d1d5db;margin-bottom:8px;">
+              <span style="font-size:13px;color:#374151;">本问得分</span>
+              <span class="pad-score-tag" style="background:#fef2f2;color:#b91c1c;font-size:13px;font-weight:700;">1 / 2 分</span>
+            </div>
+            <div class="pad-ref-answer">
+              <div class="pad-ref-label">答案解析</div>
+              <div class="pad-ref-text">空1：令 W'=0，得 x=20/3≈6.67 元（满足 0≤x≤10）；空2：因为二次函数开口向下，顶点 x₀=20/3 在区间内，故在 x=20/3 处取得最大利润，表述需包含"顶点/对称轴在区间内"且指出函数开口方向。</div>
+            </div>
+          </div>
+        </div>
+        <!-- Q5 placeholder -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-5" style="display:none;">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;">解答题 · 第5题</span>
+            <span class="pad-score-tag" style="background:#f3f4f6;color:#6b7280;font-size:13px;font-weight:700;" id="ss-simple-pending-tag">— / 10 分</span>
+          </div>
+          <div style="text-align:center;padding:40px 20px;color:#9ca3af;font-size:14px;">主观题，请前往自批打分</div>
+        </div>
+        <!-- Q6 placeholder -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-6" style="display:none;">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;">复合题 · 第6题</span>
+            <span id="ss-compound-total-tag" style="display:none;font-size:13px;font-weight:700;padding:2px 10px;border-radius:8px;"></span>
+            <span id="ss-compound-pending-tag" style="font-size:13px;font-weight:700;padding:2px 10px;border-radius:8px;background:#f3f4f6;color:#6b7280;">— / 25 分</span>
+          </div>
+          <div style="text-align:center;padding:40px 20px;color:#9ca3af;font-size:14px;">主观题，请前往自批打分</div>
+        </div>
+        <!-- Q7: 未作答 -->
+        <div class="pad-q-page" id="pad-qpage-ai-result-7" style="display:none;">
+          <div class="pad-q-header">
+            <span class="pad-q-label" style="margin:0;background:#f3f4f6;color:#6b7280;">单选题 · 第7题</span>
+            <span class="pad-score-tag" style="background:#f3f4f6;color:#6b7280;font-size:13px;font-weight:700;">0 / 4 分</span>
+          </div>
+          <div style="background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e;display:flex;gap:8px;">
+            <span>⚠️</span><span>本题未作答，得 0 分。</span>
+          </div>
+          <div class="pad-q-body" style="color:#9ca3af;">下列关于极限的说法，正确的是？</div>
+          <div class="pad-choice-item" style="opacity:0.45;pointer-events:none;">A &nbsp; 有界数列必有极限</div>
+          <div class="pad-choice-item" style="opacity:0.45;pointer-events:none;">B &nbsp; 单调有界数列必有极限</div>
+          <div class="pad-choice-item" style="opacity:0.45;pointer-events:none;">C &nbsp; 收敛数列必有界</div>
+          <div class="pad-choice-item" style="opacity:0.45;pointer-events:none;">D &nbsp; 无界数列必发散</div>
+          <div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border-radius:10px;font-size:13px;">
+            <span style="color:#16a34a;font-weight:600;">正确答案：</span><span style="color:#374151;">B &nbsp; 单调有界数列必有极限</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主观题自批打分 -->
+      <div id="pad-mode-self-score" class="pad-content" style="display:none;padding-bottom:80px;">
+        <!-- Q1: 客观题 -->
+        <div class="pad-q-page" id="pad-qpage-self-score-1">
+          <div style="text-align:center;padding:40px 20px;color:#9ca3af;font-size:14px;">客观题，已自动判卷</div>
+        </div>
+        <!-- Q2: 客观题 -->
+        <div class="pad-q-page" id="pad-qpage-self-score-2" style="display:none;">
+          <div style="text-align:center;padding:40px 20px;color:#9ca3af;font-size:14px;">客观题，已自动判卷</div>
+        </div>
+        <!-- Q3: 客观题（自批模式下隐藏） -->
+        <div class="pad-q-page" id="pad-qpage-self-score-3" style="display:none;"></div>
+        <!-- Q4: 客观题（自批模式下隐藏） -->
+        <div class="pad-q-page" id="pad-qpage-self-score-4" style="display:none;"></div>
+        <!-- Q5: 解答题自批 -->
+        <div class="pad-q-page" id="pad-qpage-self-score-5" style="display:none;">
+          <div id="ss-mode-simple">
+            <div class="pad-q-header">
+              <span class="pad-q-label" style="margin:0;">解答题 · 第5题</span>
+              <span style="font-size:13px;color:#6b7280;">共10分</span>
+              <span id="ss-simple-score-display" class="pad-score-tag" style="font-size:13px;font-weight:700;background:#f3f4f6;color:#6b7280;">— / 10 分</span>
+            </div>
+            <div class="pad-q-body">已知函数 f(x) = x³ − 3x，求 f(x) 的极大值与极小值。</div>
+            <div class="pad-my-answer" style="margin-bottom:14px;">
+              <div class="pad-my-answer-label">我的作答</div>
+              <div class="pad-photo-preview">📷<br><span style="font-size:11px;color:#6b7280;">作答图片</span></div>
+            </div>
+            <div class="pad-ref-answer" style="margin-bottom:8px;">
+              <div style="display:flex;gap:16px;font-size:13px;">
+                <span style="color:#374151;font-weight:500;flex-shrink:0;">答案</span>
+                <span style="color:#374151;">f'(x)=3x²−3，令 f'=0 得 x=±1；极大值 f(−1)=2，极小值 f(1)=−2。</span>
+              </div>
+              <div style="display:flex;gap:16px;font-size:13px;margin-top:6px;">
+                <span style="color:#f59e0b;font-weight:500;flex-shrink:0;">解析</span>
+                <span style="color:#6b7280;">对 f'(x) 因式分解后判断正负区间，确认极值点与极值。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Q6: 复合题自批 -->
+        <div class="pad-q-page" id="pad-qpage-self-score-6" style="display:none;">
+          <div id="ss-mode-compound" style="position:relative;">
+            <!-- 吸顶题型栏 -->
+            <div class="pad-q-header">
+              <span class="pad-q-label" style="margin:0;">复合题 · 第6题</span>
+              <span id="ss-compound-self-score-tag" class="pad-score-tag" style="font-size:13px;font-weight:700;background:#f3f4f6;color:#6b7280;">— / 14 分</span>
+            </div>
+            <!-- 右上角纵向小问导航（top 偏移避开 header） -->
+            <div id="ss-subq-nav" style="position:absolute;top:52px;right:0;z-index:10;">
+              <div style="background:white;border-radius:24px;padding:10px 8px;box-shadow:0 2px 12px rgba(0,0,0,0.13);display:flex;flex-direction:column;align-items:center;gap:8px;">
+                <span class="ss-vnav-bubble ss-vnav-idle" data-step="0" onclick="ssJumpTo(1)">(1)-①</span>
+                <span class="ss-vnav-bubble ss-vnav-idle" data-step="1" onclick="ssJumpTo(2)">(1)-②</span>
+                <span class="ss-vnav-bubble ss-vnav-idle" data-step="2" onclick="ssJumpTo(3)">(2)</span>
+              </div>
+            </div>
+            <div class="pad-q-body" style="margin-bottom:10px;padding-right:64px;">已知函数 f(x) = ax² + bx + c（a≠0），回答下列各问。</div>
+            <!-- (1)-① -->
+            <div class="ss-section" id="ss-section-1">
+              <div class="ss-section-label">（1）-① 求 f(x) 的对称轴方程（4分）</div>
+              <div class="pad-my-answer" style="margin:8px 0;">
+                <div class="pad-my-answer-label">我的作答</div>
+                <div class="pad-answer-area" style="font-size:14px;">x = −b/2a（填空作答）</div>
+              </div>
+              <div id="ss-subscore-1" class="ss-scored-chip" style="display:none;"></div>
+              <div class="pad-ref-answer">
+                <div style="display:flex;gap:16px;font-size:13px;">
+                  <span style="color:#374151;font-weight:500;flex-shrink:0;">答案</span>
+                  <span>对称轴 x = −b/(2a)</span>
+                </div>
+                <div style="display:flex;gap:16px;font-size:13px;margin-top:6px;">
+                  <span style="color:#f59e0b;font-weight:500;flex-shrink:0;">解析</span>
+                  <span style="color:#6b7280;">由二次函数标准式直接读出对称轴。</span>
+                </div>
+              </div>
+            </div>
+            <!-- (1)-② -->
+            <div class="ss-section" id="ss-section-2" style="display:none;">
+              <div class="ss-section-label">（1）-② 求顶点坐标（4分）</div>
+              <div class="pad-my-answer" style="margin:8px 0;">
+                <div class="pad-my-answer-label">我的作答</div>
+                <div class="pad-photo-preview">📷<br><span style="font-size:11px;color:#6b7280;">作答图片</span></div>
+              </div>
+              <div id="ss-subscore-2" class="ss-scored-chip" style="display:none;"></div>
+              <div class="pad-ref-answer">
+                <div style="display:flex;gap:16px;font-size:13px;">
+                  <span style="color:#374151;font-weight:500;flex-shrink:0;">答案</span>
+                  <span>顶点 (−b/2a, (4ac−b²)/4a)</span>
+                </div>
+                <div style="display:flex;gap:16px;font-size:13px;margin-top:6px;">
+                  <span style="color:#f59e0b;font-weight:500;flex-shrink:0;">解析</span>
+                  <span style="color:#6b7280;">将对称轴代入原式得 y 坐标。</span>
+                </div>
+              </div>
+            </div>
+            <!-- (2) -->
+            <div class="ss-section" id="ss-section-3" style="display:none;">
+              <div class="ss-section-label">（2）求 f(x) 在区间 [0,1] 上的最大值与最小值（6分）</div>
+              <div class="pad-my-answer" style="margin:8px 0;">
+                <div class="pad-my-answer-label">我的作答</div>
+                <div style="display:flex;gap:10px;">
+                  <div class="pad-photo-preview">📷<br><span style="font-size:11px;color:#6b7280;">作答页1</span></div>
+                  <div class="pad-photo-preview">📷<br><span style="font-size:11px;color:#6b7280;">作答页2</span></div>
+                </div>
+              </div>
+              <div id="ss-subscore-3" class="ss-scored-chip" style="display:none;"></div>
+              <div class="pad-ref-answer">
+                <div style="display:flex;gap:16px;font-size:13px;">
+                  <span style="color:#374151;font-weight:500;flex-shrink:0;">答案</span>
+                  <span>分 a&gt;0、a=0、a&lt;0 三种情况，分别比较端点与顶点处函数值。</span>
+                </div>
+                <div style="display:flex;gap:16px;font-size:13px;margin-top:6px;">
+                  <span style="color:#f59e0b;font-weight:500;flex-shrink:0;">解析</span>
+                  <span style="color:#6b7280;">顶点在区间内外时最值取法不同，需分类讨论。</span>
+                </div>
+              </div>
+            </div>
+          </div><!-- /ss-mode-compound -->
+        </div>
+        <!-- Q7: 未作答，自批模式下不展示 -->
+        <div class="pad-q-page" id="pad-qpage-self-score-7" style="display:none;"></div>
+      </div><!-- /pad-mode-self-score -->
+
+      <!-- ── 吸底自批打分面板（解答题） ── -->
+      <div class="ss-float-panel" id="ss-float-simple" style="display:none;">
+        <div class="ss-float-prompt">对照答案，评判一下自己 <strong style="color:#0ea5e9;">第 5 题</strong> 做对了嘛？</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input class="pad-self-score-input" type="number" id="ss-simple-val" min="0" max="10" value="0" style="width:64px;font-size:18px;font-weight:700;border-color:#f59e0b;">
+          <span style="font-size:14px;color:#6b7280;">/ 10分</span>
+          <button class="btn btn-cyan" style="padding:8px 20px;font-size:14px;" onclick="ssSimpleSubmit()">提交</button>
+        </div>
+      </div>
+
+      <!-- ── 吸底自批打分面板（复合题，逐问推进） ── -->
+      <div class="ss-float-panel" id="ss-float-compound" style="display:none;">
+        <div class="ss-float-prompt">对照答案，给自己 <strong id="ss-cur-label" style="color:#0ea5e9;"></strong> 打分</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input class="pad-self-score-input" type="number" id="ss-compound-val" min="0" value="0" style="width:64px;font-size:18px;font-weight:700;border-color:#f59e0b;">
+          <span id="ss-compound-full-label" style="font-size:14px;color:#6b7280;"></span>
+          <button class="btn btn-cyan" style="padding:8px 20px;font-size:14px;" onclick="ssCompoundConfirm()">确认</button>
+        </div>
+      </div>
+
+        <div class="pad-footer">
+          <button class="pad-btn-prev" onclick="showToast('上一题')">上一题</button>
+          <button class="pad-btn-next" id="pad-main-btn" onclick="showToast('下一题')">下一题</button>
+        </div>
+        </div><!-- /pad-main -->
+      </div><!-- /pad-body -->
+    </div><!-- /pad-device -->
+  </div><!-- /pad-shell -->
+</div><!-- /panel-student -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Tab switching
+  const TAB_ORDER = ['config', 'homework', 'grading', 'analysis', 'student'];
+  function switchTab(tab) {
+    document.querySelectorAll('.nav-tab').forEach((t, i) => {
+      t.classList.remove('active');
+      if (TAB_ORDER[i] === tab) t.classList.add('active');
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    if (tab === 'student') initPadNav();
+  }
+
+  // Drawer
+  function openDrawer(id) {
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('task-drawer').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('task-drawer').classList.remove('open');
+  }
+
+  // Drawer inner tabs
+  function switchDrawerTab(tab) {
+    document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('dtab-' + tab).classList.add('active');
+    document.getElementById('dpanel-' + tab).classList.add('active');
+    const btn = document.getElementById('drawer-action-btn');
+    if (btn) btn.textContent = tab === 'student' ? '快速批改' : '查看易错项';
+  }
+
+  function drawerActionClick() {
+    const activeTab = document.querySelector('.inner-tab.active');
+    if (activeTab && activeTab.id === 'dtab-student') {
+      switchTab('grading'); closeDrawer(); showToast('已跳转到批改页');
+    } else {
+      showToast('查看易错项分析');
+    }
+  }
+
+  // Pad nav bubbles
+  // state values: correct(绿) | wrong(红) | needs-score(蓝,未批改) | unanswered(灰,未作答)
+  const padQuestions = [
+    { label: '1', stateAnswering: 'answered',    stateResult: 'wrong',       stateSelf: null },
+    { label: '2', stateAnswering: 'answered',    stateResult: 'correct',     stateSelf: null },
+    { label: '3', stateAnswering: 'answered',    stateResult: 'correct',     stateSelf: null },
+    { label: '4', stateAnswering: 'answered',    stateResult: 'partial',     stateSelf: null },
+    { label: '5', stateAnswering: 'answered',    stateResult: 'needs-score', stateSelf: 'needs-score' },
+    { label: '6', stateAnswering: 'answered',    stateResult: 'needs-score', stateSelf: 'needs-score' },
+    { label: '7', stateAnswering: 'unanswered',  stateResult: 'unanswered',  stateSelf: null },
+  ];
+  let padCurQ = 1;
+  let padActiveMode = 'answering';
+  let ssCompoundInited = false;
+  let ssCompoundDone = false;
+  let ssSimpleDone = false;
+
+  function initPadNav() {
+    const nav = document.getElementById('pad-q-nav');
+    if (!nav) return;
+    nav.innerHTML = '';
+    padQuestions.forEach((q, i) => {
+      const qNum = i + 1;
+      // self-score mode: only show Q5 and Q6
+      if (padActiveMode === 'self-score' && qNum !== 5 && qNum !== 6) return;
+      const b = document.createElement('div');
+      const stateClass = padActiveMode === 'answering' ? q.stateAnswering
+                       : padActiveMode === 'ai-result'  ? q.stateResult
+                       : (q.stateSelf || 'needs-score');
+      b.className = 'pad-q-bubble ' + stateClass;
+      b.textContent = q.label;
+      b.onclick = () => switchPadQ(qNum);
+      nav.appendChild(b);
+    });
+    // refresh total score display after nav rebuild
+    updatePadTotalScore();
+  }
+
+  function switchPadQ(n) {
+    padCurQ = n;
+    // hide all pages in the active mode panel
+    const modeEl = document.getElementById('pad-mode-' + padActiveMode);
+    if (modeEl) {
+      modeEl.querySelectorAll('.pad-q-page').forEach(p => p.style.display = 'none');
+      const page = document.getElementById('pad-qpage-' + padActiveMode + '-' + n);
+      if (page) page.style.display = '';
+    }
+    // update nav bubble active state
+    const nav = document.getElementById('pad-q-nav');
+    if (nav) {
+      nav.querySelectorAll('.pad-q-bubble').forEach((b, i) => {
+        b.classList.toggle('active', i + 1 === n);
+      });
+    }
+    // handle float panels for self-score mode
+    if (padActiveMode === 'self-score') {
+      const floatSimple = document.getElementById('ss-float-simple');
+      const floatCompound = document.getElementById('ss-float-compound');
+      if (n === 5) {
+        floatSimple.style.display = ssSimpleDone ? 'none' : 'flex';
+        floatCompound.style.display = 'none';
+      } else if (n === 6) {
+        floatSimple.style.display = 'none';
+        floatCompound.style.display = ssCompoundDone ? 'none' : 'flex';
+        if (!ssCompoundInited) { ssInitCompound(); ssCompoundInited = true; }
+      } else {
+        floatSimple.style.display = 'none';
+        floatCompound.style.display = 'none';
+      }
+    }
+  }
+
+  // Pad mode switching
+  function setPadMode(mode) {
+    padActiveMode = mode;
+    ['answering', 'ai-result', 'self-score'].forEach(m => {
+      document.getElementById('smode-' + m).classList.toggle('active', m === mode);
+      document.getElementById('pad-mode-' + m).style.display = m === mode ? 'block' : 'none';
+    });
+    const mainBtn = document.getElementById('pad-main-btn');
+    if (mode === 'answering') mainBtn.textContent = '下一题';
+    else if (mode === 'ai-result') mainBtn.textContent = '下一题';
+    else mainBtn.textContent = '提交作业';
+    // hide float panels when leaving self-score
+    if (mode !== 'self-score') {
+      document.getElementById('ss-float-simple').style.display = 'none';
+      document.getElementById('ss-float-compound').style.display = 'none';
+    }
+    // re-render nav (self-score mode shows only Q5/Q6)
+    initPadNav();
+    // self-score mode defaults to Q5; other modes keep current question
+    const targetQ = mode === 'self-score' ? 5 : padCurQ;
+    switchPadQ(targetQ);
+  }
+
+  // Self score toggle
+  function selfScore(verdict) {
+    const wrap = document.getElementById('self-score-input-wrap');
+    const correctBtn = document.getElementById('self-correct-btn');
+    const wrongBtn = document.getElementById('self-wrong-btn');
+    if (verdict === 'correct') {
+      correctBtn.classList.add('active'); wrongBtn.classList.remove('active');
+      document.getElementById('self-score-val').value = 4;
+      wrap.style.display = 'flex';
+      showToast('已标记为正确，默认给满分 4 分，可调整');
+    } else {
+      wrongBtn.classList.add('active'); correctBtn.classList.remove('active');
+      document.getElementById('self-score-val').value = 0;
+      wrap.style.display = 'flex';
+      showToast('已标记为错误，默认 0 分，可调整');
+    }
+  }
+
+  function submitSelfScore() {
+    const score = document.getElementById('self-score-val').value;
+    showToast('✓ 第(2)问自评得分 ' + score + ' 分，等待老师确认');
+  }
+
+  function selectRubric(btn, rubric) {
+    const card = btn.closest('.pad-self-score-row').closest('div[style*="border:1px"]');
+    card.querySelectorAll('.pad-self-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const isCorrect = btn.classList.contains('pad-self-btn-correct');
+    const inputEl = card.querySelector('.pad-self-score-input');
+    if (inputEl) inputEl.value = isCorrect ? parseInt(inputEl.max) : 0;
+    updateSelfTotal();
+  }
+
+  function updateSelfTotal() {
+    const inputs = document.querySelectorAll('#pad-mode-self-score .pad-self-score-input');
+    let total = 0;
+    inputs.forEach(i => total += Number(i.value) || 0);
+    const el = document.getElementById('self-total-score');
+    if (el) el.textContent = total;
+  }
+
+  // ── Self-score scene switching (kept for backward compat, no longer primary) ──
+  function setSelfSceneMode(mode) {
+    // no-op: scene is now driven by switchPadQ
+  }
+
+  // ── Compound scene: sub-question progression ──
+  const SS_SUBQS = [
+    { label: '第 (1)-① 问', full: 4, idx: 1 },
+    { label: '第 (1)-② 问', full: 4, idx: 2 },
+    { label: '第 (2) 问',   full: 6, idx: 3 },
+  ];
+  const SS_SCORES = {};
+  let ssCurStep = 0;
+
+  function ssInitCompound() {
+    ssCurStep = 0;
+    Object.keys(SS_SCORES).forEach(k => delete SS_SCORES[k]);
+    // reset all vnav bubbles to idle
+    document.querySelectorAll('#ss-subq-nav .ss-vnav-bubble').forEach(b => {
+      b.className = 'ss-vnav-bubble ss-vnav-idle';
+    });
+    ssShowStep(0);
+  }
+
+  function ssShowStep(step) {
+    if (step >= SS_SUBQS.length) { ssAllDone(); return; }
+    ssCurStep = step;
+    const subq = SS_SUBQS[step];
+    document.getElementById('ss-cur-label').textContent = subq.label;
+
+    // show only the active section
+    SS_SUBQS.forEach(s => {
+      const sec = document.getElementById('ss-section-' + s.idx);
+      if (sec) sec.style.display = s.idx === subq.idx ? 'block' : 'none';
+    });
+
+    // update vnav bubble states
+    document.querySelectorAll('#ss-subq-nav .ss-vnav-bubble').forEach(b => {
+      const bStep = parseInt(b.dataset.step);
+      const bSubq = SS_SUBQS[bStep];
+      const scored = SS_SCORES[bSubq.idx] !== undefined;
+      if (bStep === step) {
+        b.className = 'ss-vnav-bubble ss-vnav-active';
+      } else if (scored) {
+        const sv = SS_SCORES[bSubq.idx];
+        b.className = 'ss-vnav-bubble ' + (sv === bSubq.full ? 'ss-vnav-correct' : sv === 0 ? 'ss-vnav-wrong' : 'ss-vnav-partial');
+      } else {
+        b.className = 'ss-vnav-bubble ss-vnav-idle';
+      }
+    });
+
+    // show score input with default 0
+    const inp = document.getElementById('ss-compound-val');
+    // if already scored, restore value
+    inp.value = SS_SCORES[subq.idx] !== undefined ? SS_SCORES[subq.idx] : 0;
+    inp.max = subq.full;
+    document.getElementById('ss-compound-full-label').textContent = '/ ' + subq.full + '分';
+    document.getElementById('ss-compound-score-wrap').style.display = 'flex';
+    document.getElementById('ss-compound-done-msg').style.display = 'none';
+    document.getElementById('ss-compound-submit-btn').style.display = 'none';
+  }
+
+  function ssJumpTo(sectionIdx) {
+    const step = SS_SUBQS.findIndex(s => s.idx === sectionIdx);
+    if (step >= 0) ssShowStep(step);
+  }
+
+  function ssCompoundConfirm() {
+    const subq = SS_SUBQS[ssCurStep];
+    const v = Math.min(parseInt(document.getElementById('ss-compound-val').value) || 0, subq.full);
+    SS_SCORES[subq.idx] = v;
+    // update this bubble immediately
+    const bubble = document.querySelector('#ss-subq-nav .ss-vnav-bubble[data-step="' + ssCurStep + '"]');
+    if (bubble) {
+      bubble.className = 'ss-vnav-bubble ' + (v === subq.full ? 'ss-vnav-correct' : v === 0 ? 'ss-vnav-wrong' : 'ss-vnav-partial');
+    }
+    // show score chip above ref-answer
+    const chip = document.getElementById('ss-subscore-' + subq.idx);
+    if (chip) {
+      chip.textContent = '小题得分：' + v + '/' + subq.full + '分';
+      chip.style.display = 'inline-flex';
+    }
+    ssShowStep(ssCurStep + 1);
+  }
+
+  function ssAllDone() {
+    const totalFull = SS_SUBQS.reduce((a, s) => a + s.full, 0); // 14
+    const totalGot  = SS_SUBQS.reduce((a, s) => a + (SS_SCORES[s.idx] || 0), 0);
+    const isFull  = totalGot === totalFull;
+    const scoreColor = isFull ? '#15803d' : '#b91c1c';
+    const scoreBg    = isFull ? '#dcfce7' : '#fef2f2';
+
+    // 标记完成，防止 switchPadQ 再次打开浮层
+    ssCompoundDone = true;
+    document.getElementById('ss-float-compound').style.display = 'none';
+
+    // 回显到自批页题型栏
+    const selfTag = document.getElementById('ss-compound-self-score-tag');
+    if (selfTag) {
+      selfTag.textContent = totalGot + ' / ' + totalFull + ' 分';
+      selfTag.style.background = scoreBg;
+      selfTag.style.color = scoreColor;
+    }
+
+    // 同步 tab2 ai-result 页 Q6 题型栏
+    const totalTag = document.getElementById('ss-compound-total-tag');
+    if (totalTag) {
+      totalTag.textContent = totalGot + '/' + totalFull + '分';
+      totalTag.style.cssText = 'display:inline-flex;align-items:center;padding:2px 10px;border-radius:8px;font-size:13px;font-weight:700;background:' + scoreBg + ';color:' + scoreColor + ';';
+    }
+    const pendingTag = document.getElementById('ss-compound-pending-tag');
+    if (pendingTag) pendingTag.style.display = 'none';
+
+    // 更新 Q6 题号气泡（tab2/tab3 共用）
+    const q6state = isFull ? 'correct' : 'wrong';
+    padQuestions[5].stateSelf   = q6state;
+    padQuestions[5].stateResult = q6state;
+    initPadNav();
+    switchPadQ(6);
+
+    showToast('✓ 第6题自批完成');
+    updatePadTotalScore();
+  }
+
+  function updateSimpleTotal() {}
+  function updateCompoundTotal() {}
+
+  // 客观题固定得分
+  // Q1单选0/2, Q2多选4/6, Q3完型13.5/15, Q4复合5/8, Q7未作答0/4
+  const PAD_OBJ_SCORES = { 1:{got:0,full:2}, 2:{got:4,full:6}, 3:{got:13.5,full:15}, 4:{got:5,full:8}, 7:{got:0,full:4} };
+  const PAD_FULL_TOTAL = 100;
+
+  function updatePadTotalScore() {
+    const el = document.getElementById('pad-total-score-val');
+    if (!el) return;
+
+    // Check if any subjective question is still unscored
+    const simpleDisplay = document.getElementById('ss-simple-score-display');
+    const simpleScored = simpleDisplay && simpleDisplay.textContent.indexOf('—') === -1 && simpleDisplay.textContent !== '';
+    const compoundTag = document.getElementById('ss-compound-self-score-tag');
+    const compoundScored = compoundTag && compoundTag.style.color !== 'rgb(107, 114, 128)' && compoundTag.textContent.indexOf('—') === -1;
+
+    if (!simpleScored || !compoundScored) {
+      // Still pending — show dash
+      el.innerHTML = '<span style="font-size:18px;font-weight:700;color:#9ca3af;">—</span><span style="font-size:12px;color:#9ca3af;font-weight:400;">/100分</span>';
+      return;
+    }
+
+    // All scored — calculate total
+    let got = Object.values(PAD_OBJ_SCORES).reduce((a, s) => a + s.got, 0); // 21.5
+    // Q5 解答题
+    const simpleVal = parseInt(document.getElementById('ss-simple-val').value) || 0;
+    got += simpleVal;
+    // Q6 复合题主观部分
+    const compoundGot = SS_SUBQS.reduce((a, s) => a + (SS_SCORES[s.idx] || 0), 0);
+    got += compoundGot;
+    // remaining to 100
+    const fixedFull = Object.values(PAD_OBJ_SCORES).reduce((a, s) => a + s.full, 0); // 35
+    const subjectiveFull = 10 + SS_SUBQS.reduce((a, s) => a + s.full, 0); // 10+14=24
+    const remainder = PAD_FULL_TOTAL - fixedFull - subjectiveFull; // 41
+    got += remainder; // assume full score on remainder (demo placeholder)
+
+    const color = got >= 90 ? '#15803d' : got >= 60 ? '#a16207' : '#b91c1c';
+    el.innerHTML = '<span style="font-size:16px;font-weight:700;color:' + color + ';">' + got.toFixed(got % 1 === 0 ? 0 : 1) + '</span><span style="font-size:12px;color:#9ca3af;font-weight:400;">/' + PAD_FULL_TOTAL + '分</span>';
+  }
+
+  function ssSimpleSubmit() {
+    const v = Math.min(Math.max(parseInt(document.getElementById('ss-simple-val').value) || 0, 0), 10);
+    const isFull = v === 10;
+    const scoreColor = isFull ? '#15803d' : '#b91c1c';
+    const scoreBg   = isFull ? '#dcfce7' : '#fef2f2';
+    // 回显到自批页题型栏
+    const display = document.getElementById('ss-simple-score-display');
+    if (display) {
+      display.textContent = v + ' / 10 分';
+      display.style.background = scoreBg;
+      display.style.color = scoreColor;
+    }
+    // 同步 ai-result 页 Q5 题型栏
+    const pendingSimple = document.getElementById('ss-simple-pending-tag');
+    if (pendingSimple) {
+      pendingSimple.textContent = v + ' / 10 分';
+      pendingSimple.style.background = scoreBg;
+      pendingSimple.style.color = scoreColor;
+    }
+    // 标记完成，防止 switchPadQ 再次打开浮层
+    ssSimpleDone = true;
+    document.getElementById('ss-float-simple').style.display = 'none';
+    // 更新 Q5 题号气泡颜色（tab2/tab3 共用 state，满分=correct/绿，否则=wrong/红）
+    const q5state = isFull ? 'correct' : 'wrong';
+    padQuestions[4].stateSelf   = q5state;
+    padQuestions[4].stateResult = q5state;
+    initPadNav();
+    // 保持停在 Q5 页并高亮当前气泡
+    switchPadQ(5);
+    updatePadTotalScore();
+    showToast('✓ 自批已提交');
+  }
+
+  // Q4 小问(1) AI改判
+  function q4S1StartRevise() {
+    const btn = document.getElementById('q4-s1-revise-btn');
+    if (!btn || !btn.onclick === false && btn.textContent === '已修正') return;
+    // 同步当前得分到弹窗输入框
+    const curTag = document.getElementById('q4-s1-score-tag');
+    const curVal = parseInt(curTag.textContent) || 4;
+    document.getElementById('q4-revise-score-input').value = curVal;
+    document.getElementById('q4-revise-modal').classList.add('open');
+    document.getElementById('q4-revise-score-input').focus();
+  }
+  function q4S1ConfirmRevise() {
+    const v = Math.min(Math.max(parseInt(document.getElementById('q4-revise-score-input').value) || 0, 0), 4);
+    const tag = document.getElementById('q4-s1-score-tag');
+    tag.textContent = v + ' / 4 分';
+    const isFull = v === 4;
+    const isZero = v === 0;
+    tag.style.background = isFull ? '#dcfce7' : '#fef2f2';
+    tag.style.color = isFull ? '#15803d' : '#b91c1c';
+    const card = document.getElementById('q4-s1-result');
+    card.className = 'pad-ai-result ' + (isFull ? 'pad-ai-correct' : isZero ? 'pad-ai-wrong' : 'pad-ai-pending');
+    document.getElementById('q4-revise-modal').classList.remove('open');
+    const btn = document.getElementById('q4-s1-revise-btn');
+    btn.textContent = '已修正';
+    btn.style.color = '#9ca3af';
+    btn.style.cursor = 'default';
+    btn.onclick = null;
+    showToast('✓ 已修正为 ' + v + '/4 分');
+  }
+
+  function toggleChoice(el) {
+    el.classList.toggle('selected');
+  }
+
+  // Student table sort
+  const studentSortState = { col: null, dir: 1 };
+  const studentSortIconMap = { submit: 'sort-submit', correct: 'sort-scorrect', score: 'sort-score' };
+
+  function sortStudentBy(col) {
+    const tbody = document.getElementById('student-tbody');
+    if (!tbody) return;
+    if (studentSortState.col === col) studentSortState.dir *= -1;
+    else { studentSortState.col = col; studentSortState.dir = 1; }
+    const dir = studentSortState.dir;
+
+    // update icons
+    Object.entries(studentSortIconMap).forEach(([c, id]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'sort-icon' + (c === col ? (dir === 1 ? ' asc' : ' desc') : '');
+      el.textContent = c === col ? (dir === 1 ? '↑' : '↓') : '↕';
+    });
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+      if (col === 'submit') {
+        const ao = parseInt(a.dataset.submitOrder || 0);
+        const bo = parseInt(b.dataset.submitOrder || 0);
+        if (ao !== bo) return (ao - bo) * dir;
+        // 同类按用时升序（固定，不受 dir 影响）
+        return parseInt(a.dataset.submitTime || 0) - parseInt(b.dataset.submitTime || 0);
+      }
+      // correct / score：未提交(-1)始终排末尾
+      const av = parseFloat(a.dataset[col]);
+      const bv = parseFloat(b.dataset[col]);
+      if (av < 0 && bv < 0) return 0;
+      if (av < 0) return 1;
+      if (bv < 0) return -1;
+      return (av - bv) * dir;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+  }
+
+  // Filter: show only rows with pending badge
+  function filterStudents(val) {
+    document.querySelectorAll('#student-tbody tr').forEach(row => {
+      row.style.display = (val === 'pending' && !row.querySelector('.pending-badge')) ? 'none' : '';
+    });
+  }
+
+  // Popover drill-down data
+  const POPOVER_DATA = {
+    q4: {
+      title: '多空填空 · 各空正确率',
+      type: 'correct-only',  // only correct rate, no score rate
+      items: [
+        { label: '第(1)空', correct: '80%', correctClass: 'rate-high' },
+        { label: '第(2)空', correct: '60%', correctClass: 'rate-mid' },
+        { label: '第(3)空', correct: '40%', correctClass: 'rate-low' },
+        { label: '第(4)空', correct: '67%', correctClass: 'rate-mid' },
+      ]
+    },
+    q5: {
+      title: '完型填空 · 各空正确率',
+      type: 'correct-only',
+      items: [
+        { label: '第(1)空', correct: '73%', correctClass: 'rate-high' },
+        { label: '第(2)空', correct: '40%', correctClass: 'rate-low' },
+        { label: '第(3)空', correct: '53%', correctClass: 'rate-mid' },
+        { label: '第(4)空', correct: '60%', correctClass: 'rate-mid' },
+        { label: '第(5)空', correct: '33%', correctClass: 'rate-low' },
+        { label: '第(6)空', correct: '45%', correctClass: 'rate-low' },
+        { label: '第(7)空', correct: '70%', correctClass: 'rate-high' },
+        { label: '第(8)空', correct: '55%', correctClass: 'rate-mid' },
+        { label: '第(9)空', correct: '38%', correctClass: 'rate-low' },
+        { label: '第(10)空', correct: '62%', correctClass: 'rate-mid' },
+        { label: '第(11)空', correct: '48%', correctClass: 'rate-low' },
+        { label: '第(12)空', correct: '75%', correctClass: 'rate-high' },
+        { label: '第(13)空', correct: '30%', correctClass: 'rate-low' },
+        { label: '第(14)空', correct: '58%', correctClass: 'rate-mid' },
+        { label: '第(15)空', correct: '66%', correctClass: 'rate-mid' },
+      ]
+    },
+    'q6-correct': {
+      title: '复合题 · 各小问正确率',
+      type: 'correct-tree',
+      items: [
+        {
+          label: '(1)', correct: '52%', correctClass: 'rate-mid',
+          children: [
+            {
+              label: '①', correct: '68%', correctClass: 'rate-mid',
+              children: [
+                { label: '空1', correct: '75%', correctClass: 'rate-high' },
+                { label: '空2', correct: '60%', correctClass: 'rate-mid' },
+              ]
+            },
+            { label: '②', correct: '50%', correctClass: 'rate-mid' },
+          ]
+        },
+        { label: '(2)', correct: '30%', correctClass: 'rate-low' },
+        {
+          label: '(3)', correct: '22%', correctClass: 'rate-low',
+          children: [
+            { label: '①', correct: '40%', correctClass: 'rate-low' },
+            { label: '②', correct: '15%', correctClass: 'rate-low' },
+          ]
+        },
+      ]
+    },
+    'q6-rate': {
+      title: '复合题 · 各小问得分率',
+      type: 'rate-score',
+      items: [
+        {
+          label: '(1)', rate: '59%', rateClass: 'rate-mid', avg: null, full: null,
+          children: [
+            { label: '①', rate: '68%', rateClass: 'rate-mid', avg: '2.7', full: '4' },
+            { label: '②', rate: '50%', rateClass: 'rate-mid', avg: '1.5', full: '3' },
+          ]
+        },
+        { label: '(2)', rate: '55%', rateClass: 'rate-mid', avg: '3.3', full: '6' },
+        {
+          label: '(3)', rate: '28%', rateClass: 'rate-low', avg: null, full: null,
+          children: [
+            { label: '①', rate: '40%', rateClass: 'rate-low', avg: '2.0', full: '5' },
+            { label: '②', rate: '15%', rateClass: 'rate-low', avg: '0.8', full: '5' },
+          ]
+        },
+      ]
+    }
+  };
+
+  let _activePopoverBtn = null;
+
+  function showDrillPopover(btn, key) {
+    closeDrillPopover();
+    const data = POPOVER_DATA[key];
+    if (!data) return;
+
+    _activePopoverBtn = btn;
+    btn.classList.add('active');
+
+    const type = data.type;
+    const cols2 = type === 'correct-only' && data.items.length > 6;
+
+    let rowsHtml = '';
+
+    if (type === 'correct-tree') {
+      // 递归渲染，最多3层：小问→子问→空
+      function renderCorrectNode(node, depth, isLastAtThisLevel) {
+        const indent = depth * 14;
+        const bg = depth > 0 ? ';background:#f8fafc' : '';
+        const labelStyle = depth > 0 ? 'color:#6b7280;font-size:12px;' : '';
+        const chipStyle = depth > 1 ? 'font-size:11px;' : '';
+        const prefix = depth === 1 ? '┣ ' : depth === 2 ? '┗ ' : '';
+        let html = `<div class="drill-popover-row" style="grid-column:1/-1;padding-left:${8 + indent}px${bg}${isLastAtThisLevel && (!node.children || !node.children.length) ? ';border-bottom:none' : ''}">
+          <span class="label" style="${labelStyle}">${prefix}${node.label}</span>
+          <span class="vals"><span class="rate-chip ${node.correctClass}" style="${chipStyle}">${node.correct}</span></span>
+        </div>`;
+        if (node.children) {
+          node.children.forEach((child, ci) => {
+            html += renderCorrectNode(child, depth + 1, isLastAtThisLevel && ci === node.children.length - 1);
+          });
+        }
+        return html;
+      }
+      data.items.forEach((item, idx) => {
+        rowsHtml += renderCorrectNode(item, 0, idx === data.items.length - 1);
+      });
+    } else if (type === 'rate-score') {
+      // 2层：小问→子问，每行显示得分率+平均分
+      function renderRateNode(node, depth, isLastAtThisLevel) {
+        const indent = depth * 14;
+        const bg = depth > 0 ? ';background:#f8fafc' : '';
+        const labelStyle = depth > 0 ? 'color:#6b7280;font-size:12px;' : '';
+        const chipStyle = depth > 0 ? 'font-size:11px;' : '';
+        const prefix = depth === 1 ? '┣ ' : '';
+        const noChildren = !node.children || !node.children.length;
+        let html = `<div class="drill-popover-row" style="grid-column:1/-1;padding-left:${8 + indent}px${bg}${isLastAtThisLevel && noChildren ? ';border-bottom:none' : ''}">
+          <span class="label" style="${labelStyle}">${prefix}${node.label}</span>
+          <span class="vals">
+            <span class="rate-chip ${node.rateClass}" style="${chipStyle}">${node.rate}</span>
+            ${node.avg ? `<span style="font-size:12px;color:#6b7280;margin-left:4px;">${node.avg}<span style="color:#9ca3af;">/${node.full}分</span></span>` : ''}
+          </span>
+        </div>`;
+        if (node.children) {
+          node.children.forEach((child, ci) => {
+            html += renderRateNode(child, depth + 1, isLastAtThisLevel && ci === node.children.length - 1);
+          });
+        }
+        return html;
+      }
+      data.items.forEach((item, idx) => {
+        rowsHtml += renderRateNode(item, 0, idx === data.items.length - 1);
+      });
+    } else if (cols2) {
+      // correct-only 多空，2列 grid
+      const half = Math.ceil(data.items.length / 2);
+      const col1 = data.items.slice(0, half);
+      const col2 = data.items.slice(half);
+      const maxLen = Math.max(col1.length, col2.length);
+      for (let i = 0; i < maxLen; i++) {
+        const isLastRow = (i === maxLen - 1);
+        const makeCell = (item) => item
+          ? `<div class="drill-popover-row"${isLastRow ? ' style="border-bottom:none"' : ''}><span class="label">${item.label}</span><span class="vals"><span class="rate-chip ${item.correctClass}">${item.correct}</span></span></div>`
+          : `<div></div>`;
+        rowsHtml += `<div>${makeCell(col1[i])}</div><div>${makeCell(col2[i])}</div>`;
+      }
+    } else {
+      // correct-only 少量空，单列
+      rowsHtml = data.items.map((item, idx) => {
+        const isLast = idx === data.items.length - 1;
+        return `<div class="drill-popover-row" style="grid-column:1/-1${isLast ? ';border-bottom:none' : ''}"><span class="label">${item.label}</span><span class="vals"><span class="rate-chip ${item.correctClass}">${item.correct}</span></span></div>`;
+      }).join('');
+    }
+
+    const pop = document.createElement('div');
+    pop.className = 'drill-popover';
+    pop.id = 'drill-popover';
+    pop.style.visibility = 'hidden';
+    pop.innerHTML = `
+      <button class="drill-popover-close" onclick="closeDrillPopover()">×</button>
+      <div class="drill-popover-title">${data.title}</div>
+      <div class="drill-popover-grid ${cols2 ? 'cols-2' : 'cols-1'}">${rowsHtml}</div>
+    `;
+    document.body.appendChild(pop);
+
+    // Position after layout is complete
+    const rect = btn.getBoundingClientRect();
+    const pw = pop.offsetWidth;
+    const ph = pop.offsetHeight;
+    let left = rect.right + 8;
+    let top = rect.top;
+    if (left + pw > window.innerWidth - 12) left = rect.left - pw - 8;
+    if (top + ph > window.innerHeight - 12) top = window.innerHeight - ph - 12;
+    if (top < 8) top = 8;
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+    pop.style.visibility = '';
+
+    setTimeout(() => document.addEventListener('click', outsideDrillPopoverClick), 0);
+  }
+
+  function outsideDrillPopoverClick(e) {
+    const pop = document.getElementById('drill-popover');
+    if (pop && !pop.contains(e.target) && e.target !== _activePopoverBtn) {
+      closeDrillPopover();
+    }
+  }
+
+  function closeDrillPopover() {
+    const pop = document.getElementById('drill-popover');
+    if (pop) pop.remove();
+    if (_activePopoverBtn) { _activePopoverBtn.classList.remove('active'); _activePopoverBtn = null; }
+    document.removeEventListener('click', outsideDrillPopoverClick);
+  }
+
+  // Sort question table
+  let sortState = { col: null, dir: 1 };
+  function sortTable(col) {
+    const tbody = document.getElementById('question-tbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr[data-num]'));
+    if (sortState.col === col) sortState.dir *= -1;
+    else { sortState.col = col; sortState.dir = 1; }
+
+    ['num','correct','rate','avg'].forEach(c => {
+      const el = document.getElementById('sort-' + c);
+      if (!el) return;
+      el.className = 'sort-icon' + (c === col ? (sortState.dir === 1 ? ' asc' : ' desc') : '');
+      el.textContent = c === col ? (sortState.dir === 1 ? '↑' : '↓') : '↕';
+    });
+
+    rows.sort((a, b) => {
+      const aVal = parseFloat(a.dataset[col]);
+      const bVal = parseFloat(b.dataset[col]);
+      if (isNaN(aVal) && isNaN(bVal)) return 0;
+      if (isNaN(aVal)) return 1;
+      if (isNaN(bVal)) return -1;
+      return (aVal - bVal) * sortState.dir;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+  }
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Total score update
+  function updateTotal() {
+    const ids = ['q1-score','q2-score','q8-score','q21-score','q22-score','q23-score'];
+    const fixed = 56; // other questions fixed
+    let sum = fixed;
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) sum += Number(el.value) || 0;
+    });
+    document.getElementById('total-score').textContent = sum;
+  }
+
+  // AI apply all
+  function applyAllAI() {
+    showToast('✓ 已应用 AI 建议分值配置');
+  }
+
+  // Batch score
+  function setBatch(type, score) {
+    if (type === 'single') {
+      document.getElementById('q1-score').value = score;
+      document.getElementById('q2-score').value = score;
+    } else {
+      document.getElementById('q8-score').value = score;
+    }
+    updateTotal();
+    showToast('批量设置完成');
+  }
+
+  // Toggle multi-score config
+  function toggleMultiConfig() {
+    const el = document.getElementById('multi-config');
+    const btn = document.getElementById('multi-expand-btn');
+    const isHidden = el.style.display === 'none';
+    el.style.display = isHidden ? 'block' : 'none';
+    btn.classList.toggle('expanded', isHidden);
+  }
+
+  // Toggle rubric
+  function toggleRubric() {
+    const el = document.getElementById('rubric-section');
+    const btn = document.getElementById('rubric-expand-btn');
+    const isHidden = el.style.display === 'none';
+    el.style.display = isHidden ? 'block' : 'none';
+    btn.classList.toggle('expanded', isHidden);
+  }
+
+  // Add rubric point
+  function addRubricPoint() {
+    const container = document.getElementById('rubric-points');
+    const div = document.createElement('div');
+    div.className = 'rubric-point';
+    div.innerHTML = `
+      <input class="rubric-point-input" type="text" placeholder="输入评分点描述">
+      <input class="rubric-score-input" type="number" value="0" min="0" max="10" oninput="updateRubricTotal()">
+      <span class="score-unit">分</span>
+      <button class="btn-danger-ghost btn btn-sm" onclick="this.closest('.rubric-point').remove();updateRubricTotal()">✕</button>`;
+    container.appendChild(div);
+  }
+
+  function updateRubricTotal() {
+    const inputs = document.querySelectorAll('.rubric-score-input');
+    let total = 0;
+    inputs.forEach(i => total += Number(i.value) || 0);
+    const el = document.getElementById('rubric-total-score');
+    if (el) el.textContent = total;
+  }
+
+  // Student selection
+  function selectStudent(el, name, score, type) {
+    document.querySelectorAll('.student-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('current-student-name').textContent = name;
+
+    const gradedBlock = document.getElementById('block-graded');
+    const pendingBlock = document.getElementById('block-pending');
+    const appealBlock = document.getElementById('block-appeal');
+
+    gradedBlock.style.display = 'none';
+    pendingBlock.style.display = 'none';
+    appealBlock.style.display = 'none';
+
+    if (type === 'graded') {
+      gradedBlock.style.display = 'block';
+      document.getElementById('current-score').textContent = score.split('/')[0];
+    } else if (type === 'pending') {
+      pendingBlock.style.display = 'block';
+      document.getElementById('current-score').textContent = '—';
+    } else if (type === 'appeal') {
+      appealBlock.style.display = 'block';
+      document.getElementById('current-score').textContent = score.split('/')[0];
+    }
+  }
+
+  // Score selection
+  const rubricScores = { rubric1: 4, rubric2: 2, rubric3: 3 };
+  function selectScore(el, rubric, score) {
+    const selector = document.getElementById(rubric + '-selector');
+    selector.querySelectorAll('.score-option').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    rubricScores[rubric] = score;
+    updateGradingSubtotal();
+  }
+
+  function updateGradingSubtotal() {
+    const total = Object.values(rubricScores).reduce((a, b) => a + b, 0);
+    const el = document.getElementById('grading-subtotal');
+    if (el) el.textContent = total;
+  }
+
+  function giveFullScore() {
+    ['rubric1','rubric2','rubric3'].forEach(r => {
+      const selector = document.getElementById(r + '-selector');
+      const btns = selector.querySelectorAll('.score-option');
+      btns.forEach(b => b.classList.remove('selected'));
+      btns[btns.length - 1].classList.add('selected');
+    });
+    rubricScores.rubric1 = 4; rubricScores.rubric2 = 3; rubricScores.rubric3 = 3;
+    updateGradingSubtotal();
+    showToast('✓ 已给满分');
+  }
+
+  function giveZeroScore() {
+    ['rubric1','rubric2','rubric3'].forEach(r => {
+      const selector = document.getElementById(r + '-selector');
+      const btns = selector.querySelectorAll('.score-option');
+      btns.forEach(b => b.classList.remove('selected'));
+      btns[0].classList.add('selected');
+    });
+    rubricScores.rubric1 = 0; rubricScores.rubric2 = 0; rubricScores.rubric3 = 0;
+    updateGradingSubtotal();
+    showToast('已给0分');
+  }
+
+  function regrade() {
+    document.getElementById('block-graded').style.display = 'none';
+    document.getElementById('block-pending').style.display = 'block';
+    showToast('进入重新批改模式');
+  }
+
+  function submitGrading() {
+    const total = Object.values(rubricScores).reduce((a, b) => a + b, 0);
+    document.getElementById('current-score').textContent = 75 + total;
+    document.getElementById('block-pending').style.display = 'none';
+    document.getElementById('block-graded').style.display = 'block';
+    const badge = document.getElementById('pending-count');
+    const curr = parseInt(badge.textContent);
+    if (curr > 1) badge.textContent = curr - 1;
+    else badge.style.display = 'none';
+    showToast('✓ 批改已提交');
+  }
+
+  function approveAppeal() {
+    const newScore = document.getElementById('appeal-new-score').value;
+    document.getElementById('current-score').textContent = newScore;
+    const badge = document.getElementById('pending-count');
+    badge.textContent = parseInt(badge.textContent) - 1;
+    showToast('✓ 申诉已通过，分数已更新为 ' + newScore + ' 分');
+  }
+
+  function rejectAppeal() {
+    showToast('申诉已驳回');
+  }
+
+  function prevStudent() {
+    showToast('上一题');
+  }
+</script>
+</body>
+</html>
