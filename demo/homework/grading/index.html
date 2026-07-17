@@ -503,18 +503,18 @@
 <div class="nav">
   <div class="nav-logo">教学助手</div>
   <div class="nav-tabs">
-    <div class="nav-tab active" onclick="switchTab('config')">出卷配置</div>
-    <div class="nav-tab" onclick="switchTab('homework')">作业任务</div>
-    <div class="nav-tab" onclick="switchTab('grading')">老师批改 <span class="nav-badge" id="pending-count">4</span></div>
-    <div class="nav-tab" onclick="switchTab('analysis')">成绩分析</div>
+    <div class="nav-tab active" onclick="switchTab('homework')">作业任务</div>
     <div class="nav-tab" onclick="switchTab('student')">学生端效果</div>
+    <div class="nav-tab" onclick="switchTab('grading')">老师批改 <span class="nav-badge" id="pending-count">4</span></div>
+    <div class="nav-tab" onclick="switchTab('config')">出卷配置 <span style="font-size:11px;color:#aaa;font-weight:400;">草稿</span></div>
+    <div class="nav-tab" onclick="switchTab('analysis')">成绩分析 <span style="font-size:11px;color:#aaa;font-weight:400;">草稿</span></div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
      PANEL 4：作业任务（老师端）
 ═══════════════════════════════════════════ -->
-<div class="panel" id="panel-homework">
+<div class="panel active" id="panel-homework">
   <div class="hw-page">
     <div class="hw-page-header">
       <div class="hw-page-title">作业任务</div>
@@ -902,7 +902,7 @@
 <!-- ═══════════════════════════════════════════
      PANEL 1：出卷分值配置
 ═══════════════════════════════════════════ -->
-<div class="panel active" id="panel-config">
+<div class="panel" id="panel-config">
   <div class="score-header">
     <div>
       <div style="font-size:13px;opacity:0.8;margin-bottom:4px;">高二数学 · 第3次周测</div>
