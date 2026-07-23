@@ -557,8 +557,8 @@
             <div class="hw-stat-val" style="color:#f59e0b;">2</div>
           </div>
           <div class="hw-stat-item">
-            <div class="hw-stat-label">班级平均分</div>
-            <div class="hw-stat-val" style="color:#0ea5e9;">68<span style="font-size:12px;color:#9ca3af;font-weight:400;">/100</span></div>
+            <div class="hw-stat-label">平均分</div>
+            <div class="hw-stat-val" style="color:#0ea5e9;">71.2<span style="font-size:12px;color:#9ca3af;font-weight:400;">/100</span></div>
           </div>
         </div>
       </div>
@@ -586,10 +586,6 @@
             <div class="hw-stat-label">待批改</div>
             <div class="hw-stat-val">0</div>
           </div>
-          <div class="hw-stat-item">
-            <div class="hw-stat-label">班级平均分</div>
-            <div class="hw-stat-val" style="color:#9ca3af;">—</div>
-          </div>
         </div>
       </div>
 
@@ -616,10 +612,6 @@
             <div class="hw-stat-label">待批改</div>
             <div class="hw-stat-val">0</div>
           </div>
-          <div class="hw-stat-item">
-            <div class="hw-stat-label">班级平均分</div>
-            <div class="hw-stat-val" style="color:#9ca3af;">—</div>
-          </div>
         </div>
       </div>
 
@@ -645,10 +637,6 @@
           <div class="hw-stat-item">
             <div class="hw-stat-label">待批改</div>
             <div class="hw-stat-val">0</div>
-          </div>
-          <div class="hw-stat-item">
-            <div class="hw-stat-label">班级平均分</div>
-            <div class="hw-stat-val" style="color:#0ea5e9;">82<span style="font-size:12px;color:#9ca3af;font-weight:400;">/100</span></div>
           </div>
         </div>
       </div>
@@ -749,8 +737,8 @@
           <!-- 1. 单选 -->
           <tr data-num="1" data-correct="80" data-rate="80" data-avg="1.6">
             <td><strong>1</strong></td>
-            <td><span class="tag tag-blue">单选</span></td>
-            <td><span class="rate-chip rate-high">80%</span></td>
+            <td><span class="tag tag-gray">单选</span></td>
+            <td><span class="rate-chip" style="background:#f3f4f6;color:#374151;">80%</span></td>
             <td><span class="rate-chip rate-high">80%</span></td>
             <td>1.6<span class="avg-denom">/2分</span></td>
             <td><button class="link-btn">详情</button></td>
@@ -759,8 +747,8 @@
           <!-- 2. 多选 -->
           <tr data-num="2" data-correct="25" data-rate="68" data-avg="2.7">
             <td><strong>2</strong></td>
-            <td><span class="tag tag-orange">多选</span></td>
-            <td><span class="rate-chip rate-low">25%</span></td>
+            <td><span class="tag tag-gray">多选</span></td>
+            <td><span class="rate-chip" style="background:#f3f4f6;color:#374151;">25%</span></td>
             <td><span class="rate-chip rate-mid">68%</span></td>
             <td>2.7<span class="avg-denom">/4分</span></td>
             <td><button class="link-btn">详情</button></td>
@@ -769,47 +757,50 @@
           <!-- 3. 解答（主观） -->
           <tr data-num="3" data-correct="20" data-rate="48" data-avg="4.8">
             <td><strong>3</strong></td>
-            <td><span class="tag tag-purple">解答</span></td>
-            <td><span class="rate-chip rate-low">20%</span></td>
+            <td><span class="tag tag-gray">解答</span></td>
+            <td><span class="rate-chip" style="background:#f3f4f6;color:#374151;">20%</span></td>
             <td><span class="rate-chip rate-low">48%</span></td>
             <td>4.8<span class="avg-denom">/10分</span></td>
             <td><button class="link-btn">详情</button></td>
           </tr>
 
-          <!-- 4. 多空填空（popover 下钻，仅正确率） -->
+          <!-- 4. 多空填空（整题正确率 + popover 下钻） -->
           <tr data-num="4" data-correct="-" data-rate="61" data-avg="7.3" id="row-4">
             <td><strong>4</strong></td>
-            <td><span class="tag" style="background:#e0f2fe;color:#0369a1;">多空填空</span></td>
-            <td>
-              <button class="expand-row-btn" onclick="showDrillPopover(this,'q4')">＋ 展开</button>
+            <td><span class="tag tag-gray">多空填空</span></td>
+            <td style="white-space:nowrap;">
+              <span class="rate-chip" style="background:#f3f4f6;color:#374151;">67%</span>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q4')" style="margin-left:4px;">展开</button>
             </td>
             <td><span class="rate-chip rate-mid">61%</span></td>
             <td>7.3<span class="avg-denom">/12分</span></td>
             <td><button class="link-btn">详情</button></td>
           </tr>
 
-          <!-- 5. 完型填空（popover 下钻，仅正确率） -->
+          <!-- 5. 完型填空（整题正确率 + popover 下钻） -->
           <tr data-num="5" data-correct="-" data-rate="55" data-avg="8.3" id="row-5">
             <td><strong>5</strong></td>
-            <td><span class="tag" style="background:#fce7f3;color:#9d174d;">完型填空</span></td>
-            <td>
-              <button class="expand-row-btn" onclick="showDrillPopover(this,'q5')">＋ 展开</button>
+            <td><span class="tag tag-gray">完型填空</span></td>
+            <td style="white-space:nowrap;">
+              <span class="rate-chip" style="background:#f3f4f6;color:#374151;">53%</span>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q5')" style="margin-left:4px;">展开</button>
             </td>
             <td><span class="rate-chip rate-mid">55%</span></td>
             <td>8.3<span class="avg-denom">/15分</span></td>
             <td><button class="link-btn">详情</button></td>
           </tr>
 
-          <!-- 6. 复合题（正确率/得分率分别展开） -->
+          <!-- 6. 复合题（整题正确率 + 展开；得分率 + 展开） -->
           <tr data-num="6" data-correct="-" data-rate="46" data-avg="9.2" id="row-6">
             <td><strong>6</strong></td>
-            <td><span class="tag" style="background:#f3e8ff;color:#7e22ce;">复合题</span></td>
-            <td>
-              <button class="expand-row-btn" onclick="showDrillPopover(this,'q6-correct')">＋ 展开</button>
+            <td><span class="tag tag-gray">复合题</span></td>
+            <td style="white-space:nowrap;">
+              <span class="rate-chip" style="background:#f3f4f6;color:#374151;">20%</span>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q6-correct')" style="margin-left:4px;">展开</button>
             </td>
-            <td>
+            <td style="white-space:nowrap;">
               <span class="rate-chip rate-low">46%</span>
-              <button class="expand-row-btn" onclick="showDrillPopover(this,'q6-rate')" style="margin-left:6px;">＋</button>
+              <button class="expand-row-btn" onclick="showDrillPopover(this,'q6-rate')" style="margin-left:4px;">展开</button>
             </td>
             <td>9.2<span class="avg-denom">/20分</span></td>
             <td><button class="link-btn">详情</button></td>
@@ -829,7 +820,19 @@
               提交情况 <span class="sort-icon" id="sort-submit">↕</span>
             </th>
             <th class="sortable" onclick="sortStudentBy('correct')" style="cursor:pointer;white-space:nowrap;">
-              整题正确率 <span class="sort-icon" id="sort-scorrect">↕</span>
+              整题正确率
+              <span class="th-tooltip-wrap">
+                <span class="th-tooltip-icon">?</span>
+                <span class="th-tooltip-box">整题全部答对才计入正确</span>
+              </span>
+              <span class="sort-icon" id="sort-scorrect">↕</span>
+            </th>
+            <th style="white-space:nowrap;">
+              小题正确率
+              <span class="th-tooltip-wrap">
+                <span class="th-tooltip-icon">?</span>
+                <span class="th-tooltip-box">多空填空/完型填空/复合题各小空/小问的正确率</span>
+              </span>
             </th>
             <th class="sortable" onclick="sortStudentBy('score')" style="cursor:pointer;white-space:nowrap;">
               得分 <span class="sort-icon" id="sort-score">↕</span>
@@ -845,11 +848,25 @@
             <td><span style="color:#9ca3af;">—</span></td>
             <td><span style="color:#9ca3af;">—</span></td>
             <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
             <td>—</td>
+          </tr>
+          <tr data-submit-order="0" data-submit-time="0" data-correct="-1" data-score="-1">
+            <td><strong>yj003</strong></td>
+            <td>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#dc2626;font-weight:500;">↩ 已打回</span>
+              <span style="font-size:12px;color:#9ca3af;margin-left:4px;">需重新提交</span>
+            </td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
+            <td><button class="link-btn">查看详情</button></td>
           </tr>
           <tr data-submit-order="0" data-submit-time="0" data-correct="-1" data-score="-1">
             <td><strong>高一学生</strong></td>
             <td><span style="color:#9ca3af;font-size:13px;">未提交</span></td>
+            <td><span style="color:#9ca3af;">—</span></td>
             <td><span style="color:#9ca3af;">—</span></td>
             <td><span style="color:#9ca3af;">—</span></td>
             <td><span style="color:#9ca3af;">—</span></td>
@@ -861,7 +878,8 @@
               <span class="tag" style="background:#fef3c7;color:#b45309;font-size:12px;padding:2px 8px;">补交</span>
               <span style="font-size:12px;color:#9ca3af;margin-left:4px;">42min</span>
             </td>
-            <td><span class="rate-chip rate-low">25%</span> <span style="font-size:12px;color:#6b7280;">1/8题</span></td>
+            <td><span style="font-size:13px;color:#374151;font-weight:600;">25%</span> <span style="font-size:12px;color:#6b7280;">1/8题</span></td>
+            <td><span style="font-size:13px;color:#374151;font-weight:600;">38%</span> <span style="font-size:12px;color:#6b7280;">9/24空</span></td>
             <td><span style="font-size:14px;font-weight:600;">—</span><span class="avg-denom">/100分</span></td>
             <td><span class="pending-badge">⚑ 6题待批改</span></td>
             <td><button class="link-btn">查看详情</button></td>
@@ -872,7 +890,8 @@
               <span class="done-badge">✓ 按时提交</span>
               <span style="font-size:12px;color:#9ca3af;margin-left:4px;">35min</span>
             </td>
-            <td><span class="rate-chip rate-mid">50%</span> <span style="font-size:12px;color:#6b7280;">4/8题</span></td>
+            <td><span style="font-size:13px;color:#374151;font-weight:600;">50%</span> <span style="font-size:12px;color:#6b7280;">4/8题</span></td>
+            <td><span style="font-size:13px;color:#374151;font-weight:600;">54%</span> <span style="font-size:12px;color:#6b7280;">13/24空</span></td>
             <td><span style="font-size:14px;font-weight:600;">—</span><span class="avg-denom">/100分</span></td>
             <td><span class="pending-badge">⚑ 6题待批改</span></td>
             <td><button class="link-btn">查看详情</button></td>
@@ -883,7 +902,8 @@
               <span class="done-badge">✓ 按时提交</span>
               <span style="font-size:12px;color:#9ca3af;margin-left:4px;">28min</span>
             </td>
-            <td><span class="rate-chip rate-high">75%</span> <span style="font-size:12px;color:#6b7280;">6/8题</span></td>
+            <td><span style="font-size:13px;color:#374151;font-weight:600;">75%</span> <span style="font-size:12px;color:#6b7280;">6/8题</span></td>
+            <td><span style="font-size:13px;color:#374151;font-weight:600;">79%</span> <span style="font-size:12px;color:#6b7280;">19/24空</span></td>
             <td><strong style="font-size:15px;">78</strong><span class="avg-denom">/100分</span></td>
             <td><span style="color:#9ca3af;font-size:13px;">—</span></td>
             <td><button class="link-btn">查看详情</button></td>
@@ -2580,7 +2600,7 @@
       type: 'rate-score',
       items: [
         {
-          label: '(1)', rate: '59%', rateClass: 'rate-mid', avg: null, full: null,
+          label: '(1)', rate: '59%', rateClass: 'rate-mid', avg: '4', full: '7',
           children: [
             { label: '①', rate: '68%', rateClass: 'rate-mid', avg: '2.7', full: '4' },
             { label: '②', rate: '50%', rateClass: 'rate-mid', avg: '1.5', full: '3' },
@@ -2588,7 +2608,7 @@
         },
         { label: '(2)', rate: '55%', rateClass: 'rate-mid', avg: '3.3', full: '6' },
         {
-          label: '(3)', rate: '28%', rateClass: 'rate-low', avg: null, full: null,
+          label: '(3)', rate: '28%', rateClass: 'rate-low', avg: '2.8', full: '10',
           children: [
             { label: '①', rate: '40%', rateClass: 'rate-low', avg: '2.0', full: '5' },
             { label: '②', rate: '15%', rateClass: 'rate-low', avg: '0.8', full: '5' },
@@ -2614,7 +2634,7 @@
     let rowsHtml = '';
 
     if (type === 'correct-tree') {
-      // 递归渲染，最多3层：小问→子问→空
+      // 递归渲染，最多3层：小问→子问→空；正确率统一灰色不区分区间
       function renderCorrectNode(node, depth, isLastAtThisLevel) {
         const indent = depth * 14;
         const bg = depth > 0 ? ';background:#f8fafc' : '';
@@ -2623,7 +2643,7 @@
         const prefix = depth === 1 ? '┣ ' : depth === 2 ? '┗ ' : '';
         let html = `<div class="drill-popover-row" style="grid-column:1/-1;padding-left:${8 + indent}px${bg}${isLastAtThisLevel && (!node.children || !node.children.length) ? ';border-bottom:none' : ''}">
           <span class="label" style="${labelStyle}">${prefix}${node.label}</span>
-          <span class="vals"><span class="rate-chip ${node.correctClass}" style="${chipStyle}">${node.correct}</span></span>
+          <span class="vals"><span class="rate-chip" style="background:#f3f4f6;color:#374151;${chipStyle}">${node.correct}</span></span>
         </div>`;
         if (node.children) {
           node.children.forEach((child, ci) => {
@@ -2636,7 +2656,7 @@
         rowsHtml += renderCorrectNode(item, 0, idx === data.items.length - 1);
       });
     } else if (type === 'rate-score') {
-      // 2层：小问→子问，每行显示得分率+平均分
+      // 2层：小问→子问，每行显示得分率（彩色）+分值
       function renderRateNode(node, depth, isLastAtThisLevel) {
         const indent = depth * 14;
         const bg = depth > 0 ? ';background:#f8fafc' : '';
@@ -2662,7 +2682,7 @@
         rowsHtml += renderRateNode(item, 0, idx === data.items.length - 1);
       });
     } else if (cols2) {
-      // correct-only 多空，2列 grid
+      // correct-only 多空，2列 grid；正确率统一灰色
       const half = Math.ceil(data.items.length / 2);
       const col1 = data.items.slice(0, half);
       const col2 = data.items.slice(half);
@@ -2670,15 +2690,15 @@
       for (let i = 0; i < maxLen; i++) {
         const isLastRow = (i === maxLen - 1);
         const makeCell = (item) => item
-          ? `<div class="drill-popover-row"${isLastRow ? ' style="border-bottom:none"' : ''}><span class="label">${item.label}</span><span class="vals"><span class="rate-chip ${item.correctClass}">${item.correct}</span></span></div>`
+          ? `<div class="drill-popover-row"${isLastRow ? ' style="border-bottom:none"' : ''}><span class="label">${item.label}</span><span class="vals"><span class="rate-chip" style="background:#f3f4f6;color:#374151;">${item.correct}</span></span></div>`
           : `<div></div>`;
         rowsHtml += `<div>${makeCell(col1[i])}</div><div>${makeCell(col2[i])}</div>`;
       }
     } else {
-      // correct-only 少量空，单列
+      // correct-only 少量空，单列；正确率统一灰色
       rowsHtml = data.items.map((item, idx) => {
         const isLast = idx === data.items.length - 1;
-        return `<div class="drill-popover-row" style="grid-column:1/-1${isLast ? ';border-bottom:none' : ''}"><span class="label">${item.label}</span><span class="vals"><span class="rate-chip ${item.correctClass}">${item.correct}</span></span></div>`;
+        return `<div class="drill-popover-row" style="grid-column:1/-1${isLast ? ';border-bottom:none' : ''}"><span class="label">${item.label}</span><span class="vals"><span class="rate-chip" style="background:#f3f4f6;color:#374151;">${item.correct}</span></span></div>`;
       }).join('');
     }
 
