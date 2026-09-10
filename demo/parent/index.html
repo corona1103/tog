@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>toG 家长端 · 学习反馈 Demo</title>
+<style>
+:root {
+  --ink: #183044;
+  --muted: #7c8d9d;
+  --line: #e8eef2;
+  --paper: #f4f8f8;
+  --card: #ffffff;
+  --brand: #13a38e;
+  --brand-dark: #087e70;
+  --brand-soft: #e4f6f1;
+  --blue: #4489da;
+  --blue-soft: #eaf3ff;
+  --orange: #f2a45e;
+  --orange-soft: #fff2e3;
+  --purple: #8c75d8;
+  --purple-soft: #f2effc;
+  --danger: #db806d;
+  --shadow: 0 12px 30px rgba(25, 55, 72, .07);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #edf3f2 0%, #f7f7f2 100%);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+button, input { font: inherit; }
+button { border: 0; cursor: pointer; }
+
+.demo-shell { min-height: 100vh; display: flex; justify-content: center; padding: 28px 16px; }
+.phone {
+  position: relative;
+  width: min(100%, 408px);
+  min-height: 812px;
+  max-height: 920px;
+  overflow: hidden;
+  background: var(--paper);
+  border: 8px solid #263945;
+  border-radius: 38px;
+  box-shadow: 0 28px 70px rgba(23, 49, 65, .2);
+}
+.phone::before { content: ''; position: absolute; z-index: 20; top: 0; left: 50%; transform: translateX(-50%); width: 112px; height: 24px; background: #263945; border-radius: 0 0 16px 16px; }
+.statusbar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 10px 18px 0; color: #667987; font-size: 11px; font-weight: 700; }
+.status-icons { display: flex; gap: 7px; align-items: center; }
+.signal { width: 14px; height: 9px; display: inline-flex; align-items: flex-end; gap: 1px; }
+.signal i { width: 2px; background: currentColor; border-radius: 1px; }
+.signal i:nth-child(1) { height: 3px; }.signal i:nth-child(2) { height: 5px; }.signal i:nth-child(3) { height: 7px; }.signal i:nth-child(4) { height: 9px; }
+.battery { width: 18px; height: 9px; border: 1px solid currentColor; border-radius: 3px; position: relative; }.battery::after { content: ''; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: currentColor; border-radius: 0 1px 1px 0; }.battery span { display: block; width: 12px; height: 5px; margin: 1px; border-radius: 2px; background: var(--brand); }
+
+.app { height: calc(100vh - 56px); min-height: 770px; max-height: 878px; overflow: hidden; position: relative; }
+.view { height: 100%; overflow-y: auto; padding: 16px 17px 94px; scrollbar-width: none; }
+.view::-webkit-scrollbar { display: none; }
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 17px; }
+.brand-lockup { display: flex; align-items: center; gap: 9px; }
+.brand-mark { width: 30px; height: 30px; background: linear-gradient(135deg, var(--brand), #5dc7b1); color: #fff; border-radius: 11px; display: grid; place-items: center; font-size: 14px; font-weight: 800; box-shadow: 0 5px 10px rgba(19, 163, 142, .2); }
+.topbar h1 { margin: 0; font-size: 19px; letter-spacing: -.5px; }
+.topbar-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.icon-btn { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; background: #fff; color: #7c8d9d; box-shadow: 0 3px 12px rgba(30, 55, 68, .05); position: relative; }
+.icon-btn .dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); border: 2px solid #fff; }
+.eyebrow { color: var(--brand-dark); font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.title { margin: 5px 0 0; font-size: 24px; letter-spacing: -.7px; }
+.subtle { color: var(--muted); font-size: 12px; line-height: 1.65; }
+.muted { color: var(--muted); }
+
+.student-card { margin: 18px 0 15px; padding: 17px; border-radius: 22px; background: linear-gradient(135deg, #173e4c 0%, #236a70 100%); color: #fff; position: relative; overflow: hidden; box-shadow: 0 16px 24px rgba(24, 74, 82, .18); }
+.student-card::after { content: ''; position: absolute; width: 160px; height: 160px; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; right: -54px; top: -60px; box-shadow: 0 0 0 20px rgba(255,255,255,.04), 0 0 0 42px rgba(255,255,255,.03); }
+.student-row { display: flex; align-items: center; gap: 11px; position: relative; z-index: 1; }
+.avatar { width: 43px; height: 43px; border-radius: 15px; background: linear-gradient(145deg, #ffd6ad, #e99d80); display: grid; place-items: center; color: #8d4e48; font-weight: 800; font-size: 17px; }
+.student-name { font-size: 17px; font-weight: 800; }.student-school { margin-top: 3px; font-size: 11px; color: rgba(255,255,255,.7); }
+.student-card .updated { position: relative; z-index: 1; margin-top: 18px; display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,.65); }.updated strong { color: #d3f5e9; font-weight: 600; }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 21px 1px 10px; }.section-head h2 { margin: 0; font-size: 16px; letter-spacing: -.3px; }.section-head button { background: transparent; color: var(--brand-dark); font-size: 12px; padding: 4px 0; }
+.card { background: var(--card); border: 1px solid rgba(221, 232, 233, .7); border-radius: 18px; box-shadow: var(--shadow); }
+.overview { padding: 16px; }.overview-head { display: flex; align-items: center; justify-content: space-between; }.overview-head strong { font-size: 14px; }.period-chip { background: var(--brand-soft); color: var(--brand-dark); padding: 5px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; }
+.metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; margin-top: 15px; }.metric { padding: 12px; background: #f8fbfa; border-radius: 14px; min-height: 78px; }.metric-label { color: var(--muted); font-size: 11px; }.metric-value { display: flex; align-items: baseline; gap: 3px; margin-top: 6px; font-size: 23px; font-weight: 800; letter-spacing: -.8px; }.metric-unit { font-size: 10px; color: var(--muted); font-weight: 600; }.metric-diff { font-size: 10px; margin-top: 4px; }.up { color: var(--brand-dark); }.down { color: var(--danger); }.neutral { color: var(--muted); }
+
+.task-card { padding: 15px; }.task-card .card-title, .content-card .card-title { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 800; }.count-pill { padding: 4px 8px; color: var(--brand-dark); background: var(--brand-soft); border-radius: 999px; font-size: 10px; }.progress-row { display: flex; align-items: center; gap: 10px; margin: 15px 0 7px; }.progress-track { height: 8px; flex: 1; background: #edf2f1; border-radius: 8px; overflow: hidden; }.progress-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--brand), #69cab5); }.progress-value { font-size: 12px; font-weight: 800; }.card-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }.card-link { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--brand-dark); font-size: 11px; font-weight: 700; }
+
+.dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }.content-card { padding: 14px; min-height: 142px; }.content-card.ai { background: linear-gradient(145deg, #fff, #fbf9ff); }.content-card .card-title { align-items: flex-start; gap: 8px; }.mini-icon { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 10px; background: var(--orange-soft); color: #d98b3e; font-size: 14px; flex-shrink: 0; }.ai .mini-icon { background: var(--purple-soft); color: var(--purple); }.card-title-text { flex: 1; }.card-title-text small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 500; }.big-number { margin-top: 17px; font-size: 22px; font-weight: 800; }.big-number span { font-size: 10px; color: var(--muted); font-weight: 600; }.mini-caption { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.5; }.content-card button { margin-top: 11px; background: transparent; color: var(--brand-dark); font-size: 10px; font-weight: 700; padding: 0; }
+
+.report-banner { display: flex; align-items: center; gap: 12px; padding: 14px; margin-top: 14px; background: linear-gradient(135deg, #e6f7f2, #f8fcf9); border: 1px solid #ccece2; border-radius: 17px; }.report-symbol { width: 35px; height: 35px; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 17px; box-shadow: 0 5px 12px rgba(19, 163, 142, .1); }.report-copy { flex: 1; }.report-copy strong { display: block; font-size: 12px; }.report-copy span { display: block; margin-top: 3px; font-size: 10px; color: var(--muted); }.report-banner button { background: var(--brand); color: #fff; border-radius: 10px; padding: 8px 10px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+
+.bottom-nav { position: absolute; z-index: 8; bottom: 0; left: 0; right: 0; height: 76px; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255,255,255,.94); border-top: 1px solid rgba(224,234,233,.8); backdrop-filter: blur(14px); padding: 9px 8px 7px; }.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; color: #9aabb5; font-size: 10px; font-weight: 700; }.nav-item .nav-icon { width: 31px; height: 27px; display: grid; place-items: center; border-radius: 11px; font-size: 17px; }.nav-item.active { color: var(--brand-dark); }.nav-item.active .nav-icon { background: var(--brand-soft); }
+
+.segmented { display: flex; padding: 4px; background: #eaf0ef; border-radius: 12px; }.segmented button { flex: 1; padding: 8px 4px; background: transparent; color: var(--muted); border-radius: 9px; font-size: 11px; font-weight: 700; }.segmented button.active { background: #fff; color: var(--brand-dark); box-shadow: 0 3px 8px rgba(31,65,72,.08); }
+.trend-card { padding: 15px; margin-top: 13px; }.trend-card h3 { margin: 0; font-size: 14px; }.trend-caption { margin-top: 4px; font-size: 10px; color: var(--muted); }.bars { height: 125px; display: flex; align-items: flex-end; gap: 12px; padding: 20px 8px 0; border-bottom: 1px solid var(--line); }.bar-col { height: 100%; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }.bar { width: 20px; min-height: 10px; border-radius: 7px 7px 3px 3px; background: linear-gradient(180deg, #61cbb6, #13a38e); }.bar-label { font-size: 9px; color: var(--muted); }.trend-foot { display: flex; justify-content: space-between; padding-top: 10px; font-size: 10px; color: var(--muted); }.trend-foot strong { color: var(--brand-dark); }
+.tab-row { display: flex; gap: 19px; margin-top: 18px; border-bottom: 1px solid var(--line); }.tab { padding: 0 0 10px; color: var(--muted); font-size: 13px; font-weight: 700; background: transparent; border-bottom: 2px solid transparent; }.tab.active { color: var(--brand-dark); border-color: var(--brand); }
+.list { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }.list-item { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: 0 4px 16px rgba(33, 62, 74, .04); }.list-row { display: flex; align-items: center; gap: 10px; }.subject-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }.subject-dot.math { background: var(--purple); }.subject-dot.eng { background: var(--orange); }.list-title { flex: 1; font-size: 13px; font-weight: 800; }.tag { padding: 4px 7px; border-radius: 7px; font-size: 9px; font-weight: 800; }.tag.done { background: var(--brand-soft); color: var(--brand-dark); }.tag.pending { background: var(--orange-soft); color: #ba7732; }.list-desc { margin: 9px 0 0 19px; color: var(--muted); font-size: 10px; }.list-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f3f3; color: var(--muted); font-size: 10px; }.list-bottom strong { color: var(--ink); font-size: 12px; }.list-item.clickable { cursor: pointer; transition: transform .18s, box-shadow .18s; }.list-item.clickable:active { transform: scale(.985); }.self-card { padding: 15px; }.self-card + .self-card { margin-top: 10px; }.self-card h3 { margin: 0; font-size: 13px; }.self-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 13px; }.self-stat { background: #f7faf9; border-radius: 11px; padding: 10px 6px; text-align: center; }.self-stat b { display: block; font-size: 16px; }.self-stat span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }.knowledge { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }.knowledge span { padding: 6px 8px; border-radius: 8px; background: var(--blue-soft); color: #4a7bbc; font-size: 10px; }
+
+.report-head { padding: 17px; background: linear-gradient(135deg, #17444f, #29776e); border-radius: 21px; color: #fff; box-shadow: 0 16px 24px rgba(24, 74, 82, .16); }.report-head h2 { margin: 7px 0 5px; font-size: 21px; letter-spacing: -.5px; }.report-head p { margin: 0; color: rgba(255,255,255,.7); font-size: 11px; }.report-head .report-period { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-size: 10px; color: rgba(255,255,255,.7); }.report-head strong { color: #d6f8ec; }.report-quote { margin-top: 15px; padding: 13px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12); border-radius: 13px; font-size: 12px; line-height: 1.6; color: #f1fffb; }.report-section { padding: 15px; margin-top: 12px; }.report-section-title { display: flex; align-items: center; justify-content: space-between; }.report-section-title h3 { margin: 0; font-size: 14px; }.report-section-title span { color: var(--brand-dark); font-size: 11px; font-weight: 800; }.report-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 13px; }.report-metric { background: #f7faf9; border-radius: 11px; padding: 10px 5px; text-align: center; }.report-metric b { display: block; font-size: 18px; }.report-metric span { display: block; margin-top: 3px; font-size: 9px; color: var(--muted); }.report-note { margin-top: 12px; font-size: 10px; line-height: 1.65; color: var(--muted); }.highlight { display: flex; gap: 8px; margin-top: 11px; padding: 11px; background: #fbfcf8; border-radius: 11px; font-size: 11px; line-height: 1.55; }.highlight i { color: var(--brand); font-style: normal; }.data-note { margin-top: 15px; padding: 10px 12px; border-radius: 11px; background: #eef4f4; color: var(--muted); font-size: 10px; line-height: 1.55; }
+
+.profile-card { padding: 17px; }.profile-main { display: flex; gap: 11px; align-items: center; }.profile-list { margin-top: 15px; border-top: 1px solid var(--line); }.profile-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--line); font-size: 12px; }.profile-row:last-child { border-bottom: 0; }.profile-row .left { display: flex; gap: 9px; align-items: center; }.profile-row .picon { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 9px; background: #f1f6f6; color: var(--brand-dark); }.chevron { color: #a9b7be; font-size: 16px; }.switch { width: 38px; height: 22px; border-radius: 14px; padding: 3px; background: #d5dfe0; transition: .2s; }.switch::after { content: ''; display: block; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.12); transition: .2s; }.switch.on { background: var(--brand); }.switch.on::after { transform: translateX(16px); }.bind-button { width: 100%; padding: 12px; margin-top: 13px; border-radius: 12px; background: var(--brand-soft); color: var(--brand-dark); font-size: 11px; font-weight: 800; }
+
+.drawer-mask { position: absolute; z-index: 15; inset: 0; background: rgba(21, 40, 50, .32); display: flex; align-items: flex-end; }.drawer { width: 100%; max-height: 80%; overflow-y: auto; padding: 12px 17px 25px; background: #fff; border-radius: 25px 25px 0 0; animation: rise .2s ease-out; }.drawer-grip { width: 38px; height: 4px; border-radius: 4px; background: #dbe3e5; margin: 0 auto 16px; }.drawer-head { display: flex; align-items: center; justify-content: space-between; }.drawer-head h2 { margin: 0; font-size: 17px; }.close { width: 29px; height: 29px; border-radius: 50%; background: #f1f5f5; color: var(--muted); }.drawer-content { margin-top: 16px; }.detail-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 11px; }.detail-row span { color: var(--muted); }.detail-row strong { font-size: 12px; }.wrong-box { margin-top: 13px; padding: 12px; border-radius: 13px; background: #fff8f3; color: #ac734d; font-size: 11px; line-height: 1.6; }.bind-panel { padding: 8px 2px 5px; }.bind-panel h2 { margin: 0; font-size: 19px; }.bind-panel p { margin: 8px 0 17px; }.bind-input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 12px; outline: 0; color: var(--ink); }.bind-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(19,163,142,.1); }.primary-btn { width: 100%; padding: 12px; margin-top: 12px; border-radius: 12px; color: #fff; background: var(--brand); font-size: 12px; font-weight: 800; }.secondary-btn { width: 100%; padding: 11px; margin-top: 8px; border-radius: 12px; color: var(--brand-dark); background: var(--brand-soft); font-size: 12px; font-weight: 800; }
+.toast { position: absolute; z-index: 30; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(10px); max-width: 80%; padding: 10px 14px; border-radius: 12px; color: #fff; background: rgba(21, 44, 54, .92); font-size: 11px; opacity: 0; pointer-events: none; transition: .25s; white-space: nowrap; }.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.fade { animation: fade .22s ease-out; } @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } } @keyframes rise { from { transform: translateY(100%); } to { transform: none; } }
+@media (max-width: 430px) { .demo-shell { padding: 0; }.phone { width: 100%; min-height: 100vh; max-height: none; border: 0; border-radius: 0; }.phone::before { display: none; }.app { height: calc(100vh - 34px); min-height: calc(100vh - 34px); max-height: none; } }
+</style>
+</head>
+<body>
+<main class="demo-shell">
+  <section class="phone" aria-label="toG 家长端交互原型">
+    <div class="statusbar"><span>9:41</span><span class="status-icons"><span>▰</span><span class="signal"><i></i><i></i><i></i><i></i></span><span class="battery"><span></span></span></span></div>
+    <div class="app" id="app"></div>
+  </section>
+</main>
+<script>
+const DATA = {
+  student: { name: '林知夏', className: '高一（2）班', school: '杭州实验学校 · 高一', updated: '09-10 08:00' },
+  home: { taskDone: 8, taskTotal: 10, completion: 80, completionDiff: '+10%', accuracy: 82, accuracyDiff: '+6%', selfQuestions: 126, selfDiff: '+34', video: 86, videoDiff: '+18 分钟', words: 178, wordsDiff: '+42', aiTasks: 6, aiDiff: '+2' },
+  term: { taskDone: 42, taskTotal: 50, completion: 84, completionDiff: '+4%', accuracy: 79, accuracyDiff: '+3%', selfQuestions: 468, selfDiff: '+92', video: 326, videoDiff: '+74 分钟', words: 612, wordsDiff: '+126', aiTasks: 22, aiDiff: '+8' },
+  tasks: [
+    { id: 1, subject: '语文', dot: '', type: '老师作业', title: '《劝学》课后练习', date: '9月9日 · 截止 23:00', status: '已完成', accuracy: '9/10', score: '90%', desc: '共 10 题 · 已批改 · 用时 18 分钟', wrong: '第 6 题：实词“假”的意义辨析；第 9 题：文意理解。' },
+    { id: 2, subject: '数学', dot: 'math', type: '靶向任务', title: '函数单调性巩固练习', date: '9月8日 · 截止 22:00', status: '已完成', accuracy: '14/16', score: '87.5%', desc: '共 16 题 · 已批改 · 覆盖 3 个知识点', wrong: '函数单调区间判断仍有 2 题出错，建议查看对应解析。' },
+    { id: 3, subject: '英语', dot: 'eng', type: '老师作业', title: 'Unit 2 词汇与阅读', date: '9月10日 · 截止 21:00', status: '待完成', accuracy: '—', score: '待提交', desc: '共 12 题 · 预计用时 20 分钟', wrong: '提交后将显示批改结果。' }
+  ],
+  knowledge: ['函数单调性 78%', '文言实词 86%', 'Unit 2 词汇 91%', '阅读理解 80%'],
+  weeks: [
+    { label: '8/17', value: 49 }, { label: '8/24', value: 63 }, { label: '8/31', value: 72 }, { label: '本周', value: 86 }
+  ]
+};
+
+let state = { view: 'home', range: 'week', learnTab: 'tasks', drawer: null, bindOpen: false, privacyOpen: false, reminderOn: false, toastTimer: null };
+
+function metric(label, value, unit, diff, tone = 'up') {
+  return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value}<span class="metric-unit">${unit || ''}</span></div><div class="metric-diff ${tone}">${diff}</div></div>`;
+}
+
+function topbar(title, sub, action = '') {
+  return `<div class="topbar"><div class="brand-lockup"><div class="brand-mark">to</div><div><h1>${title}</h1><div class="topbar-sub">${sub}</div></div></div>${action || '<button class="icon-btn" onclick="showToast(\'本周数据已同步\')" aria-label="数据同步状态">⌁</button>'}</div>`;
+}
+
+function homeView() {
+  const d = state.range === 'week' ? DATA.home : DATA.term;
+  return `<div class="view fade">
+    ${topbar('家长端', '看见孩子的每一步学习变化', '<button class="icon-btn" onclick="setView(\'report\')" aria-label="查看周报">▤<span class="dot"></span></button>')}
+    <div class="eyebrow">早上好，林妈妈</div><h2 class="title">这周，知夏学得怎么样？</h2>
+    <div class="student-card"><div class="student-row"><div class="avatar">知</div><div><div class="student-name">${DATA.student.name}</div><div class="student-school">${DATA.student.school} · ${DATA.student.className}</div></div></div><div class="updated"><span>本周数据已同步</span><strong>更新于 ${DATA.student.updated}</strong></div></div>
+    <div class="card overview"><div class="overview-head"><strong>本周学习概览</strong><span class="period-chip">9/1 — 9/7</span></div><div class="metric-grid">${metric('老师任务完成', `${d.taskDone}/${d.taskTotal}`, '项', `${d.completionDiff} 较上周`)}${metric('任务正确率', d.accuracy, '%', `${d.accuracyDiff} 较上周`)}${metric('自学题目', d.selfQuestions, '题', `${d.selfDiff} 题`)}${metric('AI 任务完成', d.aiTasks, '项', `${d.aiDiff} 较上周`)}</div></div>
+    <div class="section-head"><h2>学习记录</h2><button onclick="setView(\'learn\')">查看全部 ›</button></div>
+    <div class="card task-card"><div class="card-title"><span>老师作业 & 靶向任务</span><span class="count-pill">${d.taskDone}/${d.taskTotal} 已完成</span></div><div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:${d.completion}%"></div></div><span class="progress-value">${d.completion}%</span></div><div class="card-meta"><span>提交率</span><span>正确率 ${d.accuracy}%</span></div><div class="card-link" onclick="setView('learn')"><span>查看任务明细与错题</span><span>→</span></div></div>
+    <div class="section-head"><h2>自学 & AI 学习</h2><button onclick="openDrawer('ai')">查看核心内容 ›</button></div>
+    <div class="dual-grid"><div class="card content-card"><div class="card-title"><div class="mini-icon">✦</div><div class="card-title-text">自主学习<small>本周学习投入</small></div></div><div class="big-number">${d.video}<span> 分钟视频</span></div><div class="mini-caption">${d.selfQuestions} 道练习 · ${d.words} 个单词</div><button onclick="setView('learn'); state.learnTab='self'; render();">查看学习内容 →</button></div><div class="card content-card ai"><div class="card-title"><div class="mini-icon">✧</div><div class="card-title-text">AI 学习<small>任务与知识覆盖</small></div></div><div class="big-number">${d.aiTasks}<span> 项任务</span></div><div class="mini-caption">覆盖 6 个知识点 · 48 道练习</div><button onclick="openDrawer('ai')">查看规划摘要 →</button></div></div>
+    <div class="report-banner"><div class="report-symbol">☼</div><div class="report-copy"><strong>本周学习周报已生成</strong><span>每周一早上更新，和学生平板保持一致</span></div><button onclick="setView('report')">去看看</button></div>
+  </div>`;
+}
+
+function trendChart() {
+  return `<div class="card trend-card"><h3>个人学习趋势</h3><div class="trend-caption">任务完成量 · 只和知夏自己的上周比较</div><div class="bars">${DATA.weeks.map((w, i) => `<div class="bar-col"><div class="bar" style="height:${w.value}%" title="${w.value}%"></div><div class="bar-label">${w.label}</div></div>`).join('')}</div><div class="trend-foot"><span>近 4 周持续记录</span><strong>本周较上周 +14%</strong></div></div>`;
+}
+
+function taskList() {
+  return `<div class="list">${DATA.tasks.map(t => `<div class="list-item clickable" onclick="openDrawer('task', ${t.id})"><div class="list-row"><span class="subject-dot ${t.dot}"></span><span class="list-title">${t.title}</span><span class="tag ${t.status === '已完成' ? 'done' : 'pending'}">${t.status}</span></div><div class="list-desc">${t.subject} · ${t.type} · ${t.date}</div><div class="list-bottom"><span>${t.desc}</span><strong>${t.score}</strong></div></div>`).join('')}</div>`;
+}
+
+function selfLearning() {
+  return `<div class="list"><div class="card self-card"><h3>自主学习记录</h3><div class="self-grid"><div class="self-stat"><b>126</b><span>练习题</span></div><div class="self-stat"><b>86</b><span>视频分钟</span></div><div class="self-stat"><b>178</b><span>背词数量</span></div></div><div class="knowledge">${DATA.knowledge.map(k => `<span>${k}</span>`).join('')}</div><div class="card-link" onclick="openDrawer('self')"><span>查看本周核心学习内容</span><span>→</span></div></div><div class="card self-card"><h3>AI Tutor 学习记录</h3><div class="list-desc" style="margin-left:0;margin-top:8px">本周完成 6 项 AI 任务，覆盖 6 个知识点，完成 48 道个性化练习。</div><div class="knowledge"><span style="background:var(--purple-soft);color:var(--purple)">函数单调性</span><span style="background:var(--purple-soft);color:var(--purple)">文言实词</span><span style="background:var(--purple-soft);color:var(--purple)">阅读理解</span></div><div class="card-link" onclick="openDrawer('ai')"><span>查看规划摘要与练习结果</span><span>→</span></div></div></div>`;
+}
+
+function learnView() {
+  return `<div class="view fade">${topbar('学习记录', '完整记录，分层看懂')}
+    <div class="segmented"><button class="${state.range === 'week' ? 'active' : ''}" onclick="state.range='week'; render()">本周</button><button class="${state.range === 'term' ? 'active' : ''}" onclick="state.range='term'; render()">本学期</button></div>
+    ${trendChart()}
+    <div class="tab-row"><button class="tab ${state.learnTab === 'tasks' ? 'active' : ''}" onclick="state.learnTab='tasks'; render()">老师任务</button><button class="tab ${state.learnTab === 'self' ? 'active' : ''}" onclick="state.learnTab='self'; render()">自学 & AI</button></div>
+    ${state.learnTab === 'tasks' ? taskList() : selfLearning()}
+  </div>`;
+}
+
+function reportView() {
+  return `<div class="view fade">${topbar('学习周报', '每周一早上生成 · 与学生平板同口径', '<button class="icon-btn" onclick="showToast(\'这份周报已是最新版本\')" aria-label="刷新周报">↻</button>')}
+    <div class="report-head"><div class="eyebrow" style="color:#b8f0df">本周学习周报</div><h2>完成得很稳，继续保持自己的节奏</h2><p>这是一份只和自己比较的学习记录。</p><div class="report-period"><span>统计周期：9/1 — 9/7</span><strong>生成于 9/8 07:30</strong></div><div class="report-quote">知夏本周完成了 8 项老师任务，自学和 AI 练习都有持续记录。任务正确率较上周提升 6 个百分点。</div></div>
+    <div class="card report-section"><div class="report-section-title"><h3>老师任务</h3><span>较上周 ↑</span></div><div class="report-metrics"><div class="report-metric"><b>8/10</b><span>完成任务</span></div><div class="report-metric"><b>80%</b><span>提交率</span></div><div class="report-metric"><b>82%</b><span>正确率</span></div></div><div class="report-note">本周语文《劝学》、数学函数单调性任务已完成并批改；英语 Unit 2 任务待提交。</div></div>
+    <div class="card report-section"><div class="report-section-title"><h3>自学记录</h3><span>持续投入</span></div><div class="report-metrics"><div class="report-metric"><b>126</b><span>练习题</span></div><div class="report-metric"><b>86</b><span>视频分钟</span></div><div class="report-metric"><b>178</b><span>背词数量</span></div></div><div class="highlight"><i>✦</i><span>本周覆盖 4 个主要知识点，其中“Unit 2 词汇”掌握度 91%。</span></div></div>
+    <div class="card report-section"><div class="report-section-title"><h3>AI 学习</h3><span>6 项任务已完成</span></div><div class="report-note">AI Tutor 本周生成并完成 6 项学习任务，包含 48 道个性化练习，覆盖函数单调性、文言实词等 6 个知识点。</div><div class="highlight"><i>✧</i><span>这里展示的是可核验的任务完成、知识点覆盖和练习数量，不把 AI 规划建议当作确定结论。</span></div></div>
+    <div class="card report-section"><div class="report-section-title"><h3>本周亮点</h3><span>来自真实记录</span></div><div class="highlight"><i>✓</i><span>任务正确率较上周提升 6 个百分点，完成任务数较上周增加 2 项。</span></div><div class="highlight"><i>✓</i><span>自主学习记录比上周多完成 34 道练习，视频学习增加 18 分钟。</span></div></div>
+    <div class="data-note">数据来源于老师任务记录和学生平板学习记录，最多可能延迟约 20 分钟。详情数据更新时间：9/8 07:12。</div>
+  </div>`;
+}
+
+function profileView() {
+  return `<div class="view fade">${topbar('我的', '管理绑定与提醒设置')}
+    <div class="card profile-card"><div class="profile-main"><div class="avatar">知</div><div><div class="student-name" style="color:var(--ink)">${DATA.student.name}</div><div class="student-school" style="color:var(--muted)">${DATA.student.school} · ${DATA.student.className}</div></div></div><button class="bind-button" onclick="openBind()">重新绑定学生</button></div>
+    <div class="section-head"><h2>设置</h2></div><div class="card profile-card" style="padding-bottom:2px"><div class="profile-list" style="margin-top:0;border-top:0"><div class="profile-row"><div class="left"><span class="picon">☼</span><span>周报提醒</span></div><button class="switch ${state.reminderOn ? 'on' : ''}" onclick="toggleReminder()" aria-label="切换周报提醒"></button></div><div class="profile-row"><div class="left"><span class="picon">ⓘ</span><span>数据说明</span></div><button class="chevron" onclick="showToast('数据来自老师任务和学生平板学习记录')">›</button></div><div class="profile-row"><div class="left"><span class="picon">♡</span><span>隐私与授权</span></div><button class="chevron" onclick="state.privacyOpen=true; render()">›</button></div></div></div>
+    <div class="data-note">家长只可查看已绑定学生的数据。学习趋势采用个人环比，不展示班级排名或同学对比。</div>
+  </div>`;
+}
+
+function drawer() {
+  if (state.bindOpen) return `<div class="drawer-mask" onclick="if(event.target===this) closeDrawer()"><div class="drawer"><div class="drawer-grip"></div><div class="bind-panel"><h2>绑定孩子</h2><p class="subtle">请输入学校或老师提供的学生绑定码，绑定后即可查看学习数据。</p><input class="bind-input" id="bindInput" placeholder="例如：AIX-2026" aria-label="学生绑定码"><button class="primary-btn" onclick="submitBind()">确认绑定</button><button class="secondary-btn" onclick="closeDrawer()">先不绑定</button></div></div></div>`;
+  if (state.privacyOpen) return `<div class="drawer-mask" onclick="if(event.target===this) closeDrawer()"><div class="drawer"><div class="drawer-grip"></div><div class="drawer-head"><h2>隐私与授权</h2><button class="close" onclick="closeDrawer()">×</button></div><div class="drawer-content"><p class="subtle">家长端只展示已绑定学生的学习数据。数据用于学习记录、趋势分析和周报生成，不用于班级排名。</p><div class="detail-row"><span>数据范围</span><strong>已绑定学生</strong></div><div class="detail-row"><span>数据更新</span><strong>最多延迟约 20 分钟</strong></div><div class="detail-row"><span>周报提醒</span><strong>${state.reminderOn ? '已授权' : '未授权'}</strong></div><button class="primary-btn" onclick="closeDrawer()">我知道了</button></div></div></div>`;
+  if (!state.drawer) return '';
+  if (state.drawer.type === 'task') { const t = DATA.tasks.find(x => x.id === state.drawer.id); return `<div class="drawer-mask" onclick="if(event.target===this) closeDrawer()"><div class="drawer"><div class="drawer-grip"></div><div class="drawer-head"><h2>${t.title}</h2><button class="close" onclick="closeDrawer()">×</button></div><div class="drawer-content"><div class="subtle">${t.subject} · ${t.type} · ${t.date}</div><div class="detail-row"><span>完成状态</span><strong>${t.status}</strong></div><div class="detail-row"><span>作答结果</span><strong>${t.accuracy}</strong></div><div class="detail-row"><span>正确率</span><strong>${t.score}</strong></div><div class="detail-row"><span>批改状态</span><strong>${t.status === '已完成' ? '已批改' : '等待提交'}</strong></div><div class="wrong-box"><strong>${t.status === '已完成' ? '错题摘要' : '任务说明'}</strong><br>${t.wrong}</div></div></div></div>`; }
+  if (state.drawer.type === 'self') return `<div class="drawer-mask" onclick="if(event.target===this) closeDrawer()"><div class="drawer"><div class="drawer-grip"></div><div class="drawer-head"><h2>本周核心学习内容</h2><button class="close" onclick="closeDrawer()">×</button></div><div class="drawer-content"><div class="detail-row"><span>视频学习</span><strong>86 分钟</strong></div><div class="detail-row"><span>自主练习</span><strong>126 题</strong></div><div class="detail-row"><span>背词记录</span><strong>178 个</strong></div><div class="detail-row"><span>覆盖知识点</span><strong>12 个</strong></div><div class="knowledge">${DATA.knowledge.map(k => `<span>${k}</span>`).join('')}</div><div class="wrong-box" style="background:var(--blue-soft);color:#4a7bbc"><strong>内容摘要</strong><br>本周重点练习函数单调性、文言实词和 Unit 2 词汇，知识点掌握记录已同步。</div></div></div></div>`;
+  return `<div class="drawer-mask" onclick="if(event.target===this) closeDrawer()"><div class="drawer"><div class="drawer-grip"></div><div class="drawer-head"><h2>AI Tutor 规划摘要</h2><button class="close" onclick="closeDrawer()">×</button></div><div class="drawer-content"><div class="subtle">展示可核验的学习结果，不展示完整 AI 对话。</div><div class="detail-row"><span>已完成 AI 任务</span><strong>6 项</strong></div><div class="detail-row"><span>覆盖知识点</span><strong>6 个</strong></div><div class="detail-row"><span>个性化练习</span><strong>48 题</strong></div><div class="knowledge"><span style="background:var(--purple-soft);color:var(--purple)">函数单调性</span><span style="background:var(--purple-soft);color:var(--purple)">文言实词</span><span style="background:var(--purple-soft);color:var(--purple)">阅读理解</span></div><div class="wrong-box" style="background:var(--purple-soft);color:#6b5ba5"><strong>本周任务结果</strong><br>系统围绕近期学习记录生成了巩固任务，知夏已完成其中 6 项，共完成 48 道练习。</div></div></div></div>`;
+}
+
+function render() {
+  const views = { home: homeView, learn: learnView, report: reportView, profile: profileView };
+  document.getElementById('app').innerHTML = views[state.view]() + drawer() + `<div class="toast" id="toast"></div>` + nav();
+}
+function nav() { const items = [['home','⌂','首页'],['learn','◒','学习'],['report','▤','周报'],['profile','☻','我的']]; return `<nav class="bottom-nav" aria-label="主导航">${items.map(i => `<button class="nav-item ${state.view === i[0] ? 'active' : ''}" onclick="setView('${i[0]}')"><span class="nav-icon">${i[1]}</span><span>${i[2]}</span></button>`).join('')}</nav>`; }
+function setView(view) { state.view = view; state.drawer = null; state.bindOpen = false; state.privacyOpen = false; render(); }
+function openDrawer(type, id) { state.drawer = { type, id }; render(); }
+function closeDrawer() { state.drawer = null; state.bindOpen = false; state.privacyOpen = false; render(); }
+function openBind() { state.bindOpen = true; state.drawer = null; render(); setTimeout(() => document.getElementById('bindInput')?.focus(), 30); }
+function submitBind() { const input = document.getElementById('bindInput'); if (input && input.value.trim().toUpperCase() === 'AIX-2026') { closeDrawer(); showToast('绑定成功，已为你打开学习首页'); setView('home'); } else { showToast('绑定码不正确，请检查后重试'); } }
+function toggleReminder() { state.reminderOn = !state.reminderOn; render(); showToast(state.reminderOn ? '已开启周报提醒（演示）' : '已关闭周报提醒'); }
+function showToast(message) { clearTimeout(state.toastTimer); const el = document.getElementById('toast'); if (!el) return; el.textContent = message; el.classList.add('show'); state.toastTimer = setTimeout(() => el.classList.remove('show'), 2200); }
+render();
+</script>
+</body>
+</html>
