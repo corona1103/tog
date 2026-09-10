@@ -194,9 +194,8 @@ function homeView() {
   const d = DATA[state.homeRange === 'week' ? 'home' : state.homeRange === 'month' ? 'month' : 'term'];
   return `<div class="view fade">
     ${topbar('家长端', '看见孩子的每一步学习变化', '<button class="icon-btn" onclick="setView(\'report\')" aria-label="查看周报">▤<span class="dot"></span></button>')}
-    <div class="eyebrow">早上好，林妈妈</div><h2 class="title">知夏的学习情况</h2>
+    <div class="eyebrow">你好，林知夏家长</div>
     <div class="report-banner report-banner-top"><div class="report-symbol">☼</div><div class="report-copy"><strong>上周学习周报已生成</strong><span>每周一早上更新，和学生平板保持一致</span></div><button onclick="setView('report')">去看看</button></div>
-    <div class="student-card"><div class="student-row"><div class="avatar">知</div><div><div class="student-name">${DATA.student.name}</div><div class="student-school">${DATA.student.school} · ${DATA.student.className}</div></div></div><div class="updated"><span>本学期数据已同步</span><strong>更新于 ${DATA.student.updated}</strong></div></div>
     <div class="card overview"><div class="overview-head"><strong>学习概览</strong><span class="period-chip">${rangeLabel(state.homeRange)}</span></div><div class="overview-range"><button class="${state.homeRange === 'week' ? 'active' : ''}" onclick="changeHomeRange('week')">本周</button><button class="${state.homeRange === 'month' ? 'active' : ''}" onclick="changeHomeRange('month')">本月</button><button class="${state.homeRange === 'term' ? 'active' : ''}" onclick="changeHomeRange('term')">本学期</button></div><div class="metric-grid">${metric('老师任务完成', `${d.taskDone}/${d.taskTotal}`, '项', `${d.completionDiff} 较上一周期`)}${metric('任务正确率', d.accuracy, '%', `${d.accuracyDiff} 较上一周期`)}${metric('自学题目', d.selfQuestions, '题', `${d.selfDiff} 题`)}${metric('AI 任务完成', d.aiTasks, '项', `${d.aiDiff} 较上一周期`)}</div></div>
     <div class="section-head"><h2>学习趋势</h2><button onclick="setView('learn')">查看详细 ›</button></div>
     ${trendCard()}
