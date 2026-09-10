@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语文自学 · 积累本</title>
+<style>
+:root{
+  --ink:#22304a;--muted:#7d8ba5;--line:#e5eaf3;--paper:#f7f9fc;--white:#fff;
+  --blue:#2f6df6;--blue-soft:#edf3ff;--cyan:#20b8c7;--teal:#24b7a8;
+  --gold:#f5b93f;--gold-soft:#fff7e5;--red:#ef6d73;--red-soft:#fff0f1;
+  --purple:#7658e8;--purple-soft:#f2efff;--shadow:0 18px 55px rgba(24,46,91,.16);
+}
+*{box-sizing:border-box}
+.review-line{padding:8px 0;border-bottom:1px dashed #e0e7f3}.review-line:last-child{border-bottom:0}.review-line-main{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap}.review-line-index{flex:0 0 22px;color:#8da1c3;font:11px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}.review-prefix,.review-suffix{white-space:pre-wrap}.review-blank-cell{display:inline-block;min-width:78px;max-width:100%;padding:1px 8px;border-bottom:2px solid #e25d67;color:#e25d67;background:#fff0f1;border-radius:4px;text-align:center;white-space:pre-wrap}.review-blank-cell.correct{border-color:#15957e;color:#15957e;background:#eaf9f4}.review-correct-line{padding-left:26px;color:#15957e;font:13px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}.review-correct-line::before{content:"正确答案：";color:#7c8da6}
+html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:#202b42}
+body{display:flex;align-items:center;justify-content:center;overflow:auto}
+button,input,textarea,select{font:inherit}
+button{border:0;cursor:pointer}
+#rotateHint{display:none;position:fixed;inset:0;background:#152039;color:#fff;z-index:50;align-items:center;justify-content:center;text-align:center;padding:32px}
+#rotateHint .hint-card{max-width:360px}
+#rotateHint .hint-icon{font-size:44px;margin-bottom:12px}
+.tablet{width:min(1280px,calc(100vw - 42px));height:min(800px,calc(100vh - 42px));min-width:960px;min-height:600px;background:var(--paper);border-radius:24px;overflow:hidden;box-shadow:var(--shadow);display:grid;grid-template-columns:82px 1fr;grid-template-rows:1fr;position:relative}
+.topbar{grid-column:1/3;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 24px}
+.brand{display:flex;align-items:center;gap:12px;min-width:270px}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#4d8cff,#36c7c1);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:800}
+.brand-name{font-weight:750;letter-spacing:.4px;font-size:17px}
+.brand-sub{color:var(--muted);font-size:12px;margin-top:2px}
+.top-context{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:12px}
+.pill{border-radius:999px;padding:6px 11px;font-size:12px;font-weight:650;display:inline-flex;align-items:center;gap:5px}
+.pill.blue{background:var(--blue-soft);color:var(--blue)}
+.pill.green{background:#eafaf6;color:#12947f}
+.pill.gold{background:var(--gold-soft);color:#ae7b17}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e9efff;color:var(--blue);font-weight:800;font-size:13px}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:18px 10px;display:flex;flex-direction:column;align-items:center;gap:9px}
+.side-brand{width:52px;height:52px;border-radius:17px;background:linear-gradient(145deg,#4d8cff,#36c7c1);color:#fff;display:grid;place-items:center;font-size:25px;font-weight:800;margin-bottom:9px;box-shadow:0 7px 15px rgba(47,109,246,.2)}
+.nav-btn{width:60px;height:62px;border-radius:16px;background:transparent;color:#97a3b8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:11px;transition:.18s}
+.nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-btn:hover{background:#f3f6fc;color:var(--blue)}
+.nav-btn.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.nav-spacer{flex:1}
+.workspace{overflow:auto;padding:28px 34px 36px;background:linear-gradient(180deg,#f8faff 0%,#f5f8fc 100%)}
+.workspace::-webkit-scrollbar{width:8px}.workspace::-webkit-scrollbar-thumb{background:#d7dfed;border-radius:9px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;gap:18px}.home-head{align-items:center}.home-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.home-actions .select{min-width:132px;padding:9px 11px}.record-btn{white-space:nowrap}
+.eyebrow{font-size:12px;color:var(--blue);font-weight:750;letter-spacing:.7px;margin-bottom:7px}
+h1{font-size:29px;line-height:1.15;margin:0 0 8px;letter-spacing:-.8px}h2{font-size:22px;margin:0 0 7px}h3{font-size:17px;margin:0 0 6px}p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+.back-btn,.ghost-btn,.primary-btn,.outline-btn,.text-btn{border-radius:11px;padding:10px 15px;transition:.18s}
+.back-btn{background:#fff;border:1px solid var(--line);color:#60708c;font-size:13px}
+.back-btn:hover,.ghost-btn:hover,.outline-btn:hover{border-color:#bed0f9;color:var(--blue);background:var(--blue-soft)}
+.primary-btn{background:var(--blue);color:#fff;font-weight:700;box-shadow:0 7px 16px rgba(47,109,246,.22)}
+.primary-btn:hover{background:#215bd9;transform:translateY(-1px)}
+.primary-btn:disabled{background:#b9c5dc;box-shadow:none;cursor:not-allowed;transform:none}
+.ghost-btn{background:#fff;border:1px solid var(--line);color:#61718c}
+.outline-btn{background:transparent;border:1px solid #cbd7eb;color:#4f6281}
+.text-btn{padding:4px 7px;background:transparent;color:var(--blue);font-size:12px}
+.grid{display:grid;gap:16px}.two{grid-template-columns:1.2fr .8fr}.three{grid-template-columns:repeat(3,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px;box-shadow:0 4px 15px rgba(39,67,116,.04)}
+.module-card{min-height:190px;position:relative;overflow:hidden;cursor:pointer;transition:.2s}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(39,67,116,.12);border-color:#cbd9f5}
+.module-card .card-deco{position:absolute;right:-18px;top:-25px;width:150px;height:150px;border-radius:45px;background:rgba(93,135,255,.1);transform:rotate(28deg)}
+.module-card.words .card-deco{background:rgba(36,183,168,.12)}
+.module-card .module-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-size:24px;margin-bottom:22px;background:var(--blue-soft)}
+.module-card.words .module-icon{background:#e9fbf8}
+.module-card h3{font-size:19px;position:relative}.module-card p{max-width:270px;position:relative}.module-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;position:relative}.arrow{font-size:20px;color:#a4b7d9}
+.summary{background:linear-gradient(135deg,#2f6df6 0%,#5d80f7 62%,#48c9c2 100%);color:#fff;border-radius:20px;padding:23px 25px;position:relative;overflow:hidden;min-height:180px}
+.summary:after{content:"";position:absolute;width:220px;height:220px;right:-75px;bottom:-95px;border:28px solid rgba(255,255,255,.12);border-radius:50%}
+.summary h2{position:relative}.summary p{color:rgba(255,255,255,.78);position:relative}.summary-stats{display:flex;gap:30px;margin-top:28px;position:relative}.stat strong{font-size:25px;display:block;letter-spacing:-.8px}.stat span{font-size:11px;color:rgba(255,255,255,.7)}
+.progress{height:7px;background:#eaf0f8;border-radius:10px;overflow:hidden}.progress > i{height:100%;display:block;border-radius:inherit;background:var(--blue)}
+.recent-list{display:flex;flex-direction:column;gap:12px}.recent-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #eff2f7}.recent-item:last-child{border-bottom:0}.mini-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#f0f5ff;color:var(--blue)}.recent-item .meta{flex:1}.recent-item b{display:block;font-size:13px}.recent-item small{color:#9aa7ba;font-size:11px}
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}.filter-bar .random-check{margin-left:auto}.select{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;color:#50617f;outline:none}.select:focus{border-color:#9bb7f8}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 13px;background:#fff;border:1px solid var(--line);border-radius:99px;color:#718099;font-size:12px;cursor:pointer}.chip.active{background:var(--blue-soft);border-color:#b8ccff;color:var(--blue);font-weight:700}
+.poem-card{cursor:pointer;position:relative;transition:.18s}.poem-card:hover{transform:translateY(-2px);border-color:#b8ccff}.poem-head{display:flex;justify-content:space-between;gap:10px}.poem-title{font-weight:750;font-size:17px}.poem-author{font-size:12px;color:var(--muted);margin-top:5px}.status-row{display:flex;gap:7px;margin-top:18px}.status-dot{width:30px;height:27px;display:grid;place-items:center;font-size:12px;font-weight:750;border-radius:8px;background:#f0f2f6;color:#8b98aa}.status-dot.done{background:#eaf9f4;color:#149b82}.status-dot.progress{background:#edf3ff;color:var(--blue)}
+.detail-shell{display:grid;grid-template-columns:250px 1fr;gap:18px;align-items:start}.detail-rail{position:sticky;top:0}.poem-summary{background:linear-gradient(160deg,#eef3ff,#fff);border:1px solid #dfe8fb;padding:20px;border-radius:18px}.poem-symbol{width:45px;height:45px;border-radius:15px;background:#fff;color:var(--blue);display:grid;place-items:center;font-size:23px;box-shadow:0 5px 14px rgba(47,109,246,.12);margin-bottom:15px}.poem-summary .small{font-size:12px;color:#7c8ba5;line-height:1.7}.detail-actions{display:flex;flex-direction:column;gap:8px;margin-top:13px}.detail-main{min-width:0}.tabs{display:flex;gap:5px;background:#eef2f8;padding:5px;border-radius:13px;margin-bottom:18px}.tab{flex:1;border-radius:9px;padding:11px 10px;background:transparent;color:#7e8da7;font-size:13px;display:flex;align-items:center;justify-content:center;gap:7px}.tab.active{background:#fff;color:var(--blue);font-weight:750;box-shadow:0 3px 9px rgba(44,70,113,.08)}.step-key{width:25px;height:25px;border-radius:8px;display:inline-grid;place-items:center;font-size:12px;font-weight:800}.step-back{background:#eaf9f4;color:#15957e}.step-mute{background:#edf3ff;color:var(--blue)}.step-practice{background:#f0f2f6;color:#8794a8}.sub-tabs{display:flex;gap:5px;padding:4px;background:#f4f6fa;border-radius:11px;margin-bottom:17px}.sub-tab{flex:1;padding:9px 7px;border-radius:8px;background:transparent;color:#8a97ab;font-size:12px}.sub-tab.active{background:#fff;color:var(--blue);font-weight:750;box-shadow:0 2px 6px rgba(48,72,112,.07)}.placeholder-panel{min-height:180px;border:1px dashed #c8d6ee;border-radius:14px;background:#fafcff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.placeholder-panel .placeholder-icon{font-size:30px;color:#9fb4e7;margin-bottom:10px}
+.poem-picker{background:#fff;border:1px solid #dbe5f5;border-radius:17px;padding:17px;margin-bottom:15px;box-shadow:0 8px 24px rgba(39,67,116,.07)}.picker-head{display:flex;justify-content:space-between;align-items:flex-start}.picker-head h3{font-size:15px}.picker-filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-bottom:13px;border-bottom:1px solid #eef1f6}.picker-filters .select{padding:8px 11px}.poem-picker-list{display:grid;gap:8px;margin-top:12px;max-height:190px;overflow:auto}.poem-picker-item{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fbfcff;color:var(--ink)}.poem-picker-item:hover,.poem-picker-item.active{border-color:#a9c0fa;background:var(--blue-soft)}.poem-picker-item b{display:block;font-size:13px}.poem-picker-item small{display:block;color:#91a0b5;font-size:11px;margin-top:4px}.picker-status{font-size:11px;color:var(--blue);white-space:nowrap}
+.text-panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px}.text-panel .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.original{font-family:"Songti SC","STSong",serif;font-size:19px;line-height:2.15;color:#34415b;letter-spacing:.5px}.original .line{padding:5px 0;border-bottom:1px dashed #e6eaf1}.understand-original-panel{max-height:245px;overflow-y:auto;padding:0 9px 2px 0}.understand-original-panel::-webkit-scrollbar,.understand-support-panel::-webkit-scrollbar{width:6px}.understand-original-panel::-webkit-scrollbar-thumb,.understand-support-panel::-webkit-scrollbar-thumb{background:#d7dfed;border-radius:9px}.understand-support-panel{max-height:155px;overflow-y:auto;padding-right:7px}.understand-support-label{font-size:12px;color:#8290a6;font-weight:700;margin:18px 0 8px}.translation{margin-top:0;padding:13px 15px;background:#fbfcff;border-left:3px solid #9eb8fb;color:#6f7f9a;font-size:13px;line-height:1.8}
+.recite-box{border-radius:15px;background:#f5f8ff;border:1px solid #dde8ff;padding:18px;margin-top:16px}.recite-label{font-size:11px;color:var(--blue);font-weight:750;margin-bottom:10px}.recite-lines{display:grid;gap:8px}.recite-line-row{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;padding:10px 11px;border:1px solid transparent;border-radius:11px}.recite-line-row.current{background:#edf3ff;border-color:#b8ccff}.recite-line-row.completed{background:#edf9f5}.recite-line-index{width:24px;height:24px;border-radius:8px;background:#e7eefc;color:var(--blue);display:grid;place-items:center;font-size:11px;font-weight:750}.recite-line-row.completed .recite-line-index{background:#d9f3ea;color:#15957e}.recite-line{font-family:"Songti SC","STSong",serif;font-size:18px;line-height:1.7;letter-spacing:.5px}.recite-line.hidden-line{letter-spacing:5px;color:#7187b5}.recite-line-status{font-size:11px;color:#98a6b9;white-space:nowrap}.recite-line-row.current .recite-line-status{color:var(--blue);font-weight:700}.recite-line-row.completed .recite-line-status{color:#15957e}.hint-toggle{cursor:pointer;border:1px solid transparent}.hint-toggle:hover{background:#dfeaff}.recite-actions{display:flex;gap:9px;margin-top:15px}
+.recite-segments{display:grid;gap:10px}.recite-segment-block{border:1px solid transparent;border-radius:13px;padding:12px 13px;background:rgba(255,255,255,.35)}.recite-segment-block.current{background:#edf3ff;border-color:#b8ccff}.recite-segment-block.completed{background:#edf9f5}.recite-segment-head{display:flex;justify-content:space-between;align-items:center;color:#8a98ad;font-size:11px;margin-bottom:6px}.recite-segment-head b{color:#61718c;font-size:12px}.recite-segment-block.current .recite-segment-head b,.recite-segment-block.current .recite-segment-head span{color:var(--blue)}.recite-segment-block.completed .recite-segment-head b,.recite-segment-block.completed .recite-segment-head span{color:#15957e}.recite-segment-lines{display:grid;gap:4px}.recite-sentence{display:flex;align-items:center;gap:8px;font-family:"Songti SC","STSong",serif;font-size:18px;line-height:1.8;letter-spacing:.5px;color:#7187b5;padding:7px 9px;border:1px solid transparent;border-radius:9px}.recite-sentence.current{color:var(--blue);background:#edf3ff;border-color:#b8ccff}.recite-sentence.revealed{color:#15957e;background:#eaf9f4;border-color:#b9e8da}.recite-sentence-no{flex:0 0 20px;color:#8da1c3;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:11px}.recite-sentence-text{min-width:0;flex:1}.recite-sentence-status{flex:0 0 20px;text-align:center;color:#15957e;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:17px;font-weight:800}.poem-stats{margin-top:12px;padding:15px}.stats-title{font-size:12px;color:#7f8da4;margin-bottom:11px}.poem-stat-row{display:grid;grid-template-columns:27px 1fr auto;gap:9px;align-items:center;padding:10px 0;border-top:1px solid #eef1f6}.poem-stat-row:first-of-type{border-top:0}.stat-key{width:27px;height:27px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800}.stat-key.back{background:#f0f2f6;color:#8794a8}.stat-key.back.completed{background:#eaf9f4;color:#15957e}.stat-key.mute{background:#edf3ff;color:var(--blue)}.stat-key.practice{background:#f0f2f6;color:#8794a8}.poem-stat-row b{display:block;font-size:12px}.poem-stat-row small{display:block;color:#9aa7b9;font-size:10px;margin-top:3px;line-height:1.45}.poem-stat-row strong{font-size:13px;color:#50617f;white-space:nowrap}.recite-complete-panel{min-height:350px}.recite-complete-mark{width:64px;height:64px;display:grid;place-items:center;margin:42px auto 18px;border-radius:22px;background:#eaf9f4;color:#15957e;font-size:38px;font-weight:800}.recite-complete-tip{text-align:center;color:#718099;font-size:13px}.recite-complete-panel .action-row{justify-content:center}
+.mode-row{display:flex;gap:9px;margin-bottom:17px}.mode-btn{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;color:#697993;font-size:12px}.mode-btn.active{background:var(--blue-soft);border-color:#b8ccff;color:var(--blue);font-weight:750}
+.direct-full-box{padding-bottom:20px}.direct-mode-tip{margin:6px 0 11px;color:#7e8da7;font-size:12px}.cloze-original{background:#f7f9fd;border:1px solid #e0e7f3;border-radius:13px;padding:14px 16px;margin:10px 0 15px}.cloze-line{display:flex;gap:10px;align-items:baseline;border-bottom:1px dashed #dfe5ef;padding:10px 0;color:#34415b;font-family:"Songti SC","STSong",serif;font-size:19px;letter-spacing:1px}.cloze-line:last-child{border-bottom:0}.cloze-index{width:20px;height:20px;flex:0 0 20px;border-radius:7px;background:#e8eefb;color:var(--blue);display:grid;place-items:center;font:700 11px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;letter-spacing:0}.cloze-content{display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-width:0}.cloze-input{height:36px;min-width:150px;max-width:100%;border:0;border-bottom:2px solid #9eb4dd;border-radius:0;background:transparent;color:#34415b;outline:none;padding:3px 8px;font-family:"Songti SC","STSong",serif;font-size:18px;letter-spacing:.5px}.cloze-input.full{min-width:360px}.cloze-input:focus{border-bottom-color:var(--blue);background:#edf3ff;box-shadow:0 0 0 2px #dce8ff}.direct-result-box{padding-bottom:20px}.review-tip{margin:6px 0 11px;color:#8d9bb0;font-size:12px}.review-original{background:#fbfcff;border:1px solid #e0e7f3;border-radius:13px;padding:14px 16px;font-family:"Songti SC","STSong",serif;font-size:20px;line-height:2.15;color:#34415b;letter-spacing:.5px;max-height:260px;overflow:auto}.review-blank{display:inline-block;min-width:21px;color:#e25d67;border-bottom:2px solid #e25d67;text-align:center}.review-answer{display:inline-block;margin-left:2px;color:#15957e;font-size:12px;vertical-align:super;letter-spacing:0}
+.question-box{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px}.question-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.question-no{color:var(--blue);font-size:12px;font-weight:750}.question-type{font-size:11px;color:#9aa8bc;background:#f3f5f8;border-radius:8px;padding:5px 8px}.prompt{font-family:"Songti SC","STSong",serif;font-size:19px;line-height:1.9;color:#35425c;margin:14px 0 17px}.answer-input{width:100%;min-height:94px;border:1px solid #dce4f1;border-radius:12px;resize:vertical;padding:13px 14px;outline:none;background:#fbfcff;color:#33415c;line-height:1.7}.answer-input:focus{border-color:#91aff7;box-shadow:0 0 0 3px #edf3ff}.input-foot{display:flex;justify-content:space-between;align-items:center;color:#9ba8ba;font-size:11px;margin-top:8px}.action-row{display:flex;gap:9px;align-items:center;margin-top:18px}.feedback{margin-top:16px;padding:13px 15px;border-radius:11px;font-size:13px}.feedback.ok{background:#eaf9f4;color:#138d78}.feedback.bad{background:var(--red-soft);color:#cc5f68}
+.result-hero{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px 22px;margin-bottom:16px}.score{display:flex;align-items:baseline;gap:4px}.score strong{font-size:34px;color:var(--blue)}.score span{color:#8b99af;font-size:12px}.result-tags{display:flex;gap:8px}.diff{background:#fff;border:1px solid var(--line);border-radius:17px;padding:21px;overflow:auto}.diff-label{font-size:12px;color:#8290a6;margin:0 0 8px}.diff-text{font-family:"Songti SC","STSong",serif;font-size:18px;line-height:2;white-space:pre-wrap;min-width:560px}.good{color:#263653}.wrong{color:#e25d67;text-decoration:underline wavy #e25d67 1px}.missing{color:#35a889;background:#e8f8f2;padding:1px 4px;border-radius:4px}.extra{color:#5577c6;background:#edf2ff;padding:1px 4px;border-radius:4px}
+.comprehension-list{display:flex;flex-direction:column;gap:10px}.comp-item{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:#fff}.comp-item:hover{border-color:#bad0ff}.comp-index{width:31px;height:31px;border-radius:10px;background:#eef3ff;color:var(--blue);display:grid;place-items:center;font-weight:750;font-size:12px}.comp-body{flex:1}.comp-body b{font-size:13px}.comp-body small{display:block;color:#9aa7b9;font-size:11px;margin-top:4px}.difficulty{color:#f0b34a;font-size:11px}.answer-state{font-size:11px;color:#9aa7b8}.answer-state.done{color:#15957e}
+.comp-practice-shell{display:grid;gap:12px}.comp-round-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px}.comp-round-head h3{font-size:16px}.comp-nav-row{display:flex;gap:8px;padding:4px;background:#eef2f8;border-radius:13px}.comp-nav{flex:1;padding:9px 6px;border-radius:9px;background:transparent;color:#8794a8;font-weight:750;font-size:12px}.comp-nav.active{background:#fff;color:var(--blue);box-shadow:0 3px 9px rgba(44,70,113,.08)}.comp-nav.done{color:#15957e}.comp-nav:disabled{color:#b8c2d0;cursor:not-allowed}.comp-question-box{padding:22px}.comp-stem{font-family:"Songti SC","STSong",serif;font-size:20px;line-height:2.2;color:#34415b;margin:16px 0 18px}.comp-inline-input{display:inline-block;min-width:250px;max-width:100%;height:38px;border:0;border-bottom:2px solid #9eb4dd;background:transparent;color:#34415b;outline:none;padding:2px 8px;font-family:"Songti SC","STSong",serif;font-size:19px}.comp-inline-input:focus{border-bottom-color:var(--blue);background:#edf3ff;box-shadow:0 0 0 2px #dce8ff}.comp-inline-input:disabled{color:#34415b;border-bottom-color:#cbd6e8}.comp-answer-review{margin-top:8px;font-size:12px;color:#51627e}
+.question-context{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.question-context .question-no{font-size:12px}.question-poem{font-size:12px;color:#60718d;font-weight:650}.question-poem::before{content:"·";margin-right:8px;color:#b3bfd0}
+.explain{background:#fbfcff;border-radius:12px;padding:13px 15px;margin-top:14px;color:#718099;font-size:12px;line-height:1.8}.explain b{color:#51627e}
+.word-tabs{display:flex;gap:8px;margin-bottom:17px}.word-tab{padding:10px 16px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;color:#74829a}.word-tab.active{background:#e9fbf8;border-color:#afe8df;color:#118d80;font-weight:750}
+.word-toolbar{display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:15px 17px}.word-toolbar-copy{flex:1;min-width:180px}.word-toolbar-copy h3{font-size:16px}.word-toolbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.word-toolbar-actions .select{padding:9px 10px}.word-view-toggle{display:flex;gap:4px;padding:4px;background:#f1f5f8;border-radius:10px}.word-view-btn{padding:8px 11px;border-radius:8px;background:transparent;color:#8290a3;font-size:12px}.word-view-btn.active{background:#fff;color:#138e80;font-weight:750;box-shadow:0 2px 6px rgba(30,95,89,.08)}.word-context-switchers{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.word-context-switchers .select{padding:8px 10px;min-width:112px}
+.word-view-filter-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 13px;background:#fff;border:1px solid var(--line);border-radius:13px}.word-filter-toggle{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.word-filter-btn{padding:8px 13px;border-radius:9px;background:transparent;color:#8290a3;font-size:12px}.word-filter-btn.active{background:var(--blue-soft);color:var(--blue);font-weight:750}
+.word-layout{display:grid;grid-template-columns:1fr .8fr;gap:17px}.word-layout-rich{align-items:start}.word-layout-single{grid-template-columns:1fr}.word-card-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;background:linear-gradient(145deg,#edfbf9,#fff);border:1px solid #d8f0ed;border-radius:20px;padding:24px}.word-layout-single .word-card-wrap{width:100%}.word-card{width:min(720px,100%);min-height:255px;background:#fff;border:1px solid #d9ece9;border-radius:20px;box-shadow:0 12px 30px rgba(34,164,149,.11);padding:25px;text-align:center;display:flex;flex-direction:column;justify-content:center;cursor:pointer}.word-card.detail{display:block;text-align:left;min-height:0;padding:18px}.word-card .word-main{font-size:50px;font-family:"Songti SC","STSong",serif;color:#194d55}.word-card .pinyin{color:#29a595;font-size:14px;margin-top:7px}.word-card .meaning{font-size:22px;font-weight:750;color:#23525a;margin:10px 0}.word-card .example{color:#6f8790;font-family:"Songti SC","STSong",serif;line-height:1.8;font-size:15px}.word-card .hint{color:#a3b1b6;font-size:12px;margin-top:17px}.word-card-detail-scroll{max-height:390px;overflow-y:auto;padding-right:7px}.word-card-detail-scroll::-webkit-scrollbar,.word-list-scroll::-webkit-scrollbar{width:6px}.word-card-detail-scroll::-webkit-scrollbar-thumb,.word-list-scroll::-webkit-scrollbar-thumb{background:#cfe7e2;border-radius:8px}.word-front-pinyin{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}.word-front-pinyin span{padding:4px 8px;border-radius:8px;background:#ecfaf7;color:#198f82;font-size:12px}.word-detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:15px}.word-detail-head h3{font-size:23px;font-family:"Songti SC","STSong",serif;color:#194d55}.word-detail-head p{font-size:12px;color:#8392a4}.focus-on{color:#bd7b16!important;background:var(--gold-soft)!important;border-color:#f0cd82!important}.word-pos-row{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}.word-pos{font-size:11px;color:#62768e;background:#f0f4f8;padding:4px 7px;border-radius:6px}.word-meaning-block{border-top:1px solid #eef2f3;padding:12px 0}.word-meaning-title{display:flex;justify-content:space-between;gap:10px;align-items:center}.word-meaning-title b{color:#24535b;font-size:14px}.word-meaning-title span{font-size:11px;color:#198f82}.word-meaning-block>p{font-size:12px;margin:6px 0 9px}.word-examples{display:grid;gap:6px}.word-example{display:grid;grid-template-columns:22px 1fr auto;gap:7px;align-items:start;padding:6px 7px;border-radius:8px;background:#f8fbfb}.word-example-no{width:19px;height:19px;border-radius:6px;background:#e3f4f0;color:#198f82;display:grid;place-items:center;font-size:10px}.word-example b{font-family:"Songti SC","STSong",serif;font-size:13px;color:#3a5260;font-weight:500;line-height:1.6}.word-example small{display:block;color:#91a0ad;font-size:10px;line-height:1.5}.word-audio{color:var(--blue);font-size:13px;align-self:start}.word-highlight{background:#bdebd8;color:#2a4d47;padding:0 2px;border-radius:2px}.word-control{display:flex;gap:9px;justify-content:center;margin-top:14px;flex-wrap:wrap}.word-info{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px}.word-info h3{font-size:16px}.word-info .primary-btn{width:100%}.word-info-note{padding:12px;border-radius:11px;background:#f5faf9;color:#648085;font-size:12px;line-height:1.7}.info-list{display:flex;flex-direction:column;gap:12px;margin-top:16px}.info-row{display:flex;justify-content:space-between;gap:15px;padding-bottom:11px;border-bottom:1px solid #eef1f6;font-size:12px}.info-row span{color:#98a5b8}.info-row b{text-align:right;color:#566681;font-weight:650}.word-list-view{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}.word-list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.word-list-scroll{max-height:430px;overflow-y:auto;display:grid;gap:8px}.word-list-row{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:12px;padding:12px 13px;border:1px solid #edf0f3;border-radius:11px;background:#fbfcfd;text-align:left}.word-list-row:hover,.word-list-row.active{border-color:#a9ded5;background:#effaf8}.word-list-word{font-size:23px;font-family:"Songti SC","STSong",serif;color:#24535b}.word-list-meta b{font-size:13px;color:#3f5666}.word-list-meta small{display:block;color:#91a0ad;font-size:11px;margin-top:4px}.word-list-focus{font-size:11px;color:#ba7b16}
+.word-frequency{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center;margin:13px 0;padding:10px 11px;background:#f4fbfa;border-radius:10px;color:#7b9195;font-size:11px}.word-frequency b{color:#e18a35;font-size:14px}.word-memory{display:flex;gap:8px;align-items:flex-start;padding:10px 11px;margin-bottom:6px;background:#f5f8ff;border-radius:10px;color:#64738b;font-size:11px;line-height:1.7}.word-memory b{color:var(--blue);white-space:nowrap}.word-detail-flip{text-align:center;margin-top:9px}
+.choice-list{display:grid;gap:9px;margin-top:15px}.choice{padding:12px 14px;border:1px solid #dce4ef;background:#fff;border-radius:11px;text-align:left;color:#5e708e}.choice:hover{border-color:#a5bdfa;background:#f5f8ff}.choice.selected{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);font-weight:700}.choice.correct{border-color:#8fdcc8;background:#ebfbf6;color:#138f7b}.choice.wrong{border-color:#f2b5ba;background:#fff1f2;color:#cc5f68;text-decoration:none}
+.word-meaning-current{border-left:3px solid var(--blue);padding-left:10px}.word-practice-overall{max-width:820px;margin:0 auto 12px;padding:14px 17px;display:flex;align-items:center;gap:22px}.overall-copy{display:flex;align-items:baseline;gap:10px;white-space:nowrap}.overall-copy b{font-size:14px;color:#3e5272}.overall-copy span{font-size:11px;color:#8b99ae}.overall-progress{flex:1;display:flex;align-items:center;gap:10px}.overall-progress .word-practice-progress{flex:1;margin-top:0}.overall-progress small{width:34px;text-align:right;color:#7d8da6;font-size:11px}.word-practice-layout{max-width:820px;margin:0 auto}.word-practice-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:12px}.word-practice-head h3{font-size:17px}.word-practice-progress{height:7px;background:#edf2f6;border-radius:8px;overflow:hidden;margin-top:10px}.word-practice-progress i{display:block;height:100%;background:linear-gradient(90deg,#27b7a8,#4b81f7);border-radius:inherit}.word-practice-question{padding:24px}.word-practice-question .question-meta{margin-bottom:18px}.word-question{font-size:23px;font-family:"Songti SC","STSong",serif;color:#30425c;line-height:1.8;margin:18px 0}.word-practice-prompt{color:#718099;font-size:13px;margin-top:3px}.word-practice-feedback{padding:12px 14px;border-radius:11px;margin-top:16px;font-size:13px}.word-practice-feedback.ok{background:#eaf9f4;color:#138d78}.word-practice-feedback.bad{background:#fff0f1;color:#cc5f68}.word-practice-card{max-width:900px;margin:0 auto}.word-practice-card .word-card{width:100%;cursor:default;text-align:left}.word-practice-card .word-card-detail-scroll{max-height:460px}.word-practice-focus{padding:13px 15px;background:#f5f8ff;border:1px solid #dae6ff;border-radius:12px;color:#50617f;font-family:"Songti SC","STSong",serif;line-height:1.8;margin-bottom:13px}.word-note{padding:12px 14px;border-radius:11px;background:#fff8e9;color:#9c751e;font-size:12px;line-height:1.7;margin-top:15px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);padding:11px 17px;border-radius:12px;background:#243453;color:#fff;font-size:12px;box-shadow:0 8px 25px rgba(15,25,48,.22);opacity:0;pointer-events:none;transition:.25s;z-index:60}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{padding:35px;text-align:center;color:#96a3b7}
+.records-shell{display:grid;gap:16px}.records-toolbar{display:flex;align-items:center;gap:8px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:14px}.records-toolbar-label{font-size:12px;color:#9aa7b9;padding:0 8px}.record-filter{padding:9px 15px;border-radius:9px;background:transparent;color:#7d8ba5;font-size:12px}.record-filter.active{background:var(--blue-soft);color:var(--blue);font-weight:750}.record-day{display:grid;grid-template-columns:92px 1fr;gap:18px;align-items:start}.record-date{padding:14px 0 0;color:#425473;font-size:15px;font-weight:750}.record-date small{display:block;margin-top:5px;color:#9aa7b9;font-size:11px;font-weight:500}.record-list{display:grid;gap:9px}.record-row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 13px;box-shadow:0 4px 14px rgba(39,67,116,.035)}.record-row-main{display:grid;grid-template-columns:32px minmax(0,1fr) auto auto;align-items:center;gap:10px}.record-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:12px;font-weight:800}.record-icon.recite{background:#eaf9f4;color:#15957e}.record-icon.practice{background:var(--blue-soft);color:var(--blue)}.record-icon.random{background:var(--purple-soft);color:var(--purple)}.record-icon.word{background:#fff5df;color:#d38a1c}.record-copy{min-width:0}.record-kind{font-size:11px;color:#8d9bb0;margin-bottom:3px}.record-title{font-size:14px;color:#344766;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.record-time{font-size:12px;color:#8d9bb0;white-space:nowrap}.record-detail{margin:11px 0 0 42px;padding:12px 13px;background:#f9fbff;border:1px solid #e4ebf8;border-radius:11px}.record-detail-head{display:flex;justify-content:space-between;align-items:center;color:#74839d;font-size:11px;margin-bottom:8px}.record-question{padding:9px 0;border-top:1px dashed #dfe6f2;font-size:12px;color:#425473;line-height:1.7}.record-question:first-of-type{border-top:0}.record-question strong{color:#334667}.record-answer{display:block;margin-top:3px;color:#73829c}.record-answer.correct{color:#15957e}.record-answer.wrong{color:#d05c66}.record-empty{padding:34px 18px;background:#fff;border:1px dashed #cbd8ef;border-radius:15px;text-align:center;color:#96a3b7}.record-empty h3{color:#637493;margin-bottom:5px}.records-back{margin-left:auto;white-space:nowrap}
+.coming-card{cursor:pointer;background:linear-gradient(120deg,#fff,#f6f8ff);border:1px dashed #bdccef;min-height:116px;display:flex;align-items:center;justify-content:space-between;transition:.18s}.coming-card:hover{border-color:#8eacf3;background:#f4f7ff;transform:translateY(-2px)}.coming-mark{width:45px;height:45px;border-radius:15px;background:#eef3ff;color:var(--blue);display:grid;place-items:center;font-size:23px;margin-right:15px}.coming-copy{display:flex;align-items:center}.coming-copy p{margin-top:3px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(20,32,58,.48);display:none;align-items:center;justify-content:center;z-index:55;padding:20px}.modal-backdrop.show{display:flex}.modal{width:min(530px,calc(100vw - 40px));background:#fff;border-radius:20px;box-shadow:0 25px 70px rgba(12,25,53,.3);padding:25px}.modal-head{display:flex;justify-content:space-between;align-items:flex-start}.modal-close{width:31px;height:31px;border-radius:10px;background:#f4f6fa;color:#77869e;font-size:18px}.feedback-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.feedback-option{text-align:left;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:#fbfcff;color:#5f708b;font-size:13px}.feedback-option:hover,.feedback-option.selected{border-color:#a9c0fa;background:var(--blue-soft);color:var(--blue)}.feedback-other{width:100%;margin-top:10px;border:1px solid #dce4f1;border-radius:10px;padding:11px;outline:none;resize:none;display:none}.feedback-other.show{display:block}
+ .word-result-dialog{width:min(440px,calc(100vw - 40px));padding:28px}.word-result-dialog h2{font-size:22px;color:#2e3f5e;margin-top:6px}.word-result-count{display:flex;align-items:baseline;gap:8px;justify-content:center;padding:26px 0 12px;color:#718099}.word-result-count strong{font-size:54px;line-height:1;color:var(--blue)}.word-result-count span{font-size:14px}.word-result-message{text-align:center;color:#8290a5;font-size:13px}.word-result-actions{justify-content:center;margin-top:23px}.word-result-actions button{min-width:82px}
+@media (max-width:980px),(max-height:620px){#rotateHint{display:flex}.tablet{opacity:.2}}
+@media (max-width:1100px){.record-row-main{grid-template-columns:32px minmax(0,1fr) auto}.record-row-main .record-action{grid-column:3;grid-row:1}.record-time{grid-column:2;grid-row:2}.record-detail{margin-left:0}}
+</style>
+</head>
+<body>
+<div id="rotateHint"><div class="hint-card"><div class="hint-icon">↔</div><h2>请横屏使用</h2><p style="color:#b9c4d8;margin-top:8px">积累本 Demo 按平板横屏比例设计，暂不支持竖屏布局。</p></div></div>
+<div class="tablet">
+  <aside class="sidebar">
+    <div class="side-brand">学</div>
+    <button class="nav-btn active" data-action="home"><span class="nav-icon">⌂</span>积累本</button>
+    <button class="nav-btn" data-action="poetry"><span class="nav-icon">诗</span>古诗文</button>
+    <button class="nav-btn" data-action="words"><span class="nav-icon">词</span>实虚词</button>
+    <div class="nav-spacer"></div>
+  </aside>
+  <main class="workspace" id="workspace"></main>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-backdrop" id="researchModal"><div class="modal"><div class="modal-head"><div><div class="eyebrow">帮助我们完善积累本</div><h2>你还需要什么方面的学习帮助？</h2><p>选择你最希望优先看到的语文学习内容。</p></div><button class="modal-close" data-action="close-feedback">×</button></div><div class="feedback-options"><button class="feedback-option" data-feedback-option="字词积累">字词与成语积累</button><button class="feedback-option" data-feedback-option="文言文精读">文言文精读</button><button class="feedback-option" data-feedback-option="现代文阅读">现代文阅读</button><button class="feedback-option" data-feedback-option="作文素材">作文素材积累</button><button class="feedback-option" data-feedback-option="文学常识">文学常识</button><button class="feedback-option" data-feedback-option="其他">其他学习帮助</button></div><textarea class="feedback-other" id="feedbackOther" placeholder="还有其他想法，也可以告诉我们"></textarea><div class="action-row" style="justify-content:flex-end"><button class="ghost-btn" data-action="close-feedback">下次再说</button><button class="primary-btn" data-action="submit-feedback">提交反馈</button></div></div></div>
+<script>
+const poems = [
+  {
+    id:"guancang",title:"观沧海",author:"曹操",dynasty:"东汉",book:"部编版",volume:"八年级上册",chapter:"第三单元",
+    text:"东临碣石，以观沧海。水何澹澹，山岛竦峙。树木丛生，百草丰茂。秋风萧瑟，洪波涌起。",
+    translation:"向东登上碣石山，来观赏大海。海水多么宽阔浩荡，山岛高高地挺立着。树木郁郁葱葱，百草丰美茂盛。秋风吹过树木发出悲凉的声音，巨大的波浪涌起。",
+    segments:[["东临碣石，以观沧海。","水何澹澹，山岛竦峙。"],["树木丛生，百草丰茂。","秋风萧瑟，洪波涌起。"]],
+    pair:[{prompt:"东临碣石，以观沧海。",answer:"水何澹澹，山岛竦峙。",label:"给上句，默写下句"},{prompt:"树木丛生，百草丰茂。",answer:"秋风萧瑟，洪波涌起。",label:"给上句，默写下句"}],
+    comprehension:[
+      {type:"情境提示",title:"描绘大海水波荡漾、山岛高耸的句子",answer:"水何澹澹，山岛竦峙。",explain:"“澹澹”写水波动荡，“竦峙”写山岛高耸，构成开阔的海景。",difficulty:"★★☆"},
+      {type:"主题归类",title:"描写秋风萧瑟、海浪涌起的句子",answer:"秋风萧瑟，洪波涌起。",explain:"题干中的“秋风”“海浪”分别对应“萧瑟”和“涌起”。",difficulty:"★☆☆"},
+      {type:"手法识别",title:"诗中最能体现诗人宏伟气魄的句子",answer:"日月之行，若出其中；星汉灿烂，若出其里。",explain:"运用想象和夸张，表现诗人开阔的胸襟与宏大的抱负。",difficulty:"★★★"},
+      {type:"情境提示",title:"描写树木繁茂、百草丰美的句子",answer:"树木丛生，百草丰茂。",explain:"“丛生”和“丰茂”写出草木生机勃勃的景象。",difficulty:"★☆☆"},
+      {type:"主题归类",title:"曹操登山观海时所处位置的句子",answer:"东临碣石，以观沧海。",explain:"“东临碣石”交代登临地点，“以观沧海”点明观海目的。",difficulty:"★★☆"}
+    ]
+  },
+  {
+    id:"shuidiao",title:"水调歌头",author:"苏轼",dynasty:"北宋",book:"部编版",volume:"八年级上册",chapter:"第三单元",
+    text:"不应有恨，何事长向别时圆？人有悲欢离合，月有阴晴圆缺，此事古难全。",
+    translation:"月亮不该对人有什么怨恨吧，为什么总是在离别时才圆呢？人有悲欢离合，月有阴晴圆缺，这种事情自古以来难以周全。",
+    segments:[["不应有恨，何事长向别时圆？"],["人有悲欢离合，月有阴晴圆缺，此事古难全。"]],
+    pair:[{prompt:"不应有恨，何事长向别时圆？",answer:"人有悲欢离合，月有阴晴圆缺，此事古难全。",label:"给上句，默写下句"}],
+    comprehension:[
+      {type:"情境提示",title:"表达对人生聚散无常的豁达感悟",answer:"人有悲欢离合，月有阴晴圆缺，此事古难全。",explain:"将人的聚散与月的圆缺对应，表达对人生无常的旷达胸襟。",difficulty:"★★☆"},
+      {type:"主题归类",title:"写月亮在离别时分外圆满的句子",answer:"不应有恨，何事长向别时圆？",explain:"以反问写月亮在离别时圆满，引出对人生离合的感慨。",difficulty:"★☆☆"},
+      {type:"情境提示",title:"由月亮的阴晴圆缺联想到人生悲欢离合",answer:"人有悲欢离合，月有阴晴圆缺。",explain:"将人的聚散与月的圆缺相联系，情景交融。",difficulty:"★★☆"},
+      {type:"手法识别",title:"表达自古以来人生难以十全十美的句子",answer:"此事古难全。",explain:"“古难全”点明人生聚散、月有圆缺都是自古难以圆满的常态。",difficulty:"★☆☆"},
+      {type:"主题归类",title:"苏轼借月抒发对亲人的思念",answer:"人有悲欢离合，月有阴晴圆缺，此事古难全。",explain:"借月亮的圆缺寄托对人生离合的理解与思念。",difficulty:"★★☆"}
+    ]
+  }
+];
+function makeExamples(label,source,items){
+  const result=items.map(item=>typeof item==="string"?{sentence:item,translation:"结合上下文理解“"+label+"”的意思。",source}:item);
+  while(result.length<10){const no=result.length+1;result.push({sentence:items[0]+"（例句"+no+"）",translation:"结合上下文理解“"+label+"”的意思。",source});}
+  return result.slice(0,10);
+}
+const allWords = [
+  {word:"负",category:"实词",pronunciations:["fù"],example:"至于负者歌于途，行者休于树。",meanings:[
+    {label:"背、背着",partOfSpeech:"动词",note:"背负、承担",examples:makeExamples("背、背着","《醉翁亭记》",["至于负者歌于途，行者休于树。","负箧曳屣行深山巨谷中。","负势竞上，互相轩邈。"] )},
+    {label:"辜负、对不起",partOfSpeech:"动词",note:"没有履行承诺或辜负期望",examples:makeExamples("辜负、对不起","中考语境例句",["民不负我，我不负民。","愿不负少年凌云志。","莫负春光，及时努力。"] )}
+  ],source:"《醉翁亭记》",choices:["背、背着","辜负","凭借","失败"]},
+  {word:"亡",category:"实词",pronunciations:["wú","wáng"],examFrequency:{gaokao:4,zhongkao:6},example:"河曲智叟亡以应。",meanings:[
+    {label:"没有（通“无”）",partOfSpeech:"动词",note:"���示不存在或没有",examples:makeExamples("没有（通“无”）","《愚公移山》",["河曲智叟亡以应。","今亡亦死，举大计亦死。","亡不越乡，未有知其才者。"] )},
+    {label:"灭亡、死亡",partOfSpeech:"动词",note:"失去生命或国家覆灭",examples:makeExamples("灭亡、死亡","中考语境例句",["国恒亡，然后知生于忧患而死于安乐也。","且秦灭韩亡魏。","此诚危急存亡之秋也。"] )}
+  ],source:"《愚公移山》",choices:["没有（通“无”）","灭亡、死亡","逃跑","丢失"]},
+  {word:"之",category:"虚词",pronunciations:["zhī"],example:"予独爱莲之出淤泥而不染。",meanings:[
+    {label:"用于主谓之间，取消句子独立性",partOfSpeech:"助词",note:"使主谓短语成为句子成分",examples:makeExamples("用于主谓之间","《爱莲说》",["予独爱莲之出淤泥而不染。","无丝竹之乱耳，无案牍之劳形。","当余之从师也，负箧曳屣行深山巨谷中。"] )},
+    {label:"的",partOfSpeech:"助词",note:"用于定语和中心语之间",examples:makeExamples("的","课内常见用法",["水陆草木之花。","忘路之远近。","山川之美，古来共谈。"] )}
+  ],source:"《爱莲说》",choices:["用于主谓之间","的","代指莲花","到、往"]},
+  {word:"为",category:"虚词",pronunciations:["wéi","wèi"],example:"不足为外人道也。",meanings:[
+    {label:"向、对",partOfSpeech:"介词",note:"引出动作行为的对象",examples:makeExamples("向、对","《桃花源记》",["不足为外人道也。","为人谋而不忠乎？","此中人语云：不足为外人道也。"] )},
+    {label:"做、成为",partOfSpeech:"动词",note:"表示动作或状态变化",examples:makeExamples("做、成为","课内常见用法",["武陵人捕鱼为业。","中峨冠而多髯者为东坡。","为坻，为屿，为堪，为岩。"] )}
+  ],source:"《桃花源记》",choices:["向、对","做、成为","因为","替、给"]}
+];
+const words = {
+  "实词":allWords.filter(w=>w.category==="实词"),
+  "虚词":allWords.filter(w=>w.category==="虚词")
+};
+function seedQuestions(type){
+  const source=poems[0].comprehension.slice(0,5);
+  return source.map((q,index)=>({question:q.title,poemTitle:poems[0].title,userAnswer:type==="随机抽查"&&index===1?"":q.answer,correctAnswer:q.answer,correct:type!=="随机抽查"||index!==1}));
+}
+function createSeedLearningRecords(){
+  return [
+    {id:"seed-recite",date:"2026-09-10",time:"19:20",category:"poem",type:"recite",title:"《观沧海》",poemId:"guancang",status:"completed"},
+    {id:"seed-comp",date:"2026-09-10",time:"19:24",category:"poem",type:"comprehension",title:"观沧海 理解性默写 5题",poemId:"guancang",questions:seedQuestions("理解性默写"),status:"completed",rate:100},
+    {id:"seed-direct",date:"2026-09-09",time:"17:20",category:"poem",type:"direct",title:"观沧海 直接默写 5题",poemId:"guancang",questions:seedQuestions("直接默写"),status:"completed",rate:100},
+    {id:"seed-random",date:"2026-09-09",time:"18:06",category:"poem",type:"random",title:"随机抽查 5题",poemId:"guancang",questions:seedQuestions("随机抽查"),status:"completed",rate:80},
+    {id:"seed-word-fu",date:"2026-09-09",time:"17:42",category:"word",type:"wordCard",title:"“负”",wordKey:"负-实词",status:"learned"},
+    {id:"seed-word-lin",date:"2026-09-08",time:"16:15",category:"word",type:"wordCard",title:"“亡”",wordKey:"亡-实词",status:"learned"}
+  ];
+}
+let state = {
+  screen:"home", module:null, selectedPoemId:null, poemTab:"understand", showTranslation:false,
+  reciting:false, reciteSegment:0, reciteSentenceIndex:0, reciteRevealed:false, reciteHintVisible:false, reciteFullVisible:false, directMode:"pair", directQuestion:0,
+  directAnswer:"", directClozeAnswers:{}, directPairPattern:[], directFeedback:null, directResult:false, compFilter:"全部", compMode:"list", understandSubTab:"译文", showPoemPicker:false,
+  compQuestion:0, compAnswer:"", compFeedback:null, compResult:false, compRound:[], compAnswers:{}, compResults:{}, wordType:"全部",
+  wordMode:"cards", wordView:"cards", wordFilter:"全部", wordCount:2, wordIndex:0, wordFace:"front", learned:{}, focusedWords:{}, wordPracticeIndex:0, wordBook:"部编版", wordVolume:"八年级上册", wordSource:"课内同步词书", poemBook:"部编版", poemVolume:"八年级上册", poemChapter:"第三单元",
+  directStats:{practiced:0,bestRate:0}, compStats:{practiced:0,correct:0,totalRate:0}, poemReciteStats:{}, reciteCompleted:false, reciteCountdown:0, directPerfectCountdown:0,
+  learningRecords:createSeedLearningRecords(), recordFilter:"all", expandedRecordId:null, compSessionType:"comprehension",
+  wordPracticeAnswer:"", wordPracticeFeedback:null, wordPracticeResult:false, wordPracticeStage:"meaning", wordPracticeQueue:[], wordPracticeRetryQueue:[], wordPracticeCard:false, wordPracticeCardQuestion:null, wordPracticeLocked:false, wordPracticeMistakes:0, wordPracticeMode:"learn", wordPracticeOffset:0, feedbackChoice:""
+};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+function recordNow(){const now=new Date();return {date:now.toISOString().slice(0,10),time:now.toTimeString().slice(0,5)}}
+function appendLearningRecord(record){const id=record.id||"record-"+Date.now()+"-"+Math.random().toString(16).slice(2);state.learningRecords.unshift({...record,id})}
+function recordQuestions(type,p,questions,rate){const now=recordNow(),label={direct:"直接默写",comprehension:"理解性默写",random:"随机抽查"}[type];appendLearningRecord({...now,category:"poem",type,title:type==="random"?"随机抽查 "+questions.length+"题":p.title+" "+label+" "+questions.length+"题",poemId:p.id,questions,status:"completed",rate})}
+const currentPoem = () => poems.find(p => p.id === state.selectedPoemId) || poems[0];
+function wordPool(){
+ let pool=allWords;
+ if(state.wordFilter==="重点")pool=allWords.filter(w=>state.focusedWords[wordKey(w)]);
+ else if(state.wordFilter==="已学会")pool=allWords.filter(w=>state.learned[wordKey(w)]);
+ else if(state.wordFilter==="待学习")pool=allWords.filter(w=>!state.learned[wordKey(w)]);
+ if(state.wordFilter==="全部")return pool.filter(w=>!state.learned[wordKey(w)]).concat(pool.filter(w=>state.learned[wordKey(w)]));
+ return pool;
+}
+function practiceScope(){return state.wordPracticeMode==="review"?allWords.filter(w=>state.learned[wordKey(w)]):wordPool()}
+function practicePool(){const scope=practiceScope();if(!scope.length)return [];const count=Math.max(1,Math.min(Number(state.wordCount)||2,scope.length));const offset=Math.min(Math.max(0,Number(state.wordPracticeOffset)||0),Math.max(0,scope.length-count));return scope.slice(offset,offset+count)}
+function currentWord(){const list=wordPool();return list[Math.min(state.wordIndex,list.length-1)]||allWords[0]}
+function wordKey(w){return w.word+"-"+w.category}
+function normalizeAnswer(value){return String(value||"").replace(/[，。！？；、\s]/g,"")}
+function answerRate(answer,standard){return normalizeAnswer(answer)===normalizeAnswer(standard)?100:0}
+function rateText(rate,count){return count?Math.round(rate/count)+"%":"--"}
+function maskSegment(segment,showHint){let seen=false;return String(segment).split("").map(char=>{if(/[，。！？；、]/.test(char))return char;if(!seen){seen=true;return showHint?char:"＿"}return "＿"}).join("")}
+function blankSegment(segment){return String(segment).split("").map(char=>/[，。！？；、]/.test(char)?char:"＿").join("")}
+function segmentSentences(segment){return Array.isArray(segment)?segment:[segment]}
+function segmentText(segment){return segmentSentences(segment).join("")}
+function reciteSentences(p){const list=[];p.segments.forEach((segment,segmentIndex)=>segmentSentences(segment).forEach((text,sentenceIndex)=>list.push({text,segmentIndex,sentenceIndex})));return list}
+function completedSentenceCount(p){return Math.min(state.reciteSentenceIndex,reciteSentences(p).length)}
+function completedSegmentCount(p){const completed=reciteSentences(p).slice(0,completedSentenceCount(p));return new Set(completed.map(item=>item.segmentIndex)).size}
+function reciteStatsFor(p){return state.poemReciteStats[p.id]||{sentences:0,completions:0}}
+function recordReciteCompletion(p){const stats=reciteStatsFor(p);state.poemReciteStats[p.id]={sentences:stats.sentences+reciteSentences(p).length,completions:stats.completions+1};const now=recordNow();appendLearningRecord({...now,category:"poem",type:"recite",title:"《"+p.title+"》",poemId:p.id,status:"completed"})}
+function reviewAnswer(answer,standard){const typed=normalizeAnswer(answer);let index=0;return String(standard).split("").map(char=>{if(/[，。！？；、]/.test(char))return char;const current=typed[index++];return current===char?esc(char):'<span class="review-blank">＿</span><span class="review-answer">'+esc(char)+'</span>'}).join("")}
+function poemSentences(p){return String(p.text).match(/[^。！？；!?;]+[。！？；!?;]?/g)||[]}
+function splitSentence(sentence){const index=sentence.indexOf("，");if(index<0)return {first:"",separator:"",second:sentence};return {first:sentence.slice(0,index),separator:"，",second:sentence.slice(index+1)}}
+function ensurePairPattern(p){const count=poemSentences(p).length;if(state.directPairPattern.length!==count)state.directPairPattern=Array.from({length:count},()=>Math.random()>.5);return state.directPairPattern}
+function directTypedAnswer(p){const sentences=poemSentences(p);return sentences.map((sentence,i)=>{const typed=state.directClozeAnswers[i]||"";if(state.directMode==="full")return typed;const parts=splitSentence(sentence);return state.directPairPattern[i]?parts.first+parts.separator+typed:typed+parts.separator+parts.second}).join("")}
+function directBlankTarget(p,index){const sentence=poemSentences(p)[index]||"",pattern=ensurePairPattern(p)[index],parts=splitSentence(sentence);return state.directMode==="full"?sentence:(pattern?parts.second:parts.first)}
+function directBlankRate(p){const sentences=poemSentences(p);if(!sentences.length)return 0;let correct=0;sentences.forEach((_,i)=>{const typed=state.directClozeAnswers[i]||"";if(normalizeAnswer(typed)===normalizeAnswer(directBlankTarget(p,i)))correct++});return Math.round(correct/sentences.length*100)}
+function shuffled(values){return values.slice().sort(()=>Math.random()-.5)}
+function ensureCompRound(p){if(state.compRound.length===5&&state.compRound.every(index=>p.comprehension[index]))return state.compRound;state.compRound=shuffled(p.comprehension.map((_,index)=>index)).slice(0,5);return state.compRound}
+function startCompRound(p){state.compRound=shuffled(p.comprehension.map((_,index)=>index)).slice(0,5);state.compQuestion=0;state.compAnswers={};state.compResults={};state.compFeedback=null;state.compMode="question"}
+function currentCompQuestion(p){const round=ensureCompRound(p);return p.comprehension[round[state.compQuestion]]}
+function toast(message){const el=$("#toast");el.textContent=message;el.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove("show"),1800)}
+function clearReciteCountdown(){clearInterval(window.__reciteTimer);window.__reciteTimer=null}
+function startReciteCountdown(){clearReciteCountdown();window.__reciteTimer=setInterval(()=>{if(state.reciteCountdown<=1){clearReciteCountdown();return setState({reciteCompleted:false,reciteCountdown:0,poemTab:"direct",directMode:"pair",directResult:false,directClozeAnswers:{}})}state.reciteCountdown-=1;render()},1000)}
+function clearDirectPerfectCountdown(){clearInterval(window.__directPerfectTimer);window.__directPerfectTimer=null}
+function startDirectPerfectCountdown(){clearDirectPerfectCountdown();window.__directPerfectTimer=setInterval(()=>{if(state.directPerfectCountdown<=1){clearDirectPerfectCountdown();return setState({directPerfectCountdown:0,poemTab:"comp",compMode:"question",compQuestion:0,compRound:[],compAnswers:{},compResults:{},compFeedback:null,compResult:false})}state.directPerfectCountdown-=1;render()},1000)}
+function setState(patch){Object.assign(state,patch);render()}
+function goHome(){clearTimeout(window.__wordPracticeTimer);clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"home",module:null,selectedPoemId:null,reciting:false,reciteCompleted:false,reciteCountdown:0,directPerfectCountdown:0,directResult:false,compResult:false,wordPracticeResult:false})}
+function openPoetry(){clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"poemList",module:"poetry",selectedPoemId:null})}
+function openWords(){setState({screen:"wordHome",module:"words",wordMode:"cards",wordIndex:0,wordFace:"front",wordPracticeResult:false})}
+function openPoemDetail(id){clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"poemDetail",module:"poetry",selectedPoemId:id,poemTab:"understand",understandSubTab:"译文",showTranslation:false,showPoemPicker:false,reciting:false,reciteCompleted:false,reciteCountdown:0,directPerfectCountdown:0,reciteSegment:0,reciteSentenceIndex:0,reciteHintVisible:false,reciteFullVisible:false,directMode:"pair",directClozeAnswers:{},directPairPattern:[],directStats:{practiced:0,bestRate:0},compStats:{practiced:0,correct:0,totalRate:0},directResult:false,compMode:"question",compQuestion:0,compRound:[],compAnswers:{},compResults:{},compResult:false})}
+function practiceOptions(w,meaningIndex,wordIndex){
+ const correct=w.meanings[meaningIndex].label;
+ const pool=[...w.meanings.map(m=>m.label),...w.choices,...allWords.flatMap(item=>item.meanings.map(m=>m.label))].filter((value,index,array)=>value&&array.indexOf(value)===index&&value!==correct);
+ return [correct,...pool].slice(0,4);
+}
+function createMeaningQuestions(list){const questions=[];list.forEach((w,wordIndex)=>w.meanings.forEach((meaning,meaningIndex)=>questions.push({kind:"meaning",wordIndex,meaningIndex,correct:meaning.label,options:practiceOptions(w,meaningIndex,wordIndex)})));return questions}
+function createCompareQuestions(list){return list.map((w,wordIndex)=>{const sameMeaning=w.meanings[0]?.examples?.[1]?.sentence||w.example;const otherMeaning=w.meanings[1]?.examples?.[0]?.sentence||w.example;return {kind:"compare",wordIndex,meaningIndex:0,correct:sameMeaning,options:[sameMeaning,otherMeaning]}})}
+function practiceProgress(list){
+ const meaningTotal=list.reduce((sum,w)=>sum+w.meanings.length,0),total=meaningTotal+list.length;
+ let done=0;
+ if(state.wordPracticeStage==="meaning")done=state.wordPracticeIndex;
+ else if(state.wordPracticeStage==="meaningRedo")done=meaningTotal;
+ else if(state.wordPracticeStage==="compare")done=meaningTotal+state.wordPracticeIndex;
+ else if(state.wordPracticeStage==="compareRedo")done=total;
+ else if(state.wordPracticeResult)done=total;
+ return {done:Math.min(done,total),total,percent:Math.round(Math.min(done,total)/Math.max(1,total)*100),meaningTotal};
+}
+function openWordPractice(mode="learn",offset=0){
+ state.wordPracticeMode=mode;state.wordPracticeOffset=offset;
+ const list=practicePool();
+ if(!list.length){toast(mode==="review"?"暂无已学会词目可复习":"当前筛选范围暂无可练词目");return}
+ state.wordPracticeQueue=createMeaningQuestions(list);
+ return setState({screen:"wordPractice",module:"words",wordPracticeIndex:0,wordPracticeStage:"meaning",wordPracticeRetryQueue:[],wordPracticeAnswer:"",wordPracticeFeedback:null,wordPracticeResult:false,wordPracticeCard:false,wordPracticeCardQuestion:null,wordPracticeLocked:false,wordPracticeMistakes:0});
+}
+function startNextWordGroup(){const scope=practiceScope();if(!scope.length){toast(state.wordPracticeMode==="review"?"暂无已学会词目可复习":"当前范围暂无可学习词目");return}const count=Math.max(1,Math.min(Number(state.wordCount)||2,scope.length));const nextOffset=state.wordPracticeOffset+count<scope.length?state.wordPracticeOffset+count:0;return openWordPractice(state.wordPracticeMode,nextOffset)}
+function poem(p){return p || currentPoem()}
+function header(title,desc,back,extra){const action=back==="poemList"?"poem-list":back==="wordHome"?"words":back||"home";const backButton=back&&back!=="home"?'<button class="back-btn" data-action="'+action+'">← 返回上一级</button>':"";return '<div class="page-head"><div><div class="eyebrow">语文自学 · 积累本</div><h1>'+title+'</h1><p>'+desc+'</p></div>'+(extra||"")+backButton+'</div>'}
+function wordContextSwitchers(){return '<div class="word-context-switchers"><select class="select" data-word-context="wordBook" aria-label="教材版本"><option '+(state.wordBook==="部编版"?"selected":"")+'>部编版</option><option '+(state.wordBook==="人教版"?"selected":"")+'>人教版</option></select><select class="select" data-word-context="wordVolume" aria-label="教材册次"><option '+(state.wordVolume==="八年级上册"?"selected":"")+'>八年级上册</option><option '+(state.wordVolume==="九年级上册"?"selected":"")+'>九年级上册</option></select><select class="select" data-word-context="wordSource" aria-label="词书"><option '+(state.wordSource==="课内同步词书"?"selected":"")+'>课内同步词书</option><option '+(state.wordSource==="中考高频词书"?"selected":"")+'>中考高频词书</option></select></div>'}
+function homeHeader(){return '<div class="page-head home-head"><div><div class="eyebrow">语文自学 · 学习入口</div><h1>积累本</h1><p>把课内积累变成每天都能完成的小练习。</p></div><div class="home-actions"><button class="outline-btn record-btn" data-action="view-my-record">我的学习记录</button></div></div>'}
+function filteredLearningRecords(){return state.learningRecords.filter(record=>state.recordFilter==="all"||record.category===state.recordFilter).slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time))}
+function recordDateLabel(date){const today=new Date().toISOString().slice(0,10),yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);if(date===today)return "今天";if(date===yesterday)return "昨天";return date.slice(5).replace("-","月")+"日"}
+function recordTypeLabel(record){return {recite:"古诗文 · 背诵",direct:"古诗文 · 直接默写",comprehension:"古诗文 · 理解性默写",random:"古诗文 · 随机抽查",wordCard:"实虚词 · 词卡学习"}[record.type]||"学习记录"}
+function recordIcon(record){if(record.type==="recite")return '<span class="record-icon recite">背</span>';if(record.type==="wordCard")return '<span class="record-icon word">词</span>';if(record.type==="random")return '<span class="record-icon random">抽</span>';return '<span class="record-icon practice">练</span>'}
+function renderRecordDetail(record){if(!record.questions?.length)return '';return '<div class="record-detail"><div class="record-detail-head"><span>本次共 '+record.questions.length+' 题</span><span>正确率 '+(record.rate??0)+'%</span></div>'+record.questions.map((q,index)=>'<div class="record-question"><strong>'+(index+1)+'. '+esc(q.question||"练习题")+'</strong>'+(q.poemTitle?'<span class="record-answer">篇目：'+esc(q.poemTitle)+'</span>':"")+'<span class="record-answer '+(q.correct?"correct":"wrong")+'">'+(q.correct?"✓ 作答正确":"✕ 作答错误")+' · 我的作答：'+esc(q.userAnswer||"未作答")+'</span>'+(!q.correct?'<span class="record-answer">正确答案：'+esc(q.correctAnswer||"")+'</span>':"")+'</div>').join('')+'</div>'}
+function renderLearningRecords(){
+ const records=filteredLearningRecords(),groups=records.reduce((result,record)=>{(result[record.date] ||= []).push(record);return result},{});
+ const filters=[['all','全部'],['poem','古诗文'],['word','实虚词']].map(([value,label])=>'<button class="record-filter '+(state.recordFilter===value?"active":"")+'" data-record-filter="'+value+'">'+label+'</button>').join('');
+ const days=Object.entries(groups).map(([date,list])=>'<div class="record-day"><div class="record-date">'+recordDateLabel(date)+'<small>'+date.replace(/-/g,".")+'</small></div><div class="record-list">'+list.map(record=>'<div class="record-row"><div class="record-row-main">'+recordIcon(record)+'<div class="record-copy"><div class="record-kind">'+recordTypeLabel(record)+'</div><div class="record-title">'+esc(record.title)+'</div></div><span class="record-time">'+esc(record.time)+'</span><button class="outline-btn record-action" data-action="record-action" data-record-id="'+esc(record.id)+'">'+(record.type==="recite"?"查看篇目":record.type==="wordCard"?"查看词卡":"查看详情")+'</button></div>'+(state.expandedRecordId===record.id?renderRecordDetail(record):"")+'</div>').join('')+'</div></div>').join('');
+ return header("我的学习记录","按时间回看背诵、练习和词卡学习过程","home",'<button class="back-btn records-back" data-action="records-home">← 返回积累本</button>')+'<div class="records-shell"><div class="records-toolbar"><span class="records-toolbar-label">学习类别</span>'+filters+'</div>'+(days||'<div class="record-empty"><h3>暂无学习记录</h3><p>完成一次背诵、练习或词卡学习后，记录会显示在这里。</p></div>')+'</div>';
+}
+function render(){
+  const main=$("#workspace");
+  main.innerHTML = state.screen==="home"?renderHome():
+    state.screen==="poemList"?renderPoemList():
+    state.screen==="poemDetail"?renderPoemDetail():
+    state.screen==="wordHome"?renderWordHome():
+    state.screen==="wordPractice"?renderWordPractice():
+    state.screen==="learningRecords"?renderLearningRecords():renderHome();
+  bindEvents();
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.action=== (state.module==="poetry"?"poetry":state.module==="words"?"words":"home")));
+}
+function renderHome(){
+ return homeHeader()+
+ '<div class="grid"><section class="summary"><div class="eyebrow" style="color:#dce8ff">累计学习概览</div><h2>持续积累，稳步提升</h2><p>已完成 2 篇古诗文理解性默写，学会 4 个文言文词语。</p><div class="summary-stats"><div class="stat"><strong>2</strong><span>完成篇目</span></div><div class="stat"><strong>4</strong><span>学会词数</span></div></div></section></div>'+
+ '<div style="height:18px"></div><div class="grid two"><div class="card module-card" data-action="poetry"><div class="card-deco"></div><div class="module-icon">📖</div><h3>古诗文背默</h3><p>先理解，再背诵，用默写和理解性练习检验掌握情况。</p><div class="module-foot"><span class="arrow">→</span></div></div><div class="card module-card words" data-action="words"><div class="card-deco"></div><div class="module-icon">🪶</div><h3>文言文实虚词</h3><p>通过词卡和练习积累课内重点实词、虚词及常见用法。</p><div class="module-foot"><span class="arrow">→</span></div></div></div>'+
+ '<div style="height:18px"></div><section class="card coming-card" data-action="open-feedback"><div class="coming-copy"><div class="coming-mark">✦</div><div><div class="eyebrow">更多内容，敬请期待</div><h3>语文自学还可以学什么？</h3><p>告诉我们你最需要的学习帮助，共同完善积累本。</p></div></div><span class="arrow">→</span></section>';
+}
+function getVisiblePoems(){return poems.filter(p=>(!state.poemBook||p.book===state.poemBook)&&(!state.poemVolume||p.volume===state.poemVolume)&&(state.poemChapter==="全部篇目"||p.chapter===state.poemChapter))}
+function renderPoemPicker(){
+ const visible=getVisiblePoems();
+ const list=visible.map(p=>'<button class="poem-picker-item '+(p.id===state.selectedPoemId?"active":"")+'" data-action="select-poem" data-id="'+p.id+'"><span><b>'+p.title+'</b><small>'+p.dynasty+' · '+p.author+' · '+p.chapter+'</small></span><span class="picker-status">'+(p.id===state.selectedPoemId?"当前篇目":"选择")+'</span></button>').join("");
+ return '<div class="poem-picker"><div class="picker-head"><div><div class="eyebrow">更换篇目</div><h3>从当前教材范围选择篇目</h3></div><button class="modal-close" data-action="close-poem-picker">×</button></div><div class="picker-filters"><select class="select" data-poem-filter="poemBook"><option '+(state.poemBook==="部编版"?"selected":"")+'>部编版</option><option '+(state.poemBook==="人教版"?"selected":"")+'>人教版</option></select><select class="select" data-poem-filter="poemVolume"><option '+(state.poemVolume==="八年级上册"?"selected":"")+'>八年级上册</option><option '+(state.poemVolume==="九年级上册"?"selected":"")+'>九年级上册</option></select><div class="chips"><button class="chip '+(state.poemChapter==="第三单元"?"active":"")+'" data-poem-chapter="第三单元">第三单元</button><button class="chip '+(state.poemChapter==="第四单元"?"active":"")+'" data-poem-chapter="第四单元">第四单元</button><button class="chip '+(state.poemChapter==="全部篇目"?"active":"")+'" data-poem-chapter="全部篇目">全部篇目</button></div></div><div class="poem-picker-list">'+(list||'<div class="empty">当前筛选条件下暂无篇目</div>')+'</div></div>';
+}
+function renderPoemList(){
+ const visible=getVisiblePoems();
+ const cards=visible.map(p=>{const backDone=reciteStatsFor(p).completions>0;return '<div class="card poem-card" data-action="poem" data-id="'+p.id+'"><div class="poem-head"><div><div class="poem-title">'+p.title+'</div><div class="poem-author">'+p.dynasty+' · '+p.author+' · '+p.chapter+'</div></div></div><p style="margin-top:15px">'+esc(p.translation.slice(0,46))+'…</p><div class="status-row"><span class="status-dot '+(backDone?"done":"")+'" title="背：'+(backDone?"已完成":"未开始")+'">背</span><span class="status-dot progress" title="默：直接默写进行中">默</span><span class="status-dot" title="练：理解性默写未开始">练</span></div></div>'}).join("");
+ const content=cards||'<div class="card empty">当前书目和单元暂无可练篇目</div>';
+ return header("古诗文背默","从教材篇目开始，理解、背诵，再完成默写检测。","home")+
+ '<div class="filter-bar"><select class="select" data-poem-filter="poemBook"><option '+(state.poemBook==="部编版"?"selected":"")+'>部编版</option><option '+(state.poemBook==="人教版"?"selected":"")+'>人教版</option></select><select class="select" data-poem-filter="poemVolume"><option '+(state.poemVolume==="八年级上册"?"selected":"")+'>八年级上册</option><option '+(state.poemVolume==="九年级上册"?"selected":"")+'>九年级上册</option></select><div class="chips"><button class="chip '+(state.poemChapter==="第三单元"?"active":"")+'" data-poem-chapter="第三单元">第三单元</button><button class="chip '+(state.poemChapter==="第四单元"?"active":"")+'" data-poem-chapter="第四单元">第四单元</button><button class="chip '+(state.poemChapter==="全部篇目"?"active":"")+'" data-poem-chapter="全部篇目">全部篇目</button></div><button class="primary-btn random-check" data-action="random-comprehension">随机抽查</button></div>'+
+ '<div class="grid two">'+content+'</div>';
+}
+function renderPoemStats(p){
+ const direct=state.directStats,comp=state.compStats,recite=reciteStatsFor(p),backDone=recite.completions>0;
+ return '<div class="card poem-stats"><div class="stats-title">本篇学习记录</div><div class="poem-stat-row"><span class="stat-key back '+(backDone?"completed":"")+'">背</span><div><b>背诵</b><small>已背过 '+recite.sentences+' 句 · 背完 '+recite.completions+' 次</small></div><strong>'+recite.completions+' 次</strong></div><div class="poem-stat-row"><span class="stat-key mute">默</span><div><b>直接默写</b><small>已练 '+direct.practiced+' 句 · 最高正确率</small></div><strong>'+ (direct.practiced?direct.bestRate+'%':'--')+'</strong></div><div class="poem-stat-row"><span class="stat-key practice">练</span><div><b>理解性默写</b><small>已练 '+comp.practiced+' 题 · 平均正确率</small></div><strong>'+rateText(comp.totalRate,comp.practiced)+'</strong></div></div>';
+}
+function renderPoemDetail(){
+ const p=currentPoem();
+ const tab=state.poemTab;
+ let body=tab==="understand"?renderUnderstand(p):tab==="direct"?renderDirect(p):renderComprehension(p);
+ return header(p.title,p.dynasty+" · "+p.author+" · "+p.chapter,"home")+
+ '<div class="detail-shell"><aside class="detail-rail"><div class="poem-summary"><div class="poem-symbol">诗</div><div class="eyebrow">当前篇目</div><h3>'+p.title+'</h3><div class="small">'+p.author+' · '+p.dynasty+'<br>'+p.chapter+'</div><div class="detail-actions"><button class="ghost-btn" data-action="toggle-poem-picker">更换篇目</button></div></div>'+renderPoemStats(p)+'</aside><section class="detail-main">'+(state.showPoemPicker?renderPoemPicker():"")+'<div class="tabs"><button class="tab '+(tab==="understand"?"active":"")+'" data-tab="understand"><span class="step-key step-back">背</span>理解与背诵</button><button class="tab '+(tab==="direct"?"active":"")+'" data-tab="direct"><span class="step-key step-mute">默</span>直接默写</button><button class="tab '+(tab==="comp"?"active":"")+'" data-tab="comp"><span class="step-key step-practice">练</span>理解性默写</button></div>'+body+'</section></div>';
+}
+function renderUnderstand(p){
+ if(state.reciteCompleted){
+   const all=reciteSentences(p),stats=reciteStatsFor(p),count=state.reciteCountdown||3;
+   return '<div class="text-panel recite-complete-panel"><div class="panel-head"><div><div class="eyebrow">本次背诵已完成</div><h3>全文 '+all.length+' 句已背完</h3><p>累计背完 '+stats.completions+' 次，已背过 '+stats.sentences+' 句。</p></div><span class="pill green">背 · 已完成</span></div><div class="recite-complete-mark">✓</div><div class="recite-complete-tip">接下来可以直接进入默写检测，也可以重新从第一句开始背诵。</div><div class="action-row"><button class="ghost-btn" data-action="restart-recite">重新背</button><button class="primary-btn" data-action="go-direct-after-recite">去默写 '+count+'s</button></div></div>';
+ }
+ if(state.reciting){
+   const all=reciteSentences(p),completed=Math.min(state.reciteSentenceIndex,all.length),currentItem=all[completed];
+   const blocks=p.segments.map((segment,segmentIndex)=>{const sentences=segmentSentences(segment);const lines=sentences.map((sentence,sentenceIndex)=>{const itemIndex=all.findIndex(item=>item.segmentIndex===segmentIndex&&item.sentenceIndex===sentenceIndex);const done=itemIndex<completed,current=itemIndex===completed;const display=done||(current&&state.reciteFullVisible)?sentence:maskSegment(sentence,state.reciteHintVisible);return '<div class="recite-sentence '+(done?"revealed ":"")+(current?"current":"")+'"><span class="recite-sentence-no">'+(sentenceIndex+1)+'</span><span class="recite-sentence-text">'+esc(display)+'</span><span class="recite-sentence-status">'+(done?"✓":"")+'</span></div>'}).join("");return '<div class="recite-segment-block"><div class="recite-segment-head"><b>第 '+(segmentIndex+1)+' 段</b><span>'+sentences.length+' 句</span></div><div class="recite-segment-lines">'+lines+'</div></div>'}).join("");
+   return '<div class="text-panel"><div class="panel-head"><div><div class="eyebrow">背诵模式 · '+(completed+1)+' / '+all.length+' 句</div><h3>逐句回忆，段落仅用于展示</h3></div><button class="pill blue hint-toggle" data-action="toggle-recite-hint">'+(state.reciteHintVisible?"隐藏首字":"展示首字")+'</button></div><div class="progress"><i style="width:'+(completed/all.length*100)+'%"></i></div><div class="recite-box"><div class="recite-label">按顺序逐句背诵，完成句高亮显示</div><div class="recite-segments">'+blocks+'</div><div class="recite-actions"><button class="ghost-btn" data-action="toggle-recite-full">'+(state.reciteFullVisible?"继续背":"看提示")+'</button><button class="primary-btn" data-action="complete-recite-sentence">背完了</button><button class="text-btn" data-action="exit-recite">退出背诵</button></div></div></div>';
+ }
+ const tabs=["译文","注释","赏析","作者简介"];
+ const supportTab=tabs.includes(state.understandSubTab)?state.understandSubTab:"译文";
+ const subTabs=tabs.map(t=>'<button class="sub-tab '+(supportTab===t?"active":"")+'" data-understand-subtab="'+t+'">'+t+'</button>').join("");
+ let content="";
+ if(supportTab==="译文")content='<div class="translation">'+esc(p.translation)+'</div>';
+ else {const copy={"注释":"重点字词、通假字和句式注释将在内容完善后开放。","赏析":"围绕意象、手法、情感和表达效果的赏析内容将在后续开放。","作者简介":"作者生平、创作背景和代表作品将在后续开放。"}[supportTab];content='<div class="placeholder-panel"><div class="placeholder-icon">✦</div><h3>'+supportTab+'内容预留</h3><p>'+copy+'</p><span class="pill gold" style="margin-top:12px">敬请期待</span></div>'}
+ const original='<div class="understand-original-panel"><div class="original">'+p.text.split("。").filter(Boolean).map(x=>'<div class="line">'+x+"。</div>").join("")+'</div></div>';
+ return '<div class="text-panel"><div class="panel-head"><div><div class="eyebrow">先理解，再背诵</div><h3>原文</h3></div></div>'+original+'<div class="understand-support-label">辅助理解</div><div class="sub-tabs">'+subTabs+'</div><div class="understand-support-panel">'+content+'</div><div class="action-row"><button class="primary-btn" data-action="start-recite">开始背诵</button><button class="ghost-btn" data-action="go-direct">直接进入默写</button></div></div>';
+}
+function renderDirect(p){
+ if(state.directResult)return renderDirectResult(p);
+ const pattern=ensurePairPattern(p),sentences=poemSentences(p);
+ const lines=sentences.map((sentence,i)=>{const parts=splitSentence(sentence),pairMode=state.directMode==="pair";let line="";if(!pairMode||!parts.separator){line='<input class="cloze-input full" data-direct-blank="'+i+'" aria-label="第 '+(i+1)+' 句" placeholder="默写本句" value="'+esc(state.directClozeAnswers[i]||"")+'">'}else if(pattern[i]){line=esc(parts.first+parts.separator)+'<input class="cloze-input" data-direct-blank="'+i+'" aria-label="第 '+(i+1)+' 句下半句" placeholder="填写下句" value="'+esc(state.directClozeAnswers[i]||"")+'">'+esc("")}else{line='<input class="cloze-input" data-direct-blank="'+i+'" aria-label="第 '+(i+1)+' 句上半句" placeholder="填写上句" value="'+esc(state.directClozeAnswers[i]||"")+'">'+esc(parts.separator+parts.second)}return '<div class="cloze-line"><span class="cloze-index">'+(i+1)+'</span><span class="cloze-content">'+line+'</span></div>'}).join("");
+ const modeTip=state.directMode==="full"?"整篇默写：每句全部挖空。":"上下句默写：每句随机展示上句或下句，填写另一半。";
+ return '<div class="mode-row"><button class="mode-btn '+(state.directMode==="pair"?"active":"")+'" data-mode="pair">上下句默写</button><button class="mode-btn '+(state.directMode==="full"?"active":"")+'" data-mode="full">整篇默写</button></div><div class="question-box direct-full-box"><div class="question-meta"><span class="question-no">整篇完成后统一提交</span><span class="question-type">'+(state.directMode==="full"?"整篇默写":"上下句默写")+'</span></div><p class="direct-mode-tip">'+modeTip+'</p><div class="cloze-original">'+lines+'</div><div class="input-foot"><span>点击空白处直接输入</span><span>已填 <b id="directCount">'+Object.values(state.directClozeAnswers).filter(Boolean).length+'</b> / '+sentences.length+' 处</span></div><div class="action-row"><button class="primary-btn" data-action="submit-direct">提交批改</button><button class="ghost-btn" data-action="clear-direct">清空重填</button></div></div>';
+}
+function renderDirectResult(p){
+ const sentences=poemSentences(p),pattern=ensurePairPattern(p),perfect=directBlankRate(p)===100,count=state.directPerfectCountdown||3;
+ const lines=sentences.map((sentence,i)=>{const parts=splitSentence(sentence),typed=String(state.directClozeAnswers[i]||"").trim(),target=directBlankTarget(p,i),correct=normalizeAnswer(typed)===normalizeAnswer(target),shown=state.directMode==="pair"?(pattern[i]?parts.first+parts.separator:""):"",suffix=state.directMode==="pair"?(pattern[i]?"":parts.separator+parts.second):"";return '<div class="review-line"><div class="review-line-main"><span class="review-line-index">'+(i+1)+'.</span><span class="review-prefix">'+esc(shown)+'</span><span class="review-blank-cell '+(correct?"correct":"")+'">'+esc(typed||"未作答")+'</span><span class="review-suffix">'+esc(suffix)+'</span></div>'+(!correct?'<div class="review-correct-line">'+esc(target)+'</div>':"")+'</div>'}).join("");
+ const nextAction=perfect?'<button class="ghost-btn" data-action="go-comp">去理解练习 '+count+'s</button>':'<button class="ghost-btn" data-action="go-comp">去理解练习</button>';
+ return '<div class="question-box direct-result-box"><div class="question-meta"><span class="question-no">批改结果</span><span class="question-type">'+(state.directMode==="pair"?"上下句默写":"整篇默写")+'</span></div><p class="review-tip">按句分行展示；正确空为绿色，错误空为红色，错误空下方展示正确答案。</p><div class="review-original">'+lines+'</div><div class="action-row"><button class="primary-btn" data-action="retry-direct">重新默写</button>'+nextAction+'</div></div>';
+}
+function renderComprehension(p){
+ const round=ensureCompRound(p),position=state.compQuestion,questionIndex=round[position],q=p.comprehension[questionIndex],result=state.compResults[position],answer=state.compAnswers[position]||"";
+ const firstUnsubmitted=round.findIndex((_,i)=>!state.compResults[i]);
+ const nextAllowed=firstUnsubmitted<0?round.length-1:firstUnsubmitted;
+ const nav=round.map((_,i)=>{const locked=i>nextAllowed;return '<button class="comp-nav '+(i===position?"active ":"")+(state.compResults[i]?"done ":"")+(locked?"locked ":"")+ '" data-action="comp-nav" data-index="'+i+'" '+(locked?"disabled":"")+'>'+ (i+1)+(state.compResults[i]?" ✓":"")+'</button>'}).join("");
+ const feedback=result?'<div class="feedback '+(result.correct?"ok":"bad")+'">'+(result.correct?"✓ 回答正确":"✕ 回答错误")+(result.correct?"":'<div class="comp-answer-review">正确答案：'+esc(q.answer)+'</div>')+'</div>':"";
+ const action=result?(position===4?'<button class="primary-btn" data-action="retry-comp">再来一组</button>':'<button class="primary-btn" data-action="next-comp">下一题</button>'):'<button class="primary-btn" data-action="submit-comp">提交答案</button>';
+ return '<div class="comp-practice-shell"><div class="card comp-round-head"><div><div class="eyebrow">理解性默写 · 本轮 5 题</div><h3>根据题干，在原题空白处作答</h3><p>按顺序完成本轮题目；已提交题目可点击回看，后续题目完成前不可跳过。</p></div><span class="pill purple" style="background:var(--purple-soft);color:var(--purple)">第 '+(position+1)+' / 5 题</span></div><div class="comp-nav-row">'+nav+'</div><div class="question-box comp-question-box"><div class="question-meta"><div class="question-context"><span class="question-no">第 '+(position+1)+' 题</span><span class="question-poem">《'+esc(p.title)+'》 · '+esc(p.author)+'</span></div></div><div class="comp-stem">'+esc(q.title)+'：<input class="comp-inline-input" data-comp-blank aria-label="第 '+(position+1)+' 题答案" placeholder="填写诗句" value="'+esc(answer)+'" '+(result?"disabled":"")+'></div><div class="action-row">'+action+'</div>'+feedback+'</div></div>';
+}
+function renderCompResult(p){return renderComprehension(p)}
+function renderWordPinyin(w){return w.pronunciations.map(p=>'<span>◉ '+esc(p)+'</span>').join("")}
+function highlightWord(sentence,target){return esc(sentence).split(esc(target)).join('<mark class="word-highlight">'+esc(target)+'</mark>')}
+function renderWordMeanings(w,preferredIndex){const ordered=w.meanings.map((meaning,index)=>({meaning,index})).sort((a,b)=>Number(a.index!==preferredIndex)-Number(b.index!==preferredIndex));return ordered.map(({meaning,index})=>'<section class="word-meaning-block '+(index===preferredIndex?"word-meaning-current":"")+'"><div class="word-meaning-title"><b>'+esc(meaning.label)+'</b><span>'+esc(meaning.partOfSpeech)+' · '+meaning.examples.length+' 条例句</span></div><p>'+esc(meaning.note)+'</p><div class="word-examples">'+meaning.examples.map((ex,i)=>'<div class="word-example"><span class="word-example-no">'+(i+1)+'</span><div><b>'+highlightWord(ex.sentence,w.word)+'</b><small>'+esc(ex.translation)+' · '+esc(ex.source)+'</small></div><span class="word-audio">◖</span></div>').join("")+'</div></section>').join("")}
+function renderWordList(list){return '<div class="word-list-view"><div class="word-list-head"><div><div class="eyebrow">当前书目范围</div><h3>按列表查看</h3><p>点击词目进入对应词卡。</p></div><span class="pill green">实词 13 / 45 · 虚词 15 / 20</span></div><div class="word-list-scroll">'+list.map((w,i)=>'<button class="word-list-row '+(i===state.wordIndex?"active":"")+'" data-action="select-word" data-index="'+i+'"><span class="word-list-word">'+esc(w.word)+'</span><span class="word-list-meta"><b>'+esc(w.meanings[0].label)+'</b><small>'+esc(w.category)+' · '+esc(w.pronunciations.join(" / "))+' · '+w.meanings.length+' 个义项</small></span><span class="word-list-focus">'+(state.focusedWords[wordKey(w)]?"★ 已标重点":"查看")+'</span></button>').join("")+'</div></div>'}
+function renderWordToolbar(){return '<section class="card word-toolbar"><div class="word-toolbar-actions" style="width:100%;justify-content:flex-end"><label class="eyebrow" style="margin:0;color:#8290a3">本次练习词数 <select class="select" data-word-count>'+[2,3,4,5].map(n=>'<option value="'+n+'" '+(Number(state.wordCount)===n?"selected":"")+'>'+n+' 个</option>').join("")+'</select></label><button class="outline-btn" data-action="go-word-review">去复习</button><button class="primary-btn" data-action="go-word-learn">去学习</button></div></section>'}
+function renderWordViewFilter(){return '<div class="word-view-filter-row"><div class="word-view-toggle"><button class="word-view-btn '+(state.wordView==="list"?"active":"")+'" data-action="word-list">按列表查看</button><button class="word-view-btn '+(state.wordView==="cards"?"active":"")+'" data-action="word-cards">按词卡查看</button></div><div class="word-filter-toggle">'+["重点","已学会","待学习","全部"].map(filter=>'<button class="word-filter-btn '+(state.wordFilter===filter?"active":"")+'" data-word-filter="'+filter+'">'+filter+'</button>').join("")+'</div></div>'}
+function renderWordHome(){
+ const list=wordPool();const w=currentWord();
+ if(state.wordMode==="practice")return renderWordPractice();
+ const focused=!!state.focusedWords[wordKey(w)], learned=!!state.learned[wordKey(w)];
+ const focusLabel=focused?"已收藏重点":"标记重点";
+ const card=state.wordFace==="front"?'<div class="word-card" data-action="flip-word"><div class="word-main">'+esc(w.word)+'</div><div class="word-front-pinyin">'+renderWordPinyin(w)+'</div><div class="meaning">'+esc(w.meanings[0].label)+'</div><div class="example">'+highlightWord(w.example,w.word)+'<br><span style="font-size:12px;color:#8fa0a8">'+esc(w.source)+'</span></div><div class="hint">点击查看多读音、词性、释义与例句</div></div>':'<div class="word-card detail"><div class="word-card-detail-scroll"><div class="word-detail-head"><div><div class="eyebrow">词卡详情 · '+esc(w.category)+'</div><h3>'+esc(w.word)+'</h3><p>教材语境 · '+esc(w.source)+'</p></div><button class="outline-btn '+(focused?"focus-on":"")+'" data-action="mark-word-focus">'+focusLabel+'</button></div><div class="word-front-pinyin">'+renderWordPinyin(w)+'</div><div class="word-pos-row">'+w.meanings.map(m=>'<span class="word-pos">'+esc(m.partOfSpeech)+'</span>').join("")+'</div><div class="word-frequency"><span>近10年高考出现</span><b>'+(w.examFrequency?.gaokao||w.meanings.length)+' 次</b><span>近3年中考出现</span><b>'+(w.examFrequency?.zhongkao||w.meanings.length+1)+' 次</b></div><div class="word-memory"><b>小斩助记</b><span>先看语境，再判断词性与词义；同一个字的不同用法用例句来区分。</span></div>'+renderWordMeanings(w)+'</div><div class="word-detail-flip"><button class="text-btn" data-action="flip-word">返回词卡正面</button></div></div>';
+ const controls='<div class="word-control"><button class="ghost-btn" data-action="prev-word">← 上一个</button><button class="outline-btn '+(focused?"focus-on":"")+'" data-action="mark-word-focus">'+focusLabel+'</button><button class="primary-btn" data-action="mark-learned">'+(learned?"已学会 ✓":"标记学会")+'</button><button class="ghost-btn" data-action="next-word">下一个 →</button></div>';
+ const content=state.wordView==="list"?renderWordList(list):list.length?'<div class="word-layout word-layout-rich word-layout-single"><div class="word-card-wrap"><div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:11px"><div><div class="eyebrow">词卡学习 · 实词 13 / 45 · 虚词 15 / 20</div><p>当前展示书目范围内的全部词卡</p></div><span class="pill '+(learned?"green":"gold")+'">'+(learned?"已学会":"待学习")+'</span></div>'+card+controls+'</div></div>':'<div class="card empty">当前筛选范围暂无词卡</div>';
+ return header("文言文实虚词","结合教材例句，积累一个字在不同语境中的读音、词性与词义。","home",wordContextSwitchers())+renderWordToolbar()+renderWordViewFilter()+content;
+}
+function currentWordPracticeQuestion(){return state.wordPracticeQueue[state.wordPracticeIndex]}
+function renderWordPracticeCard(q){
+ const list=practicePool(),w=list[q.wordIndex],meaning=w.meanings[q.meaningIndex],focused=!!state.focusedWords[wordKey(w)];
+ const focusButton='<button class="outline-btn '+(focused?"focus-on":"")+'" data-action="mark-practice-focus" data-word-index="'+q.wordIndex+'">'+(focused?"已收藏重点":"标记重点")+'</button>';
+ return header("词卡学习","","wordHome")+'<div class="word-practice-card"><div class="card word-practice-head"><div><div class="eyebrow">'+(q.kind==="meaning"?"词义选择 · 错题学习":"辨析选择 · 错题学习")+'</div><h3>当前词：“'+esc(w.word)+'”</h3><p>看完词卡后，手动点击“继续下一题”。</p></div>'+focusButton+'</div><div class="word-card detail"><div class="word-card-detail-scroll"><div class="word-detail-head"><div><div class="eyebrow">词卡详情 · '+esc(w.category)+'</div><h3>'+esc(w.word)+'</h3><p>教材语境 · '+esc(w.source)+'</p></div></div><div class="word-front-pinyin">'+renderWordPinyin(w)+'</div><div class="word-pos-row">'+w.meanings.map(m=>'<span class="word-pos">'+esc(m.partOfSpeech)+'</span>').join("")+'</div><div class="word-frequency"><span>近10年高考出现</span><b>'+(w.examFrequency?.gaokao||w.meanings.length)+' 次</b><span>近3年中考出现</span><b>'+(w.examFrequency?.zhongkao||w.meanings.length+1)+' 次</b></div><div class="word-practice-focus"><b>本题释义 · '+esc(meaning.label)+'</b><br>'+highlightWord(meaning.examples[0].sentence,w.word)+'<br><small>'+esc(meaning.examples[0].translation)+' · '+esc(meaning.examples[0].source)+'</small></div><div class="word-memory"><b>小斩助记</b><span>先看语境，再判断词性与词义；同一个字的不同用法用例句来区分。</span></div>'+renderWordMeanings(w,q.meaningIndex)+'</div></div><div class="action-row" style="justify-content:center"><button class="primary-btn" data-action="continue-word-practice">继续下一题</button></div></div>';
+}
+function renderWordPractice(){
+ if(state.wordPracticeResult)return renderWordResultModal();
+ if(state.wordPracticeCard&&state.wordPracticeCardQuestion)return renderWordPracticeCard(state.wordPracticeCardQuestion);
+ const list=practicePool(),q=currentWordPracticeQuestion();
+ if(!q)return "";
+ const w=list[q.wordIndex],selected=state.wordPracticeAnswer,feedback=state.wordPracticeFeedback;
+ const stageName=state.wordPracticeStage==="meaning"?"第一轮 · 词义选择":state.wordPracticeStage==="meaningRedo"?"第一轮 · 错题重做":state.wordPracticeStage==="compare"?"第二轮 · 辨析选择":"第二轮 · 错题重做";
+ const overall=practiceProgress(list);
+ const prompt=q.kind==="meaning"?'选择“'+esc(w.word)+'”在下面例句中的意思':'下列选项中与例句加点字的用法和释义相同的是';
+ const feedbackHtml=feedback?'<div class="word-practice-feedback '+(feedback.correct?"ok":"bad")+'">'+(feedback.correct?"✓ 回答正确，正在进入下一题":"✕ 回答错误，正在打开词卡")+'</div>':"";
+ const choices=q.options.map(c=>'<button class="choice '+(selected===c?"selected ":"")+(feedback?(c===q.correct?"correct":selected===c?"wrong":""):"")+'" data-word-choice="'+esc(c)+'" '+(state.wordPracticeLocked?"disabled":"")+'>'+ (q.kind==="compare"?highlightWord(c,w.word):esc(c)) +'</button>').join("");
+ const helper=q.kind==="compare"?"选择与题干例句中加点字用法和释义相同的例句":"选出最符合当前语境的释义";
+ const phase=state.wordPracticeStage.startsWith("meaning")?"第一轮 · 词义选择":"第二轮 · 辨析选择";
+ return header("文言文词汇 · 词汇练习","","wordHome")+'<div class="word-practice-overall card"><div class="overall-copy"><div class="eyebrow">两轮练习整体进度</div><b>已完成 '+overall.done+' / '+overall.total+' 题</b><span>'+phase+'</span></div><div class="overall-progress"><div class="word-practice-progress"><i style="width:'+Math.max(overall.done?4:0,overall.percent)+'%"></i></div><small>'+overall.percent+'%</small></div></div><div class="word-practice-layout"><div class="card word-practice-question"><div class="question-meta"><span class="question-no">'+phase+'</span><span class="question-type">'+(q.kind==="meaning"?"词义选择":"辨析选择")+'</span></div><div class="eyebrow" style="margin-top:20px">'+prompt+'</div><div class="word-question">'+highlightWord(w.example,w.word)+'</div><p class="word-practice-prompt">'+helper+'</p><div class="choice-list">'+choices+'</div>'+feedbackHtml+'</div></div>';
+ }
+function renderWordResultModal(){
+ const list=practicePool(),meaningCount=list.reduce((sum,w)=>sum+w.meanings.length,0),review=state.wordPracticeMode==="review";
+ return '<div class="modal-backdrop show word-result-modal"><div class="modal word-result-dialog"><div class="modal-head"><div><div class="eyebrow">练习完成</div><h2>'+(review?"本轮复习完成":"本轮学习完成")+'</h2></div><button class="modal-close" data-action="back-word-cards">×</button></div><div class="word-result-count"><strong>'+meaningCount+'</strong><span>个'+(review?"复习词义":"学会词义")+'</span></div><p class="word-result-message">两轮练习已完成，可以继续下一组巩固。</p><div class="action-row word-result-actions"><button class="primary-btn" data-action="next-word-group">下一组</button><button class="outline-btn" data-action="retry-word">再练一次</button><button class="ghost-btn" data-action="back-word-cards">返回</button></div></div></div>';
+}
+function bindEvents(){
+ document.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",handleAction));
+ document.querySelectorAll("[data-tab]").forEach(el=>el.addEventListener("click",()=>{clearReciteCountdown();clearDirectPerfectCountdown();setState({poemTab:el.dataset.tab,compMode:"list",directMode:el.dataset.tab==="direct"?"pair":state.directMode,directResult:false,compResult:false,reciting:false,reciteCompleted:false,reciteCountdown:0,directPerfectCountdown:0})}));
+ document.querySelectorAll("[data-mode]").forEach(el=>el.addEventListener("click",()=>setState({directMode:el.dataset.mode,directClozeAnswers:{},directFeedback:null,directResult:false})));
+ document.querySelectorAll("[data-understand-subtab]").forEach(el=>el.addEventListener("click",()=>setState({understandSubTab:el.dataset.understandSubtab})));
+ document.querySelectorAll("[data-poem-filter]").forEach(el=>el.addEventListener("change",e=>setState({[e.target.dataset.poemFilter]:e.target.value})));
+ document.querySelectorAll("[data-poem-chapter]").forEach(el=>el.addEventListener("click",()=>setState({poemChapter:el.dataset.poemChapter})));
+ document.querySelectorAll("[data-word-count]").forEach(el=>el.addEventListener("change",e=>setState({wordCount:Number(e.target.value),wordIndex:0,wordFace:"front"})));
+ document.querySelectorAll("[data-word-context]").forEach(el=>el.addEventListener("change",e=>setState({[e.target.dataset.wordContext]:e.target.value,wordIndex:0,wordFace:"front"})));
+ document.querySelectorAll("[data-word-filter]").forEach(el=>el.addEventListener("click",()=>setState({wordFilter:el.dataset.wordFilter,wordIndex:0,wordFace:"front"})));
+ document.querySelectorAll("[data-record-filter]").forEach(el=>el.addEventListener("click",()=>setState({recordFilter:el.dataset.recordFilter,expandedRecordId:null})));
+ document.querySelectorAll("[data-direct-blank]").forEach(el=>el.addEventListener("input",e=>{state.directClozeAnswers[e.target.dataset.directBlank]=e.target.value;const count=$("#directCount");if(count)count.textContent=Object.values(state.directClozeAnswers).filter(Boolean).length}));
+ document.querySelectorAll("[data-comp-blank]").forEach(el=>el.addEventListener("input",e=>state.compAnswers[state.compQuestion]=e.target.value));
+}
+function handleRecordAction(id){
+ const record=state.learningRecords.find(item=>item.id===id);
+ if(!record)return toast("学习记录不存在");
+ if(record.type==="recite"){openPoemDetail(record.poemId);return setState({poemTab:"understand"})}
+ if(record.type==="wordCard"){
+  const index=allWords.findIndex(word=>wordKey(word)===record.wordKey);
+  if(index<0)return toast("词卡内容暂不可用");
+  return setState({screen:"wordHome",module:"words",wordIndex:index,wordView:"cards",wordFace:"front"});
+ }
+ return setState({expandedRecordId:state.expandedRecordId===id?null:id});
+}
+function handleAction(e){
+ const el=e.currentTarget;const a=el.dataset.action;
+ if(a==="home")return goHome();if(a==="poetry")return openPoetry();if(a==="words"){clearTimeout(window.__wordPracticeTimer);return openWords();}
+ if(a==="continue-poem"){openPoemDetail("guancang");return}
+ if(a==="random-comprehension"){const pool=[];getVisiblePoems().forEach(p=>p.comprehension.forEach((q,index)=>pool.push({poem:p,index:index})));if(!pool.length)return toast("当前筛选范围暂无可抽查题目");const pick=pool[Math.floor(Math.random()*pool.length)],others=shuffled(pick.poem.comprehension.map((_,index)=>index).filter(index=>index!==pick.index));return setState({screen:"poemDetail",module:"poetry",selectedPoemId:pick.poem.id,poemTab:"comp",showPoemPicker:false,compMode:"question",compSessionType:"random",compQuestion:0,compRound:[pick.index,...others].slice(0,5),compAnswers:{},compResults:{},compFeedback:null,compResult:false});}
+ if(a==="open-feedback"){state.feedbackChoice="";document.querySelectorAll("[data-feedback-option]").forEach(x=>x.classList.remove("selected"));document.getElementById("feedbackOther").classList.remove("show");document.getElementById("researchModal").classList.add("show");return}
+ if(a==="close-feedback"){document.getElementById("researchModal").classList.remove("show");return}
+ if(a==="submit-feedback"){if(!state.feedbackChoice)return toast("请选择一个你需要的学习方向");document.getElementById("researchModal").classList.remove("show");return toast("感谢你的反馈");}
+ if(a==="poem-list")return openPoetry();
+ if(a==="poem")return openPoemDetail(el.dataset.id);
+ if(a==="toggle-poem-picker")return setState({showPoemPicker:!state.showPoemPicker});
+ if(a==="close-poem-picker")return setState({showPoemPicker:false});
+ if(a==="select-poem")return openPoemDetail(el.dataset.id);
+ if(a==="my-learning"||a==="view-my-record"){clearReciteCountdown();clearDirectPerfectCountdown();return setState({screen:"learningRecords",module:null,expandedRecordId:null})}
+ if(a==="record-action")return handleRecordAction(el.dataset.recordId);
+ if(a==="records-home")return goHome();
+ if(a==="toggle-translation")return setState({showTranslation:!state.showTranslation});
+ if(a==="start-recite"){clearReciteCountdown();return setState({reciting:true,reciteCompleted:false,reciteCountdown:0,reciteSegment:0,reciteSentenceIndex:0,reciteHintVisible:false,reciteFullVisible:false});}
+ if(a==="toggle-recite-hint")return setState({reciteHintVisible:!state.reciteHintVisible});
+ if(a==="toggle-recite-full")return setState({reciteFullVisible:!state.reciteFullVisible});
+ if(a==="reveal-segment")return setState({reciteHintVisible:true});
+ if(a==="hide-segment")return setState({reciteHintVisible:false});
+ if(a==="exit-recite")return setState({reciting:false,reciteCompleted:false,reciteCountdown:0,reciteSentenceIndex:0,reciteHintVisible:false,reciteFullVisible:false});
+ if(a==="restart-recite"){clearReciteCountdown();return setState({reciting:true,reciteCompleted:false,reciteCountdown:0,reciteSentenceIndex:0,reciteHintVisible:false,reciteFullVisible:false,poemTab:"understand"})}
+ if(a==="go-direct-after-recite"){clearReciteCountdown();return setState({reciteCompleted:false,reciteCountdown:0,poemTab:"direct",directMode:"pair",directResult:false,directClozeAnswers:{}})}
+ if(a==="complete-recite-sentence"){const p=currentPoem(),all=reciteSentences(p);if(state.reciteSentenceIndex+1<all.length)return setState({reciteSentenceIndex:state.reciteSentenceIndex+1,reciteHintVisible:false,reciteFullVisible:false});recordReciteCompletion(p);state.reciteSentenceIndex=all.length;state.reciteFullVisible=false;state.reciting=false;state.reciteCompleted=true;state.reciteCountdown=3;render();return startReciteCountdown();}
+ if(a==="go-direct"){clearReciteCountdown();return setState({poemTab:"direct",reciteCompleted:false,reciteCountdown:0,directMode:"pair",directResult:false});}
+ if(a==="clear-direct")return setState({directAnswer:"",directClozeAnswers:{},directFeedback:null});
+ if(a==="show-original")return toast("原文对照已展开，结果页会再次标记错误位置");
+ if(a==="submit-direct")return submitDirect();
+ if(a==="retry-direct"){clearDirectPerfectCountdown();return setState({directMode:"pair",directPerfectCountdown:0,directResult:false,directAnswer:"",directClozeAnswers:{},directFeedback:null,directQuestion:0});}
+ if(a==="go-comp"){clearDirectPerfectCountdown();return setState({poemTab:"comp",directPerfectCountdown:0,compMode:"question",compSessionType:"comprehension",compQuestion:0,compRound:[],compAnswers:{},compResults:{},compFeedback:null,compResult:false});}
+ if(a==="start-comp"){const p=currentPoem();startCompRound(p);return setState({poemTab:"comp",compMode:"question",compSessionType:"comprehension",compQuestion:0});}
+ if(a==="comp-nav"){const index=Number(el.dataset.index||0),firstUnsubmitted=state.compRound.findIndex((_,i)=>!state.compResults[i]),nextAllowed=firstUnsubmitted<0?state.compRound.length-1:firstUnsubmitted;if(index>nextAllowed)return toast("请先完成前面的题目");return setState({compQuestion:index,compFeedback:state.compResults[index]||null});}
+ if(a==="next-comp")return nextComp();
+ if(a==="submit-comp")return submitComp();
+ if(a==="next-comp")return nextComp();
+ if(a==="retry-comp"){startCompRound(currentPoem());return render();}
+ if(a==="go-word-review")return openWordPractice("review",0);
+ if(a==="go-word-learn")return openWordPractice("learn",0);
+ if(a==="word-list")return setState({screen:"wordHome",module:"words",wordMode:"cards",wordView:"list"});
+ if(a==="word-cards")return setState({screen:"wordHome",module:"words",wordMode:"cards",wordView:"cards"});
+ if(a==="select-word")return setState({screen:"wordHome",module:"words",wordMode:"cards",wordView:"cards",wordIndex:Number(el.dataset.index||0),wordFace:"front"});
+ if(a==="flip-word")return setState({wordFace:state.wordFace==="front"?"back":"front"});
+ if(a==="prev-word"){const n=wordPool().length;return setState({wordIndex:(state.wordIndex-1+n)%n,wordFace:"front"});}
+ if(a==="next-word"){const n=wordPool().length;return setState({wordIndex:(state.wordIndex+1)%n,wordFace:"front"});}
+ if(a==="mark-word-focus"){const key=wordKey(currentWord()),next=!state.focusedWords[key];state.focusedWords[key]=next;toast(next?"已收藏到重点词卡":"已取消重点收藏");return render();}
+ if(a==="mark-practice-focus"){const w=practicePool()[Number(el.dataset.wordIndex||0)],key=wordKey(w),next=!state.focusedWords[key];state.focusedWords[key]=next;toast(next?"已收藏到重点词卡":"已取消重点收藏");return render();}
+ if(a==="mark-learned"){const w=currentWord(),key=wordKey(w);if(!state.learned[key]){state.learned[key]=true;const now=recordNow();appendLearningRecord({...now,category:"word",type:"wordCard",title:"“"+w.word+"”",wordKey:key,status:"learned"});toast("已记录为学会")}else toast("该词已记录为学会");return render();}
+ if(a==="start-word-practice")return openWordPractice("learn",0);
+ if(a==="continue-word-practice"){state.wordPracticeCard=false;state.wordPracticeCardQuestion=null;return advanceWordPractice();}
+ if(a==="switch-word-mode")return toast("当前已在词卡学习中，可用左右按钮切换词目");
+ if(a==="submit-word")return submitWord();
+ if(a==="next-word-question"){if(state.wordPracticeIndex+1>=practicePool().length)return setState({wordPracticeResult:true});return setState({wordPracticeIndex:state.wordPracticeIndex+1,wordPracticeAnswer:"",wordPracticeFeedback:null});}
+ if(a==="open-word-card"){state.wordMode="cards";return setState({screen:"wordHome",wordMode:"cards",wordFace:"back"});}
+ if(a==="back-word-cards")return setState({screen:"wordHome",module:"words",wordMode:"cards",wordView:"cards",wordFace:"front",wordPracticeResult:false});
+ if(a==="next-word-group")return startNextWordGroup();
+ if(a==="retry-word")return openWordPractice(state.wordPracticeMode,state.wordPracticeOffset);
+}
+function submitDirect(){
+ if(state.directResult)return;
+ const p=currentPoem(),sentences=poemSentences(p);ensurePairPattern(p);
+ const rate=directBlankRate(p);
+ const questions=sentences.map((sentence,i)=>({question:sentence,userAnswer:String(state.directClozeAnswers[i]||"").trim(),correctAnswer:directBlankTarget(p,i),correct:normalizeAnswer(state.directClozeAnswers[i]||"")===normalizeAnswer(directBlankTarget(p,i))}));
+ recordQuestions("direct",p,questions,rate);
+ state.directStats={practiced:state.directStats.practiced+sentences.length,bestRate:Math.max(state.directStats.bestRate,rate)};
+ state.directResult=true;
+ state.directPerfectCountdown=rate===100?3:0;
+ render();
+ if(rate===100)startDirectPerfectCountdown();
+}
+function submitComp(){
+ const p=currentPoem(),position=state.compQuestion,q=currentCompQuestion(p),answer=String(state.compAnswers[position]||"").trim();if(state.compResults[position])return;const rate=answerRate(answer,q.answer),correct=rate===100;state.compStats={practiced:state.compStats.practiced+1,correct:state.compStats.correct+(correct?1:0),totalRate:state.compStats.totalRate+rate};state.compResults[position]={correct,rate,unanswered:!answer};
+ const finished=state.compRound.length>0&&state.compRound.every((_,index)=>state.compResults[index]);
+ if(finished){const questions=state.compRound.map((questionIndex,index)=>{const item=p.comprehension[questionIndex],result=state.compResults[index];return {question:item.title,userAnswer:String(state.compAnswers[index]||"").trim(),correctAnswer:item.answer,correct:result.correct,poemTitle:p.title}});const totalRate=Math.round(questions.filter(item=>item.correct).length/questions.length*100);recordQuestions(state.compSessionType||"comprehension",p,questions,totalRate)}
+ setState({compFeedback:{correct,rate,unanswered:!answer}});
+}
+function nextComp(){if(state.compQuestion>=4)return;setState({compQuestion:state.compQuestion+1,compFeedback:null});}
+function currentWordForPractice(){const q=currentWordPracticeQuestion(),list=practicePool();return q?list[q.wordIndex]:list[0]}
+function finishWordPractice(){const list=practicePool().slice();list.forEach(w=>{const key=wordKey(w);if(!state.learned[key]){state.learned[key]=true;const now=recordNow();appendLearningRecord({...now,category:"word",type:"wordCard",title:"“"+w.word+"”",wordKey:key,status:"learned"})}});state.wordPracticeResult=true;state.wordPracticeCard=false;state.wordPracticeCardQuestion=null;state.wordPracticeLocked=false;render()}
+function startComparePractice(){state.wordPracticeStage="compare";state.wordPracticeQueue=createCompareQuestions(practicePool());state.wordPracticeRetryQueue=[];state.wordPracticeIndex=0;state.wordPracticeAnswer="";state.wordPracticeFeedback=null;state.wordPracticeLocked=false;render()}
+function advanceWordPractice(){
+ state.wordPracticeAnswer="";state.wordPracticeFeedback=null;state.wordPracticeLocked=false;
+ if(state.wordPracticeIndex+1<state.wordPracticeQueue.length){state.wordPracticeIndex+=1;return render()}
+ const retry=state.wordPracticeRetryQueue.slice();
+ if(retry.length){state.wordPracticeStage=state.wordPracticeStage.startsWith("meaning")?"meaningRedo":"compareRedo";state.wordPracticeQueue=retry;state.wordPracticeRetryQueue=[];state.wordPracticeIndex=0;return render()}
+ if(state.wordPracticeStage.startsWith("meaning"))return startComparePractice();
+ finishWordPractice();
+}
+function answerWordChoice(choice){
+ if(state.wordPracticeLocked||state.wordPracticeCard)return;
+ const q=currentWordPracticeQuestion();if(!q)return;
+ const correct=choice===q.correct;state.wordPracticeAnswer=choice;state.wordPracticeFeedback={correct};state.wordPracticeLocked=true;
+ if(!correct){state.wordPracticeRetryQueue.push(q);state.wordPracticeMistakes+=1}
+ render();
+ clearTimeout(window.__wordPracticeTimer);
+ const isFinal=correct&&state.wordPracticeStage.startsWith("compare")&&state.wordPracticeIndex===state.wordPracticeQueue.length-1&&state.wordPracticeRetryQueue.length===0;
+ window.__wordPracticeTimer=setTimeout(()=>{if(!correct){state.wordPracticeCard=true;state.wordPracticeCardQuestion=q;state.wordPracticeLocked=false;render()}else advanceWordPractice()},isFinal?1000:500);
+}
+document.addEventListener("click",e=>{const c=e.target.closest("[data-word-choice]");if(c)answerWordChoice(c.dataset.wordChoice)});
+document.addEventListener("click",e=>{const option=e.target.closest("[data-feedback-option]");if(!option)return;state.feedbackChoice=option.dataset.feedbackOption;document.querySelectorAll("[data-feedback-option]").forEach(x=>x.classList.toggle("selected",x===option));document.getElementById("feedbackOther").classList.toggle("show",state.feedbackChoice==="其他");});
+render();
+</script>
+</body>
+</html>
