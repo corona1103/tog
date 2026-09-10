@@ -332,7 +332,7 @@ function renderPoemDetail(){
 function renderUnderstand(p){
  if(state.reciteCompleted){
    const all=reciteSentences(p),stats=reciteStatsFor(p),count=state.reciteCountdown||3;
-   return '<div class="text-panel recite-complete-panel"><div class="panel-head"><div><div class="eyebrow">本次背诵已完成</div><h3>全文 '+all.length+' 句已背完</h3><p>累计背完 '+stats.completions+' 次，已背过 '+stats.sentences+' 句。</p></div><span class="pill green">背 · 已完成</span></div><div class="recite-complete-mark">✓</div><div class="recite-complete-tip">接下来可以直接进入默写检测，也可以重新从第一句开始背诵。</div><div class="action-row"><button class="ghost-btn" data-action="restart-recite">重新背</button><button class="primary-btn" data-action="go-direct-after-recite">去默写 '+count+'s</button></div></div>';
+   return '<div class="text-panel recite-complete-panel"><div class="panel-head"><div><div class="eyebrow">本次背诵已完成</div><h3>全文 '+all.length+' 句已背完</h3><p>累计背完 '+stats.completions+' 次，已背过 '+stats.sentences+' 句。</p></div><span class="pill green">背 · 已完成</span></div><div class="recite-complete-mark">✓</div><div class="recite-complete-tip">接下来可以直接进入默写检测，也可以重新从第一句开始背诵。</div><div class="action-row"><button class="ghost-btn" data-action="restart-recite">再次背诵</button><button class="primary-btn" data-action="go-direct-after-recite">去默写</button></div></div>';
  }
  if(state.reciting){
    const all=reciteSentences(p),completed=Math.min(state.reciteSentenceIndex,all.length),currentItem=all[completed];
