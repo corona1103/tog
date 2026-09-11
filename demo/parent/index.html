@@ -106,6 +106,7 @@ button { border: 0; cursor: pointer; }
  .subject-compare { margin-top: 12px; display: grid; gap: 7px; }.subject-compare-row { display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: #f7faf9; border-radius: 10px; }.subject-compare-row .name { width: 36px; font-size: 10px; font-weight: 800; }.subject-compare-row .bar-wrap { flex: 1; height: 6px; background: #e7efed; border-radius: 6px; overflow: hidden; }.subject-compare-row .bar-wrap i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #7acdbb, #13a38e); }.subject-compare-row .value { width: 60px; color: var(--muted); text-align: right; font-size: 9px; }
 .trend-chart-area { position: relative; height: 150px; margin-top: 12px; }.trend-chart-area .bars { position: absolute; inset: 0; z-index: 1; margin: 0; }.accuracy-line { position: absolute; z-index: 2; inset: 17px 8px 25px; width: calc(100% - 16px); height: calc(100% - 42px); overflow: visible; pointer-events: none; }.accuracy-line polyline { fill: none; stroke: #f2a45e; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }.accuracy-line circle { fill: #fff; stroke: #f2a45e; stroke-width: 3; vector-effect: non-scaling-stroke; }.trend-legend { display: flex; gap: 13px; margin-top: 7px; color: var(--muted); font-size: 9px; }.legend-dot { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: var(--brand); }.legend-dot.accuracy { background: var(--orange); }.subject-summary { margin-top: 12px; display: grid; gap: 9px; }.subject-summary-row { padding: 13px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }.subject-summary-head { display: flex; align-items: center; justify-content: space-between; }.subject-summary-head strong { font-size: 13px; }.subject-summary-head span { color: var(--brand-dark); font-size: 11px; font-weight: 800; }.subject-summary-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 10px; }.subject-summary-meta div { padding: 8px 5px; text-align: center; background: #f7faf9; border-radius: 9px; }.subject-summary-meta b { display: block; font-size: 14px; }.subject-summary-meta small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
 </style>
+<style>.method-extra { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.35; }</style>
 </head>
 <body>
 <main class="demo-shell">
@@ -117,9 +118,9 @@ button { border: 0; cursor: pointer; }
 <script>
 const DATA = {
   student: { name: '林知夏', className: '高一（2）班', school: '杭州实验学校 · 高一', updated: '09-10 08:00' },
-  home: { taskDone: 8, taskTotal: 10, completion: 80, completionDiff: '+10%', accuracy: 82, accuracyDiff: '+6%', selfQuestions: 126, selfDiff: '+34', video: 86, videoDiff: '+18 分钟', words: 178, wordsDiff: '+42', aiTasks: 6, aiDiff: '+2', period: '9/1 — 9/7' },
-  month: { taskDone: 28, taskTotal: 34, completion: 82, completionDiff: '+6%', accuracy: 80, accuracyDiff: '+4%', selfQuestions: 392, selfDiff: '+76', video: 248, videoDiff: '+53 分钟', words: 486, wordsDiff: '+102', aiTasks: 18, aiDiff: '+6', period: '9月1日 — 9月30日' },
-  term: { taskDone: 42, taskTotal: 50, completion: 84, completionDiff: '+4%', accuracy: 79, accuracyDiff: '+3%', selfQuestions: 468, selfDiff: '+92', video: 326, videoDiff: '+74 分钟', words: 612, wordsDiff: '+126', aiTasks: 22, aiDiff: '+8', period: '2026春季学期' },
+  home: { taskDone: 8, taskTotal: 10, completion: 80, completionDiff: '+10%', accuracy: 82, accuracyDiff: '+6%', answers: 126, answersDiff: '+34', video: 86, videoDiff: '+18 分钟', words: 178, wordsDiff: '+42', aiTasks: 6, aiDiff: '+2', period: '9/1 — 9/7' },
+  month: { taskDone: 28, taskTotal: 34, completion: 82, completionDiff: '', accuracy: 80, accuracyDiff: '', answers: 392, answersDiff: '', video: 248, videoDiff: '', words: 486, wordsDiff: '', aiTasks: 18, aiDiff: '', period: '9月1日 — 9月30日' },
+  term: { taskDone: 42, taskTotal: 50, completion: 84, completionDiff: '', accuracy: 79, accuracyDiff: '', answers: 468, answersDiff: '', video: 326, videoDiff: '', words: 612, wordsDiff: '', aiTasks: 22, aiDiff: '', period: '2026春季学期' },
   tasks: [
     { id: 1, subject: '语文', dot: '', type: '老师作业', title: '《劝学》课后练习', date: '9月9日 · 截止 23:00', status: '已完成', accuracy: '9/10', score: '90%', desc: '共 10 题 · 已批改 · 用时 18 分钟', wrong: '第 6 题：实词“假”的意义辨析；第 9 题：文意理解。' },
     { id: 2, subject: '数学', dot: 'math', type: '靶向任务', title: '函数单调性巩固练习', date: '9月8日 · 截止 22:00', status: '已完成', accuracy: '14/16', score: '87.5%', desc: '共 16 题 · 已批改 · 覆盖 3 个知识点', wrong: '函数单调区间判断仍有 2 题出错，建议查看对应解析。' },
@@ -140,9 +141,9 @@ const DATA = {
     { label: '物理', total: 8, submitted: 7, submitRate: 88, accuracy: 75 }
   ],
   methods: [
-    { id: 'mistakes', icon: '↺', title: '错题周周清', desc: '错题归因、订正与复习闭环', value: '本周清理 18 题', subjects: ['语文 4', '数学 9', '英语 5'] },
-    { id: 'weak', icon: '◈', title: '薄弱点打透', desc: '围绕薄弱知识点持续练习', value: '打透 6 个知识点', subjects: ['数学 3', '物理 2', '化学 1'] },
-    { id: 'words', icon: 'Aa', title: '单词周周升', desc: '词汇积累、复习与掌握追踪', value: '掌握 178 个词', subjects: ['英语 126', '语文 52'] }
+    { id: 'mistakes', icon: '↺', title: '错题周周清', desc: '错题归因、订正与复习闭环', value: '本周清理 18 题', extra: '新增错题 10 题', subjects: ['语文 4', '数学 9', '英语 5'] },
+    { id: 'weak', icon: '◈', title: '薄弱点打透', desc: '围绕薄弱知识点持续练习', value: '点亮 1345 个知识点', extra: '平均掌握度 50%', subjects: ['数学 3', '物理 2', '化学 1'] },
+    { id: 'words', icon: 'Aa', title: '单词周周升', desc: '词汇积累、复习与掌握追踪', value: '覆盖 178 个词', extra: '平均正确率 15%', subjects: [] }
   ],
   knowledgeMap: [
     { id: 'math', name: '数学', lit: 18, total: 24, rate: 75 },
@@ -158,7 +159,7 @@ const DATA = {
 let state = { view: 'home', homeRange: 'week', learnTab: 'tasks', subjectFilter: 'all', drawer: null, bindOpen: false, privacyOpen: false, reminderOn: false, toastTimer: null };
 
 function metric(label, value, unit, diff, tone = 'up') {
-  return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value}<span class="metric-unit">${unit || ''}</span></div><div class="metric-diff ${tone}">${diff}</div></div>`;
+  return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value}<span class="metric-unit">${unit || ''}</span></div>${diff ? `<div class="metric-diff ${tone}">${diff}</div>` : ''}</div>`;
 }
 
 function topbar(title, sub, action = '') {
@@ -172,11 +173,11 @@ function subjectButtons() {
   return [['all', '全科'], ['chinese', '语文'], ['math', '数学'], ['english', '英语'], ['physics', '物理']].map(([key, label]) => `<button class="${state.subjectFilter === key ? 'active' : ''}" onclick="setSubjectFilter('${key}')">${label}</button>`).join('');
 }
 function methodCards(detail = false) {
-  return `<div class="method-grid">${DATA.methods.map(m => `<div class="method-card ${detail ? 'detail' : ''}" onclick="openDrawer('method', '${m.id}')"><div class="method-icon">${m.icon}</div><h3>${m.title}</h3><p>${m.desc}</p><strong>${m.value}</strong><div class="method-subjects">${m.subjects.slice(0, detail ? m.subjects.length : 2).map(s => `<span>${s}</span>`).join('')}</div></div>`).join('')}</div>`;
+  return `<div class="method-grid">${DATA.methods.map(m => `<div class="method-card ${detail ? 'detail' : ''}" onclick="openDrawer('method', '${m.id}')"><div class="method-icon">${m.icon}</div><h3>${m.title}</h3><p>${m.desc}</p><strong>${m.value}</strong><span class="method-extra">${m.extra}</span>${m.subjects.length ? `<div class="method-subjects">${m.subjects.slice(0, detail ? m.subjects.length : 2).map(s => `<span>${s}</span>`).join('')}</div>` : ''}</div>`).join('')}</div>`;
 }
 function selfSubjectComparison() {
   const subjects = ['chinese', 'math', 'english', 'physics'];
-  return `<div class="card self-card"><h3>自学分学科统计</h3><div class="subject-compare">${subjects.map(key => { const s = DATA.subjectStats[key]; return `<div class="subject-compare-row"><span class="name">${s.label}</span><span class="bar-wrap"><i style="width:${Math.max(18, s.self / 50 * 100)}%"></i></span><span class="value">${s.self} 题 · ${s.accuracy}%</span></div>`; }).join('')}</div></div>`;
+  return `<div class="card self-card"><h3>自学分学科统计</h3><div class="subject-compare">${subjects.map(key => { const s = DATA.subjectStats[key]; const accuracy = s.accuracyTrend[s.accuracyTrend.length - 1]; return `<div class="subject-compare-row"><span class="name">${s.label}</span><span class="bar-wrap"><i style="width:${Math.max(18, s.self / 50 * 100)}%"></i></span><span class="value">${s.self} 题 · ${accuracy}%</span></div>`; }).join('')}</div></div>`;
 }
 function knowledgeGraph() {
   return `<div class="card knowledge-map"><h3>知识图谱</h3><p>数理化生已点亮知识点，点击查看各学科掌握程度</p><div class="knowledge-subjects">${DATA.knowledgeMap.map(k => `<div class="knowledge-subject" onclick="openDrawer('knowledge', '${k.id}')"><b>${k.lit}</b><span>${k.name} · ${k.total}点</span><i style="width:${Math.max(22, k.rate * .38)}px"></i></div>`).join('')}</div></div>`;
@@ -196,7 +197,7 @@ function homeView() {
     ${topbar('家长端', '看见孩子的每一步学习变化', '<button class="icon-btn" onclick="setView(\'report\')" aria-label="查看周报">▤<span class="dot"></span></button>')}
     <div class="eyebrow">你好，林知夏家长</div>
     <div class="report-banner report-banner-top"><div class="report-symbol">☼</div><div class="report-copy"><strong>上周学习周报已生成</strong><span>每周一早上更新，和学生平板保持一致</span></div><button onclick="setView('report')">去看看</button></div>
-    <div class="card overview"><div class="overview-head"><strong>学习概览</strong><span class="period-chip">${rangeLabel(state.homeRange)}</span></div><div class="overview-range"><button class="${state.homeRange === 'week' ? 'active' : ''}" onclick="changeHomeRange('week')">本周</button><button class="${state.homeRange === 'month' ? 'active' : ''}" onclick="changeHomeRange('month')">本月</button><button class="${state.homeRange === 'term' ? 'active' : ''}" onclick="changeHomeRange('term')">本学期</button></div><div class="metric-grid">${metric('老师任务完成', `${d.taskDone}/${d.taskTotal}`, '项', `${d.completionDiff} 较上一周期`)}${metric('任务正确率', d.accuracy, '%', `${d.accuracyDiff} 较上一周期`)}${metric('自学题目', d.selfQuestions, '题', `${d.selfDiff} 题`)}${metric('AI 任务完成', d.aiTasks, '项', `${d.aiDiff} 较上一周期`)}</div></div>
+    <div class="card overview"><div class="overview-head"><strong>学习概览</strong><span class="period-chip">${rangeLabel(state.homeRange)}</span></div><div class="overview-range"><button class="${state.homeRange === 'week' ? 'active' : ''}" onclick="changeHomeRange('week')">本周</button><button class="${state.homeRange === 'month' ? 'active' : ''}" onclick="changeHomeRange('month')">本月</button><button class="${state.homeRange === 'term' ? 'active' : ''}" onclick="changeHomeRange('term')">本学期</button></div><div class="metric-grid">${metric('老师任务完成', `${d.taskDone}/${d.taskTotal}`, '项', d.completionDiff ? `${d.completionDiff} 较上一周期` : '')}${metric('任务正确率', d.accuracy, '%', d.accuracyDiff ? `${d.accuracyDiff} 较上一周期` : '')}${metric('答题数量', d.answers, '题', d.answersDiff ? `${d.answersDiff} 题` : '')}${metric('答题正确率', d.accuracy, '%', d.accuracyDiff ? `${d.accuracyDiff} 较上一周期` : '')}</div></div>
     <div class="section-head"><h2>学习趋势</h2><button onclick="setView('learn')">查看详细 ›</button></div>
     ${trendCard()}
     <div class="section-head"><h2>学习成果</h2><button onclick="setView('learn'); state.learnTab='self'; render();">查看全部 ›</button></div>
