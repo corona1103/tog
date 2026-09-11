@@ -1,0 +1,64 @@
+# 工具：knowledge_search — 知识点检索
+# 依据：design-doc-v3-AI学伴.md §S2 日常作业与答疑 + §意图分类路由
+# 维护：描述/何时用 = PM-A 主笔；参数 schema = 研发主笔；评审 PM-B
+# 改动必须走 PR + 触发 eval 回归
+
+name: knowledge_search
+version: 0.2.0
+
+# ↓ 这段 description 直接进模型上下文，是产品规格不是技术注释
+description: |
+  检索教材与知识点库，返回某知识点的结构化讲解、例题、易错点。
+  当学生问"什么是X""X怎么用""帮我讲讲X"时使用。
+  不要在学生只是要直接做题、或纯闲聊、或问学习计划时使用——
+  做题用 problem_generator，计划咨询用 strategy_brain。
+  白名单：仅当检索的 kp_id 在学生当前开放等级的白名单内时才调用，
+  否则按 safety-governance 拒绝并提示。
+
+when_to_use:
+  - 学生问概念、要讲解
+  - 错因追问需关联知识点（路由自"错因追问"意图）
+when_not_to_use:
+  - 学生明确要出题练习 → problem_generator
+  - 学生问"该学什么/为什么学这个" → strategy_brain
+  - 学生表达情绪 → 走情绪回应，不调本工具
+
+input_schema:
+  type: object
+  required: [kp_id]
+  properties:
+    kp_id:
+      type: string
+      description: 知识点 id（来自 ontology/knowledge-point.schema.json），不是自然语言
+      # 意图识别先做"自然语言→kp_id"映射，这里只收 id
+    grade:
+      type: string
+      description: 年级，缺省从学生画像取
+
+output_schema:
+  type: object
+  properties:
+    explanation:
+      type: string
+      description: 结构化讲解，分步
+    examples:
+      type: array
+      items: { type: object }
+    pitfalls:
+      type: array
+      items: { type: string }
+      description: 易错点
+
+failure_handling: |
+  返回空结果时，模型应用自身知识兜底，并在回复中标注"这部分可能不够权威，
+  建议问老师"。连续 2 次同一 kp_id 返回空 → 触发重复检测，转 handoff_human。
+
+cost_hint:
+  avg_latency_ms: 120
+  avg_tokens: 600
+
+# 安全治理挂钩
+safety:
+  whitelist_anchored_on: kp_id
+  open_level_required: [full_open, limited_open]
+  # 严格模式学生不可调用

@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aitutor/ontology/student-kp-state.schema.json",
+  "title": "StudentKnowledgePointState",
+  "description": "教育本体·学生×知识点状态。依据：本体论评审·问题3（学生画像字段太粗）+ 问题5（三大脑共享数据层）。诊断/策略/追踪三大脑都读写此对象，避免回复前后矛盾。",
+  "type": "object",
+  "required": ["student_id", "kp_id", "mastery", "updated_at"],
+  "properties": {
+    "student_id": { "type": "string" },
+    "kp_id": {
+      "type": "string",
+      "description": "对应 knowledge-point.schema.json 的 id"
+    },
+    "mastery": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "掌握率 0-1。诊断输入聚合到此（[题目→得分]+[题目→kp]→[kp→得分率]）",
+      "example": 0.32
+    },
+    "mastery_level": {
+      "type": "string",
+      "enum": ["untrained", "aware", "mastered", "proficient"],
+      "description": "掌握分档，由 mastery 映射：<0.3 untrained, <0.5 aware, <0.8 mastered, ≥0.8 proficient"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["conquer", "maintain", "abandon"],
+      "description": "三档策略归属（v3 §简化诊断管线）：mastery<0.3→conquer, 0.3-0.7→maintain, >0.7且ROI低→abandon"
+    },
+    "last_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "problem_id": { "type": "string" },
+          "error_at": { "type": "string", "format": "date-time" },
+          "error_type": { "type": "string" }
+        }
+      },
+      "description": "近 30 天该知识点的错误记录（滚动），用于错误模式分析"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "每次作业/考试后更新"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["exam", "homework", "ai_practice"],
+      "description": "掌握率数据来源"
+    }
+  }
+}

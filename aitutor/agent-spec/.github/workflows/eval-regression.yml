@@ -1,0 +1,57 @@
+# 评估回归 CI
+# 触发：任何 tools/ prompts/ boundaries/ ontology/ memory/ 的改动提 PR 或合并
+# 作用：跑全量 eval/cases/，对比指标变化，PR 必须附对比
+# 维护：研发-2（实现），PM-B（验收）。CI 模板，需按实际评测脚本调整。
+
+name: eval-regression
+
+on:
+  pull_request:
+    paths:
+      - 'tools/**'
+      - 'prompts/**'
+      - 'boundaries/**'
+      - 'ontology/**'
+      - 'memory/**'
+      - 'eval/**'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/**'
+      - 'prompts/**'
+      - 'boundaries/**'
+      - 'ontology/**'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: |
+          # 安装评测依赖（研发按实际填）
+          # pip install -r eval/requirements.txt
+
+      - name: Run full eval suite
+        run: |
+          # 跑全量 case，输出指标 + 每个 case 的 pass/fail
+          bash eval/run.sh --full --output eval/results.json
+
+      - name: Compare with baseline
+        run: |
+          # 与主分支基线对比，退化则失败
+          # python eval/compare.py --baseline eval/baseline.json --current eval/results.json
+          echo "TODO: 接实际对比脚本"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: eval/results.json
+
+      - name: Fail on regression
+        run: |
+          # 越界漏拒率、内容安全事故 = 0 红线；其余指标退化 > 5% 失败
+          echo "TODO: 接实际断言逻辑"

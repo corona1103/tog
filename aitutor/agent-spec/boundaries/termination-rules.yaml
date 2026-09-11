@@ -1,0 +1,47 @@
+# 终止 / 收敛 / 防沉迷规则
+# 依据：design-doc-v3-AI学伴.md §安全治理 + §底线指标 + 附录A PRD样例 §A.6
+# 维护：阈值 = PM-A 拍板（成本×体验×合规权衡），实现 = 研发。改动走 PR + 回归。
+
+normal_termination:
+  finish_signal:
+    description: 模型输出 action=finish 且已覆盖学生本轮诉求
+    enforced: true
+  max_steps_per_turn:
+    value: 8
+    rationale: 平衡讲解深度与首 token/单步延迟（首 token<2s，单步<3s）
+    on_exceed: 强制收尾 + 提示"我们分几次聊"
+
+cost_limits:
+  max_tokens_per_turn: 12000
+  on_exceed: 自动摘要历史 + 保留最近 3 轮原文 + 强制收尾
+
+loop_protection:
+  duplicate_detection:
+    rule: 连续 2 次相同工具 + 相同参数
+    on_trigger: 强制改策略；若仍重复 → handoff_human
+  stuck_detection:
+    rule: 连续 2 轮学生表达"不知道/不会/想看答案"
+    on_trigger: 启发式跳级到第 5 轮（见 heuristics-layered-hint.md）
+
+# 进校平板硬红线（来自 v3 §底线指标，PM 不可调低）
+hard_redlines:
+  daily_usage_limit_min: 45
+  screen_time_policy_pct: 30
+  on_hit:
+    - 立即停止当前会话
+    - 提示"今天学得够啦，休息一下"
+    - 当日不再主动触达
+  content_safety_incident:
+    target: 0
+    on_any: 产品下线（红线）
+
+handoff_triggers:
+  - 学生明确要求人工
+  - 连续 2 次答非所问
+  - 越界请求（学籍/付费/隐私/他人成绩）
+  - 心理触发词（自伤/绝望/活不过）→ 立即红色预警
+  - 连续 3 天未学习 → 触发情绪陪伴链路（非直接转人工）
+
+note: |
+  max_steps 与 max_tokens 为初始基线，需在灰度期（8月底）按真实延迟/成本回归后调。
+  防沉迷 45min 与屏幕 30% 为政策红线，不可由研发单方调整。

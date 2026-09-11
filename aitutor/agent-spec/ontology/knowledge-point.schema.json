@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aitutor/ontology/knowledge-point.schema.json",
+  "title": "KnowledgePoint",
+  "description": "教育本体·知识点对象。依据：design-doc-v3-AI学伴.md §关键实现规格 + 本体论评审·问题1。这是诊断大脑/策略大脑/追踪大脑/对话层的共享数据地基。",
+  "type": "object",
+  "required": ["id", "name", "subject", "grade"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "知识点唯一标识，白名单锚定此 id 而非自然语言字符串",
+      "example": "kp_math_g1_func_shift"
+    },
+    "name": {
+      "type": "string",
+      "description": "标准名称（教研定，作为唯一显示名）",
+      "example": "二次函数图象平移"
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "同义表述，仅用于意图识别映射到 id，不用于白名单匹配",
+      "example": ["函数平移", "抛物线平移"]
+    },
+    "subject": {
+      "type": "string",
+      "enum": ["math", "chem", "phys", "eng", "cn", "bio"],
+      "description": "学科，对应分批上线计划：math/chem=9月, phys/eng=10月, cn/bio=11月+"
+    },
+    "grade": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "适用学段：g7-g12",
+      "example": ["g10", "g11"]
+    },
+    "topic_group": {
+      "type": "string",
+      "description": "所属专题（比知识点粗一级，用于薄弱专题聚合）",
+      "example": "函数与导数"
+    },
+    "prerequisite_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "先决知识点 id 列表。诊断时若先决掌握率<50%优先攻先决",
+      "example": ["kp_math_g1_func_basic", "kp_math_g1_vertex"]
+    },
+    "difficulty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "难度系数，0 最易 1 最难",
+      "example": 0.55
+    },
+    "exam_frequency": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "高考/中考频次归一值，用于 ROI 计算",
+      "example": 0.8
+    },
+    "related_problem_types": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "关联题型 id，用于出题和错因关联",
+      "example": ["pt_func_trans_choice", "pt_func_word"]
+    },
+    "school_progress_unit": {
+      "type": "string",
+      "description": "校内进度单元（老师录入），用于对齐教学进度",
+      "example": "必修一-第3章"
+    }
+  }
+}
