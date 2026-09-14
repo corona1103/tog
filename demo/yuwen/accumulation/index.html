@@ -470,7 +470,7 @@ function renderWordPractice(){
  }
 function renderWordResultModal(){
  const list=practicePool(),meaningCount=list.reduce((sum,w)=>sum+w.meanings.length,0),review=state.wordPracticeMode==="review";
- return '<div class="modal-backdrop show word-result-modal"><div class="modal word-result-dialog"><div class="modal-head"><div><div class="eyebrow">练习完成</div><h2>'+(review?"本轮复习完成":"本轮学习完成")+'</h2></div><button class="modal-close" data-action="back-word-cards">×</button></div><div class="word-result-count"><strong>'+meaningCount+'</strong><span>个'+(review?"复习词义":"学会词义")+'</span></div><p class="word-result-message">两轮练习已完成，可以继续下一组巩固。</p><div class="action-row word-result-actions"><button class="primary-btn" data-action="next-word-group">下一组</button><button class="outline-btn" data-action="retry-word">再练一次</button><button class="ghost-btn" data-action="back-word-cards">返回</button></div></div></div>';
+ return '<div class="modal-backdrop show word-result-modal"><div class="modal word-result-dialog"><div class="modal-head"><div><div class="eyebrow">练习完成</div><h2>'+(review?"本轮复习完成":"本轮学习完成")+'</h2></div><button class="modal-close" data-action="back-word-cards">×</button></div><div class="word-result-count"><strong>'+meaningCount+'</strong><span>个词义例句</span></div><p class="word-result-message">两轮练习已完成，可以继续下一组巩固。</p><div class="action-row word-result-actions"><button class="primary-btn" data-action="next-word-group">下一组</button><button class="ghost-btn" data-action="back-word-cards">返回</button></div></div></div>';
 }
 function bindEvents(){
  document.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",handleAction));
