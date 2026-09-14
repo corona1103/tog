@@ -143,6 +143,20 @@ const poems = [
       {type:"手法识别",title:"表达自古以来人生难以十全十美的句子",answer:"此事古难全。",explain:"“古难全”点明人生聚散、月有圆缺都是自古难以圆满的常态。",difficulty:"★☆☆"},
       {type:"主题归类",title:"苏轼借月抒发对亲人的思念",answer:"人有悲欢离合，月有阴晴圆缺，此事古难全。",explain:"借月亮的圆缺寄托对人生离合的理解与思念。",difficulty:"★★☆"}
     ]
+  },
+  {
+    id:"mulan",title:"木兰诗",author:"郭茂倩（编）",dynasty:"南北朝",book:"部编版",volume:"八年级上册",chapter:"第四单元",
+    text:"唧唧复唧唧，木兰当户织。不闻机杼声，惟闻女叹息。",
+    translation:"织布机声一声接着一声，木兰对着门在织布。听不见织布机的声音，只听见木兰的叹息声。",
+    segments:[["唧唧复唧唧，木兰当户织。","不闻机杼声，惟闻女叹息。"]],
+    pair:[{prompt:"唧唧复唧唧，木兰当户织。",answer:"不闻机杼声，惟闻女叹息。",label:"给上句，默写下句"}],
+    comprehension:[
+      {type:"情境提示",title:"描写木兰停机叹息的句子",answer:"不闻机杼声，惟闻女叹息。",explain:"以织布机声的停止和叹息声，表现木兰的忧思。",difficulty:"★☆☆"},
+      {type:"情境提示",title:"描写木兰对着门织布的句子",answer:"唧唧复唧唧，木兰当户织。",explain:"交代木兰的日常劳作状态。",difficulty:"★☆☆"},
+      {type:"主题归类",title:"以声音描写引出木兰叹息的句子",answer:"不闻机杼声，惟闻女叹息。",explain:"通过听觉对比突出木兰的异常情绪。",difficulty:"★★☆"},
+      {type:"手法识别",title:"运用反复写织布机声音的句子",answer:"唧唧复唧唧。",explain:"“复”字写出声音连续不断的特点。",difficulty:"★☆☆"},
+      {type:"情境提示",title:"交代木兰身份和日常劳作的句子",answer:"木兰当户织。",explain:"“当户织”点明木兰在家中织布。",difficulty:"★☆☆"}
+    ]
   }
 ];
 function makeExamples(label,source,items){
@@ -172,14 +186,21 @@ const words = {
   "实词":allWords.filter(w=>w.category==="实词"),
   "虚词":allWords.filter(w=>w.category==="虚词")
 };
-function seedQuestions(type){
-  const source=poems[0].comprehension.slice(0,5);
-  return source.map((q,index)=>({question:q.title,poemTitle:poems[0].title,userAnswer:type==="随机抽查"&&index===1?"":q.answer,correctAnswer:q.answer,correct:type!=="随机抽查"||index!==1}));
+function seedQuestions(type,count=5){
+  const source=poems[0].comprehension;
+  return Array.from({length:count},(_,index)=>{const q=source[index%source.length];return {question:q.title,poemTitle:poems[0].title,userAnswer:type==="随机抽查"&&index===1?"":q.answer,correctAnswer:q.answer,correct:type!=="随机抽查"||index!==1}});
 }
 function createSeedLearningRecords(){
   return [
     {id:"seed-recite",date:"2026-09-10",time:"19:20",category:"poem",type:"recite",title:"《观沧海》",poemId:"guancang",status:"completed"},
-    {id:"seed-comp",date:"2026-09-10",time:"19:24",category:"poem",type:"comprehension",title:"观沧海 理解性默写 5题",poemId:"guancang",questions:seedQuestions("理解性默写"),status:"completed",rate:100},
+    {id:"seed-recite-2",date:"2026-09-10",time:"19:21",category:"poem",type:"recite",title:"《观沧海》",poemId:"guancang",status:"completed"},
+    {id:"seed-recite-3",date:"2026-09-10",time:"19:22",category:"poem",type:"recite",title:"《观沧海》",poemId:"guancang",status:"completed"},
+    {id:"seed-comp",date:"2026-09-10",time:"19:24",category:"poem",type:"comprehension",title:"观沧海 理解性默写 8题",poemId:"guancang",questions:seedQuestions("理解性默写",8),status:"completed",rate:100},
+    {id:"seed-mulan-recite-1",date:"2026-09-10",time:"19:04",category:"poem",type:"recite",title:"《木兰诗》",poemId:"mulan",status:"completed"},
+    {id:"seed-mulan-recite-2",date:"2026-09-10",time:"19:05",category:"poem",type:"recite",title:"《木兰诗》",poemId:"mulan",status:"completed"},
+    {id:"seed-mulan-recite-3",date:"2026-09-10",time:"19:06",category:"poem",type:"recite",title:"《木兰诗》",poemId:"mulan",status:"completed"},
+    {id:"seed-mulan-recite-4",date:"2026-09-10",time:"19:07",category:"poem",type:"recite",title:"《木兰诗》",poemId:"mulan",status:"completed"},
+    {id:"seed-mulan-recite-5",date:"2026-09-10",time:"19:08",category:"poem",type:"recite",title:"《木兰诗》",poemId:"mulan",status:"completed"},
     {id:"seed-direct",date:"2026-09-09",time:"17:20",category:"poem",type:"direct",title:"观沧海 直接默写 5题",poemId:"guancang",questions:seedQuestions("直接默写"),status:"completed",rate:100},
     {id:"seed-random",date:"2026-09-09",time:"18:06",category:"poem",type:"random",title:"随机抽查 5题",poemId:"guancang",questions:seedQuestions("随机抽查"),status:"completed",rate:80},
     {id:"seed-word-fu",date:"2026-09-09",time:"17:42",category:"word",type:"wordCard",title:"“负”",wordKey:"负-实词",status:"learned"},
@@ -277,7 +298,7 @@ function openWordPractice(mode="learn",offset=0){
 function startNextWordGroup(){const scope=practiceScope();if(!scope.length){toast(state.wordPracticeMode==="review"?"暂无已学会词目可复习":"当前范围暂无可学习词目");return}const count=Math.max(1,Math.min(Number(state.wordCount)||2,scope.length));const nextOffset=state.wordPracticeOffset+count<scope.length?state.wordPracticeOffset+count:0;return openWordPractice(state.wordPracticeMode,nextOffset)}
 function poem(p){return p || currentPoem()}
 function header(title,desc,back,extra){const action=back==="poemList"?"poem-list":back==="wordHome"?"words":back||"home";const backButton=back&&back!=="home"?'<button class="back-btn" data-action="'+action+'">← 返回上一级</button>':"";return '<div class="page-head"><div><div class="eyebrow">语文自学 · 积累本</div><h1>'+title+'</h1><p>'+desc+'</p></div>'+(extra||"")+backButton+'</div>'}
-function wordContextSwitchers(){return '<div class="word-context-switchers"><select class="select" data-word-context="wordBook" aria-label="教材版本"><option '+(state.wordBook==="部编版"?"selected":"")+'>部编版</option><option '+(state.wordBook==="人教版"?"selected":"")+'>人教版</option></select><select class="select" data-word-context="wordVolume" aria-label="教材册次"><option '+(state.wordVolume==="八年级上册"?"selected":"")+'>八年级上册</option><option '+(state.wordVolume==="九年级上册"?"selected":"")+'>九年级上册</option></select><select class="select" data-word-context="wordSource" aria-label="词书"><option '+(state.wordSource==="课内同步词书"?"selected":"")+'>课内同步词书</option><option '+(state.wordSource==="中考高频词书"?"selected":"")+'>中考高频词书</option></select></div>'}
+function wordContextSwitchers(){return '<div class="word-context-switchers"><span class="context-readonly" aria-label="教材版本">'+esc(state.wordBook)+'</span><span class="context-readonly" aria-label="教材册次">'+esc(state.wordVolume)+'</span></div>'}
 function homeHeader(){return '<div class="page-head home-head"><div><div class="eyebrow">语文自学 · 学习入口</div><h1>积累本</h1><p>把课内积累变成每天都能完成的小练习。</p></div><div class="home-actions"><button class="outline-btn record-btn" data-action="view-my-record">我的学习记录</button></div></div>'}
 function recordTimestamp(record){return String(record.date||"")+" "+String(record.time||"00:00")}
 function aggregatePoemLearningRecords(){
