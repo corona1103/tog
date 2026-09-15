@@ -43,6 +43,7 @@
 - `aitutor/agent-spec/tools/queryStudentKnowledgeMastery.yaml`
 - `aitutor/agent-spec/prompts/dialogue-agent-system-v1.md`
 - `aitutor/agent-spec/prompts/dialogue-agent-system-v2-compact.md`
+- `aitutor/agent-spec/prompts/dialogue-agent-system-v3-single.md`
 
 ## 验收标准
 
@@ -51,3 +52,4 @@
 - 对话 Prompt 不把作业统计当成任务列表，不把掌握度当成正确率。
 - 对话 Prompt 不要求学生提供 studentId、userId 或 orgId。
 - 不向学生展示原始 JSON、工具名、参数、内部 ID 或错误堆栈。
+- 单文件平台可以只加载 `dialogue-agent-system-v3-single.md` 完成系统 Prompt 配置，不依赖其他规格文件。

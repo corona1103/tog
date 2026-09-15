@@ -51,3 +51,12 @@
 - 预期影响 case：全部学生主动对话 case；工具字段解析仍以 `tools/*.yaml` 为准。
 - 评估对比：需与 v1 做工具调用准确率、安全拒答和回答质量回归。
 - 评审：待 PM、研发和教研 review
+
+## 2026-09-15  单文件 Prompt
+
+- 改动人：PM + Codex 协作
+- 改动：新增 `prompts/dialogue-agent-system-v3-single.md`，将 4 个可用 MCP 的调用规则、参数约束、返回字段和解读边界整合进同一个 Prompt 文件。
+- 原因：开放 Agent 平台不支持加载外部工具规格文件，只能配置单个 Prompt。
+- 预期影响 case：全部学生主动对话及 4 个学情 MCP 调用 case。
+- 评估对比：需与 v2 精简版做工具调用准确率、安全拒答和回答质量回归。
+- 评审：待 PM、研发和教研 review
