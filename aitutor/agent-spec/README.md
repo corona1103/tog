@@ -28,6 +28,7 @@ agent-spec/
 │   ├── studentHomeworkStat.yaml
 │   ├── getLastPlanReportDetail.yaml
 │   ├── queryStudentProfileSummary.yaml
+│   ├── queryStudentKnowledgeAccuracy.yaml
 │   ├── problem_generator.yaml
 │   ├── answer_checker.yaml
 │   ├── progress_query.yaml

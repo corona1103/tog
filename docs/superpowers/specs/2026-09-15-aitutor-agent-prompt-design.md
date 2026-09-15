@@ -12,11 +12,11 @@
 - `getLastPlanReportDetail`
 - `queryStudentProfileSummary`
 - `queryStudentKnowledgeMastery`
+- `queryStudentKnowledgeAccuracy`
 - 对话 Agent 系统 Prompt
 
 本次暂不纳入：
 
-- `queryStudentKnowledgeAccuracy`：当前无法调用并返回结果。
 - `queryStudentExamReport`：按当前一期范围排除。
 - 具体任务列表查询：当前没有可用 MCP，Agent 不得假装支持。
 
@@ -48,7 +48,7 @@
 ## 验收标准
 
 - 每个 MCP 文档可以独立说明“什么时候调用、需要什么参数、如何理解返回结果、失败时怎么说”。
-- 对话 Prompt 不调用当前不可用的正确率 MCP 和考试报告 MCP。
+- 对话 Prompt 不调用考试报告 MCP；正确率 MCP 仅在接口成功返回时调用和解读。
 - 对话 Prompt 不把作业统计当成任务列表，不把掌握度当成正确率。
 - 对话 Prompt 不要求学生提供 studentId、userId 或 orgId。
 - 不向学生展示原始 JSON、工具名、参数、内部 ID 或错误堆栈。

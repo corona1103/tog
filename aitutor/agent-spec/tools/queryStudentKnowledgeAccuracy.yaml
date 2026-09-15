@@ -1,0 +1,77 @@
+# 工具：queryStudentKnowledgeAccuracy — 知识点作答正确率
+# 依据：291-学生AItutor助教.md §基础数据建设 + §学生平板/AI对话
+# 维护：PM + 研发共写；参数和返回结构以线上接口为准
+# 当前状态：一期可用
+
+name: queryStudentKnowledgeAccuracy
+version: 0.1.0
+
+description: |
+  查询当前学生指定学科或知识点的作答正确率和作答统计。
+  该工具反映作答表现，不等同于知识点掌握度。
+
+when_to_use:
+  - 学生询问某个学科或知识点的正确率
+  - 学生询问近期哪些知识点做题容易出错
+  - 学生希望根据作答表现确定复习重点
+
+when_not_to_use:
+  - 学生询问知识点掌握度，使用 queryStudentKnowledgeMastery
+  - 学生询问综合学情，使用 queryStudentProfileSummary
+  - 学生询问作业完成数量，使用 studentHomeworkStat
+
+input_schema:
+  type: object
+  required: [subjectId]
+  properties:
+    subjectId:
+      type: [string, integer]
+      description: 学科 ID，接口必填。
+    knowledgePointId:
+      type: string
+      description: 知识点 ID，可选；不传时查询该学科返回的全部知识点统计。
+    beginTime:
+      type: string
+      format: "yyyy-MM-dd"
+      description: 开始日期，与 endTime 同时传入。
+    endTime:
+      type: string
+      format: "yyyy-MM-dd"
+      description: 结束日期，与 beginTime 同时传入。
+
+identity_context: |
+  - orgId、userId 从请求头读取。
+  - Agent 不向学生索取、展示或替换 orgId、userId。
+
+output_schema:
+  envelope:
+    code: 0 表示成功；非 0 表示失败
+    message: string
+    data:
+      type: array
+      items:
+        subjectId: [string, integer]
+        studentId: [string, integer]
+        lkId: string
+        lkName: string
+        answerResultCnt: integer
+        answerResultSuccessCnt: integer
+        answerResultSuccessRate: number
+        questionNum: integer
+
+interpretation: |
+  - answerResultCnt 是作答次数；answerResultSuccessCnt 是答对次数；questionNum 是题目数。
+  - answerResultSuccessRate 已是 0～100 的百分比，禁止再乘 100；75.0 应展示为 75%。
+  - lkName 为 "-" 时表示知识点名称缺失，不把短横线当作知识点名称。
+  - 结果较多时优先展示正确率较低且作答次数不为 0 的知识点，并说明作答次数。
+  - 样本量很小时，只能说“当前作答表现较低/需要继续观察”，不能下绝对结论。
+  - 正确率和掌握度是不同指标，不能互相替代。
+
+parameter_rules: |
+  - beginTime 和 endTime 必须同时传入，格式为 yyyy-MM-dd。
+  - beginTime 不能晚于 endTime。
+  - 用户使用“最近一周”等自然语言时间时，先转换为明确日期；无法确定时只追问时间范围。
+
+failure_handling: |
+  - code 非 0、工具超时、权限不足或 data 为空时，不编造正确率。
+  - 不展示 code、command、原始 JSON 或接口错误堆栈。
