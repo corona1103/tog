@@ -42,6 +42,7 @@
 - `aitutor/agent-spec/tools/queryStudentProfileSummary.yaml`
 - `aitutor/agent-spec/tools/queryStudentKnowledgeMastery.yaml`
 - `aitutor/agent-spec/prompts/dialogue-agent-system-v1.md`
+- `aitutor/agent-spec/prompts/dialogue-agent-system-v2-compact.md`
 
 ## 验收标准
 

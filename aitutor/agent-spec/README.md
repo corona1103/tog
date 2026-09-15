@@ -43,7 +43,8 @@ agent-spec/
 │   ├── scene-s2-homework.md
 │   ├── scene-s3-evening-study.md
 │   ├── heuristics-layered-hint.md   # 启发式 5 轮降级
-│   └── dialogue-agent-system-v1.md
+│   ├── dialogue-agent-system-v1.md   # 完整评审版
+│   └── dialogue-agent-system-v2-compact.md # 实际配置精简版
 ├── boundaries/                  # 边界规则
 │   ├── safety-governance.md       # 三层安全治理
 │   ├── topic-whitelist.yaml       # 锚定 kp_id 的白名单
