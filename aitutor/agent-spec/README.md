@@ -25,6 +25,9 @@ agent-spec/
 │   └── student-kp-state.schema.json  # 学生知识点状态
 ├── tools/                       # 工具/技能 schema（给模型看的接口）
 │   ├── knowledge_search.yaml
+│   ├── studentHomeworkStat.yaml
+│   ├── getLastPlanReportDetail.yaml
+│   ├── queryStudentProfileSummary.yaml
 │   ├── problem_generator.yaml
 │   ├── answer_checker.yaml
 │   ├── progress_query.yaml
@@ -32,13 +35,15 @@ agent-spec/
 │   ├── handoff_human.yaml
 │   ├── diagnose_brain.yaml      # v3 诊断大脑（封装为工具）
 │   ├── strategy_brain.yaml      # v3 策略大脑（ROI + 三档）
-│   └── track_brain.yaml         # v3 追踪大脑（进度 + 预警）
+│   ├── track_brain.yaml         # v3 追踪大脑（进度 + 预警）
+│   └── queryStudentKnowledgeMastery.yaml
 ├── prompts/                     # 系统提示 + 场景 prompt
 │   ├── system.md
 │   ├── scene-s1-post-exam.md
 │   ├── scene-s2-homework.md
 │   ├── scene-s3-evening-study.md
-│   └── heuristics-layered-hint.md   # 启发式 5 轮降级
+│   ├── heuristics-layered-hint.md   # 启发式 5 轮降级
+│   └── dialogue-agent-system-v1.md
 ├── boundaries/                  # 边界规则
 │   ├── safety-governance.md       # 三层安全治理
 │   ├── topic-whitelist.yaml       # 锚定 kp_id 的白名单

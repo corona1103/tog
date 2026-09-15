@@ -1,0 +1,58 @@
+# 工具：getLastPlanReportDetail — 最新学习规划
+# 依据：291-学生AItutor助教.md §基础数据建设 + §学生平板/AI对话
+# 维护：PM + 研发共写；参数和返回结构以线上接口为准
+# 当前状态：一期可用
+
+name: getLastPlanReportDetail
+version: 0.1.0
+
+description: |
+  查询当前学生最新的学习规划内容。返回规划正文、所属学科、学年学期、
+  总体目标和关键行动。用于回答“我的学习计划是什么”“接下来怎么学”等问题。
+
+when_to_use:
+  - 学生询问当前学习规划、近期学习重点或学习目标
+  - 学生询问规划中的具体行动
+  - 学生希望基于现有规划调整学习难度或执行方式
+
+when_not_to_use:
+  - 学生询问实时作业完成情况
+  - 学生询问具体知识点掌握度
+  - 学生只是询问普通知识或单道题解法
+
+identity_context: |
+  - 学生身份由当前会话绑定。Agent 不向学生索取 studentId，也不接受学生提供的其他 studentId。
+  - 如果适配层要求传入身份参数，由适配层自动注入；Agent 不在对话中展示参数。
+
+output_schema:
+  envelope:
+    code: 0 表示成功；非 0 表示失败
+    message: string
+    data:
+      orgId: string
+      studentId: integer
+      subjectName: string
+      years: string
+      terms: string
+      title: string
+      content: string
+      planOkr: string
+      createTime: array
+
+normalization: |
+  - content 是 Markdown 规划正文，先提炼综述、现状和策略，再用学生能理解的语言表达。
+  - planOkr 是 JSON 字符串，需要由工具适配层或 Agent 进行二次解析。
+  - planOkr.objective 包含总体目标；planOkr.key_actions 包含关键行动、描述和关键词。
+  - subjectName 可能包含多个学科，不得默认解释成单一学科。
+  - createTime 是 [年, 月, 日, 时, 分, 秒] 数组；回答时转成正常日期时间。
+
+response_rules: |
+  - 先说总体目标，再列出 2～3 个近期可执行行动。
+  - 学生问“太简单了，帮我增加难度”时，只能基于当前规划提出调整建议，不能声称已经修改规划。
+  - 正文与 planOkr 冲突时，以 planOkr 的 objective 和 key_actions 为主要行动依据，正文用于补充背景。
+  - 不展示 orgId、studentId、command、原始 JSON 或内部字段。
+  - 无规划、规划过期或解析失败时，明确说明当前没有可读取的规划，不自行生成“已有规划”。
+
+failure_handling: |
+  - code 非 0、工具超时或 data 为空时，不编造规划。
+  - 可以提供不依赖个人数据的通用学习建议，并明确这不是学生当前的个性化规划。

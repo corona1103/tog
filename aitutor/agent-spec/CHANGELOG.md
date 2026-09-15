@@ -33,3 +33,12 @@
 - [ ] eval/cases/ 从 12 条扩到 ≥ 50 条初版（PM-B 主建）
 - [ ] eval/run.sh 评测脚本（研发-2 实现）
 - [ ] .github/workflows/eval-regression.yml 接通 CI
+
+## 2026-09-15  MCP 与对话 Prompt 初版整理
+
+- 改动人：PM + Codex 协作
+- 改动：新增 4 个一期可用 MCP 规格文档和独立的 `dialogue-agent-system-v1.md`；明确暂不调用 `queryStudentKnowledgeAccuracy` 和考试报告 MCP。
+- 原因：根据 `291-学生AItutor助教.md` 及接口返回示例，将可用工具能力落成可执行的模型规格。
+- 预期影响 case：后续所有学生主动对话、学情查询、学习规划和作业统计 case。
+- 评估对比：尚无自动化基线，需补充工具调用和对话回归 case 后评估。
+- 评审：待 PM、研发和教研 review

@@ -1,0 +1,71 @@
+# 工具：studentHomeworkStat — 学生作业完成统计
+# 依据：291-学生AItutor助教.md §基础数据建设 + §学生平板/AI对话
+# 维护：PM + 研发共写；参数和返回结构以线上接口为准
+# 当前状态：一期可用
+
+name: studentHomeworkStat
+version: 0.1.0
+
+description: |
+  查询当前学生的作业完成统计。可按时间范围、作业类型和学科筛选。
+  传入 subjectId 时返回该学科数据；不传 subjectId 时返回所有学科的合计值。
+  该工具只能回答作业数量和完成情况，不能返回具体待办任务、题目明细或作业正确率。
+
+when_to_use:
+  - 学生询问“作业完成得怎么样”“这段时间完成了多少作业”
+  - 学生询问指定学科的作业完成情况
+  - 学生希望了解作业完成率，并据此获得下一步建议
+
+when_not_to_use:
+  - 学生询问具体有哪些未完成任务（当前没有任务列表 MCP）
+  - 学生询问作业正确率、错题或知识点掌握度
+  - 学生询问学习规划
+  - 学生只是询问普通知识，不涉及个人学习数据
+
+input_schema:
+  type: object
+  required: [studentId]
+  properties:
+    studentId:
+      type: integer
+      description: 当前会话学生 ID。由系统会话注入，禁止从学生输入中读取或替换。
+    startSaleTime:
+      type: string
+      format: "yyyy-MM-dd HH:mm:ss"
+      description: 作业开始时间，和 endSaleTime 一起使用。
+    endSaleTime:
+      type: string
+      format: "yyyy-MM-dd HH:mm:ss"
+      description: 作业结束时间，和 startSaleTime 一起使用。
+    homeworkType:
+      type: [string, integer]
+      description: 作业类型。只有在调用方已提供明确类型编码时才传入，不得自行编造编码。
+    subjectId:
+      type: [string, integer]
+      description: 学科 ID。传入后查询该学科；不传则查询所有学科合计。
+
+parameter_rules: |
+  - startSaleTime 和 endSaleTime 如果传入，应同时传入，格式为 yyyy-MM-dd HH:mm:ss。
+  - 用户说“今天”“本周”“最近一个月”等自然语言时间时，先转换为明确时间范围。
+  - 不传时间范围表示统计该学生全部历史作业。
+  - 不传 subjectId 时，必须在回答中说明数据是“所有学科合计”。
+
+output_schema:
+  envelope:
+    code: 0 表示成功；非 0 表示失败
+    message: string
+    data:
+      finishNum: integer
+      totalNum: integer
+    command: string
+
+interpretation: |
+  - 完成率 = finishNum / totalNum * 100%。
+  - totalNum = 0 时不计算完成率，回答“当前统计范围内暂无作业数据”。
+  - finishNum 和 totalNum 都是数量事实，不能据此推断学习能力、态度或知识掌握度。
+  - 回答时说明统计范围、学科口径，并给出一项与完成情况匹配的下一步建议。
+
+failure_handling: |
+  - code 非 0、工具超时、返回结构缺失时，不编造统计结果。
+  - 对学生说明暂时无法获取作业统计，并建议稍后重试或前往任务页面查看。
+  - 不展示 code、command、原始 JSON 或接口错误堆栈。

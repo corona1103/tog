@@ -1,0 +1,74 @@
+# 工具：queryStudentKnowledgeMastery — 知识点掌握度
+# 依据：291-学生AItutor助教.md §学生档案 + §学生平板/AI对话
+# 维护：PM + 研发共写；参数和返回结构以线上接口为准
+# 当前状态：一期可用
+
+name: queryStudentKnowledgeMastery
+version: 0.1.0
+
+description: |
+  查询当前学生指定学科的知识点掌握度。仅支持数学、物理、化学、生物。
+  可查询单个知识点，也可查询该学生该学科下的全部知识点。
+
+when_to_use:
+  - 学生询问某个知识点掌握得怎么样
+  - 学生询问数学、物理、化学或生物的薄弱知识点
+  - 学生希望根据掌握度安排复习重点
+
+when_not_to_use:
+  - 学生询问语文、英语、历史等不支持学科的知识点掌握度
+  - 学生询问知识点正确率；正确率 MCP 当前暂停调用
+  - 学生只询问作业完成量或学习规划
+
+input_schema:
+  type: object
+  required: [subjectId]
+  properties:
+    subjectId:
+      type: [string, integer]
+      description: 学科 ID。接口必填；自然语言学科需要先映射为系统已知 ID。
+    stage:
+      type: integer
+      enum: [2, 3]
+      description: 学段。2 表示初中，3 表示高中；未知时从会话或学生档案获取，不能猜测。
+    knowledgeId:
+      type: string
+      description: 知识点 ID。不传时查询该学科全部知识点。
+
+identity_context: |
+  - orgId、studentId 从请求头读取。
+  - Agent 不向学生索取、展示或替换 orgId、studentId。
+
+output_schema:
+  envelope:
+    code: 0 表示成功；非 0 表示失败
+    message: string
+    data:
+      studentId: integer
+      subjectList:
+        type: array
+        items:
+          subjectId: [string, integer]
+          knowledgeList:
+            type: array
+            items:
+              knowledgeId: string
+              knowledgeName: string
+              score: number
+              labelId: string
+              labelNameId: string
+              stage: integer
+              updateTime: string
+
+interpretation: |
+  - score 按 0～1 的掌握度得分展示；除非系统提供分档规则，不擅自定义“掌握/薄弱”的阈值。
+  - updateTime 是知识点数据更新时间，回答时可用于说明数据新鲜度。
+  - 查询全部知识点且结果较多时，优先提炼掌握度较低或需要优先复习的知识点，并说明这是按得分排序的建议。
+  - labelId、labelNameId 是内部标签字段，默认不展示给学生。
+  - 掌握度分数是学习表现参考，不等同于学生能力评价，也不能单独预测考试成绩。
+
+failure_handling: |
+  - 不支持的学科不调用工具，直接说明当前只支持数学、物理、化学、生物。
+  - 缺少 subjectId 时只追问学科；缺少 stage 且无法从会话确定时只追问学段。
+  - code 非 0、工具超时或 data 为空时，不编造掌握度或薄弱点。
+  - 不展示 code、command、原始 JSON 或接口错误堆栈。

@@ -1,0 +1,68 @@
+# 工具：queryStudentProfileSummary — 学生学情档案摘要
+# 依据：291-学生AItutor助教.md §学生档案 + §学生平板/AI对话
+# 维护：PM + 研发共写；参数和返回结构以线上接口为准
+# 当前状态：一期可用
+
+name: queryStudentProfileSummary
+version: 0.1.0
+
+description: |
+  查询当前学生指定学科的档案摘要，包括学习画像、学科表现概况、错题变化、
+  自学表现、掌握度变化和重点关注信息。用于学情复盘和个性化学习建议。
+
+when_to_use:
+  - 学生询问“我最近学得怎么样”“我的学习状态如何”
+  - 学生希望复盘指定学科的表现
+  - 学生询问作业、错题、自学练习或学习画像的综合情况
+
+when_not_to_use:
+  - 学生只询问作业完成数量，优先使用 studentHomeworkStat
+  - 学生只询问知识点掌握度，使用 queryStudentKnowledgeMastery
+  - 学生只询问具体知识点正确率；当前 queryStudentKnowledgeAccuracy 暂停调用
+  - 学生询问学习规划，使用 getLastPlanReportDetail
+
+input_schema:
+  type: object
+  required: [subjectId]
+  properties:
+    subjectId:
+      type: [string, integer]
+      description: 学科 ID。接口必填；无法从上下文确定时先向学生确认。
+    taskType:
+      type: integer
+      enum: [1, 4]
+      description: 可选任务类型。1 表示作业，4 表示靶向任务；未指定时不传。
+
+identity_context: |
+  - orgId、userId 从请求头读取。
+  - Agent 不向学生索取、展示或替换 orgId、userId。
+
+output_schema:
+  envelope:
+    code: 0 表示成功；非 0 表示失败
+    message: string
+    data:
+      period: string
+      studentBasicData: array
+      studentSurvey: object
+      errorNoteWeekly: array
+      metrics: array
+      knowledgePointChanges: array
+
+normalization: |
+  - studentSurvey.surveyData 可能是嵌套 JSON 字符串，需要先解析为问卷数组。
+  - metrics 当前可能是“0%”“0题”等带单位字符串，不要把字符串当作无单位数值重新计算。
+  - errorNoteWeekly 是多个周切片，回答趋势时至少结合多个周期，不只看单周。
+  - knowledgePointChanges 为空时，只能说明当前没有可展示的知识点变化。
+  - 若出现 watchDuration、watchDur、watch_dur、userAvgDuration 等视频时长字段，原始单位均为毫秒。
+
+response_rules: |
+  - 先说明统计周期，再提炼 1～2 个表现事实、1 个值得关注的变化和 1 个下一步行动。
+  - 学生画像是学习表现参考，不等同于能力、人格或固定标签评价。
+  - “0%”“0题”只能描述当前统计结果，不能直接推断学生没有学习或不努力；需结合统计周期和其他字段。
+  - 不展示机构、用户、内部字段、原始 JSON 或接口技术信息。
+  - data 为空或字段不足时，明确说明目前没有足够数据，不补齐结论。
+
+failure_handling: |
+  - code 非 0、工具超时或权限不足时，说明暂时无法获取学情摘要。
+  - 可以给出不依赖个人数据的通用建议，但必须明确不是基于当前学情得出的结论。
