@@ -61,7 +61,7 @@ h1{font-size:29px;line-height:1.15;margin:0 0 8px;letter-spacing:-.8px}h2{font-s
 .module-card.words .card-deco{background:rgba(36,183,168,.12)}
 .module-card .module-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-size:24px;margin-bottom:22px;background:var(--blue-soft)}
 .module-card.words .module-icon{background:#e9fbf8}
-.module-card h3{font-size:19px;position:relative}.module-card p{max-width:270px;position:relative}.module-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;position:relative}.arrow{font-size:20px;color:#a4b7d9}
+.module-card h3{font-size:19px;position:relative}.module-card p{max-width:270px;position:relative}.module-stats{display:grid;gap:5px;margin-top:14px;position:relative;color:#6f81a0;font-size:11px;line-height:1.4}.module-stats span{display:block}.module-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;position:relative}.arrow{font-size:20px;color:#a4b7d9}
 .summary{background:linear-gradient(135deg,#2f6df6 0%,#5d80f7 62%,#48c9c2 100%);color:#fff;border-radius:20px;padding:23px 25px;position:relative;overflow:hidden;min-height:180px}
 .summary:after{content:"";position:absolute;width:220px;height:220px;right:-75px;bottom:-95px;border:28px solid rgba(255,255,255,.12);border-radius:50%}
 .summary h2{position:relative}.summary p{color:rgba(255,255,255,.78);position:relative}.summary-stats{display:flex;gap:30px;margin-top:28px;position:relative}.stat strong{font-size:25px;display:block;letter-spacing:-.8px}.stat span{font-size:11px;color:rgba(255,255,255,.7)}
@@ -222,7 +222,7 @@ let state = {
   directAnswer:"", directClozeAnswers:{}, directPairPattern:[], directFeedback:null, directResult:false, compFilter:"全部", compMode:"list", understandSubTab:"译文", showPoemPicker:false,
   compQuestion:0, compAnswer:"", compFeedback:null, compResult:false, compRound:[], compAnswers:{}, compResults:{}, wordType:"全部",
   wordMode:"cards", wordView:"cards", wordFilter:"全部", wordCount:2, wordIndex:0, wordFace:"front", learned:{}, focusedWords:{}, wordPracticeIndex:0, wordBook:"部编版", wordVolume:"八年级上册", wordSource:"课内同步词书", poemBook:"部编版", poemVolume:"八年级上册", poemChapter:"第三单元",
-  directStats:{practiced:0,bestRate:0}, compStats:{practiced:0,correct:0,totalRate:0}, poemReciteStats:{}, reciteCompleted:false, reciteCountdown:0, directPerfectCountdown:0,
+  directStats:{practiced:3,bestRate:100}, compStats:{practiced:0,correct:0,totalRate:0}, poemReciteStats:{}, reciteCompleted:false, reciteCountdown:0, directPerfectCountdown:0,
   learningRecords:createSeedLearningRecords(), recordFilter:"poem", expandedRecordId:null, recordRoundTabs:{}, compSessionType:"comprehension",
   randomRound:[], randomQuestion:0, randomAnswers:{}, randomResults:{}, randomFeedback:null, randomResult:false, randomStartedAt:null, wordCardModalKey:null,
   wordPracticeAnswer:"", wordPracticeFeedback:null, wordPracticeResult:false, wordPracticeStage:"meaning", wordPracticeQueue:[], wordPracticeRetryQueue:[], wordPracticeCard:false, wordPracticeCardQuestion:null, wordPracticeLocked:false, wordPracticeMistakes:0, wordPracticeMode:"learn", wordPracticeOffset:0, feedbackChoice:""
@@ -288,7 +288,7 @@ function setState(patch){Object.assign(state,patch);render()}
 function goHome(){clearTimeout(window.__wordPracticeTimer);clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"home",module:null,selectedPoemId:null,reciting:false,reciteCompleted:false,reciteCountdown:0,directPerfectCountdown:0,directResult:false,compResult:false,wordPracticeResult:false})}
 function openPoetry(){clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"poemList",module:"poetry",selectedPoemId:null})}
 function openWords(){setState({screen:"wordHome",module:"words",wordMode:"cards",wordIndex:0,wordFace:"front",wordPracticeResult:false})}
-function openPoemDetail(id){clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"poemDetail",module:"poetry",selectedPoemId:id,poemTab:"understand",understandSubTab:"译文",showTranslation:false,showPoemPicker:false,reciting:false,reciteCompleted:false,reciteCountdown:0,directPerfectCountdown:0,reciteSegment:0,reciteSentenceIndex:0,reciteHintVisible:false,reciteFullVisible:false,directMode:"pair",directClozeAnswers:{},directPairPattern:[],directStats:{practiced:0,bestRate:0},compStats:{practiced:0,correct:0,totalRate:0},directResult:false,compMode:"question",compQuestion:0,compRound:[],compAnswers:{},compResults:{},compResult:false})}
+function openPoemDetail(id){clearReciteCountdown();clearDirectPerfectCountdown();setState({screen:"poemDetail",module:"poetry",selectedPoemId:id,poemTab:"understand",understandSubTab:"译文",showTranslation:false,showPoemPicker:false,reciting:false,reciteCompleted:false,reciteCountdown:0,directPerfectCountdown:0,reciteSegment:0,reciteSentenceIndex:0,reciteHintVisible:false,reciteFullVisible:false,directMode:"pair",directClozeAnswers:{},directPairPattern:[],directStats:{practiced:3,bestRate:100},compStats:{practiced:0,correct:0,totalRate:0},directResult:false,compMode:"question",compQuestion:0,compRound:[],compAnswers:{},compResults:{},compResult:false})}
 function practiceOptions(w,meaningIndex,wordIndex){
  const correct=w.meanings[meaningIndex].label;
  const pool=[...w.meanings.map(m=>m.label),...w.choices,...allWords.flatMap(item=>item.meanings.map(m=>m.label))].filter((value,index,array)=>value&&array.indexOf(value)===index&&value!==correct);
@@ -359,8 +359,7 @@ function render(){
 }
 function renderHome(){
  return homeHeader()+
- '<div class="grid"><section class="summary"><div class="eyebrow" style="color:#dce8ff">累计学习概览</div><h2>持续积累，稳步提升</h2><p>已完成 2 篇古诗文理解性默写，学会 4 个文言文词语。</p><div class="summary-stats"><div class="stat"><strong>2</strong><span>完成篇目</span></div><div class="stat"><strong>4</strong><span>学会词数</span></div></div></section></div>'+
- '<div style="height:18px"></div><div class="grid two"><div class="card module-card" data-action="poetry"><div class="card-deco"></div><div class="module-icon">📖</div><h3>古诗文背默</h3><p>先理解，再背诵，用默写和理解性练习检验掌握情况。</p><div class="module-foot"><span class="arrow">→</span></div></div><div class="card module-card words" data-action="words"><div class="card-deco"></div><div class="module-icon">🪶</div><h3>文言文实虚词</h3><p>通过词卡和练习积累课内重点实词、虚词及常见用法。</p><div class="module-foot"><span class="arrow">→</span></div></div></div>'+
+ '<div class="grid two"><div class="card module-card" data-action="poetry"><div class="card-deco"></div><div class="module-icon">📖</div><h3>古诗文背默</h3><p>先理解，再背诵，用默写和理解性练习检验掌握情况。</p><div class="module-stats"><span>背完 3 篇</span><span>默对 4 篇</span><span>练过 0 篇</span></div><div class="module-foot"><span class="arrow">→</span></div></div><div class="card module-card words" data-action="words"><div class="card-deco"></div><div class="module-icon">🪶</div><h3>文言文实虚词</h3><p>通过词卡和练习积累课内重点实词、虚词及常见用法。</p><div class="module-stats"><span>实词 学会 3 词 · 10 例句</span><span>虚词 学会 10 词 · 10 例句</span></div><div class="module-foot"><span class="arrow">→</span></div></div></div>'+
  '<div style="height:18px"></div><section class="card coming-card" data-action="open-feedback"><div class="coming-copy"><div class="coming-mark">✦</div><div><div class="eyebrow">更多内容，敬请期待</div><h3>语文自学还可以学什么？</h3><p>告诉我们你最需要的学习帮助，共同完善积累本。</p></div></div><span class="arrow">→</span></section>';
 }
 function getVisiblePoems(){return poems.filter(p=>(!state.poemBook||p.book===state.poemBook)&&(!state.poemVolume||p.volume===state.poemVolume)&&(state.poemChapter==="全部篇目"||p.chapter===state.poemChapter))}
@@ -379,7 +378,7 @@ function renderPoemList(){
 }
 function renderPoemStats(p){
  const direct=state.directStats,comp=state.compStats,recite=reciteStatsFor(p),backDone=recite.completions>0;
- return '<div class="card poem-stats"><div class="stats-title">本篇学习记录</div><div class="poem-stat-row"><span class="stat-key back '+(backDone?"completed":"")+'">背</span><div><b>背诵</b><small>已背过 '+recite.sentences+' 句 · 背完 '+recite.completions+' 次</small></div><strong>'+recite.completions+' 次</strong></div><div class="poem-stat-row"><span class="stat-key mute">默</span><div><b>直接默写</b><small>已练 '+direct.practiced+' 句 · 最高正确率</small></div><strong>'+ (direct.practiced?direct.bestRate+'%':'--')+'</strong></div><div class="poem-stat-row"><span class="stat-key practice">练</span><div><b>理解性默写</b><small>已练 '+comp.practiced+' 题 · 平均正确率</small></div><strong>'+rateText(comp.totalRate,comp.practiced)+'</strong></div></div>';
+ return '<div class="card poem-stats"><div class="stats-title">本篇学习记录</div><div class="poem-stat-row"><span class="stat-key back '+(backDone?"completed":"")+'">背</span><div><b>背诵</b><small>已背过 '+recite.sentences+' 句 · 背完 '+recite.completions+' 次</small></div><strong>'+recite.completions+' 次</strong></div><div class="poem-stat-row"><span class="stat-key mute">默</span><div><b>直接默写</b><small>已练 '+direct.practiced+' 次 · 最高正确率</small></div><strong>'+ (direct.practiced?direct.bestRate+'%':'--')+'</strong></div><div class="poem-stat-row"><span class="stat-key practice">练</span><div><b>理解性默写</b><small>已练 '+comp.practiced+' 题 · 平均正确率</small></div><strong>'+rateText(comp.totalRate,comp.practiced)+'</strong></div></div>';
 }
 function renderPoemDetail(){
  const p=currentPoem();
@@ -574,7 +573,7 @@ function submitDirect(){
  const rate=directBlankRate(p);
  const pattern=ensurePairPattern(p),questions=sentences.map((sentence,i)=>{const parts=splitSentence(sentence),pairPattern=state.directMode==="pair"?!!pattern[i]:false,target=directBlankTarget(p,i),userAnswer=directAnswerForSentence(p,i).trim(),userAnswerParts=Array.isArray(state.directClozeAnswers[i])?state.directClozeAnswers[i].slice():null;return {question:sentence,sourceText:sentence,directMode:state.directMode,pairPattern,prefix:state.directMode==="full"?"":pairPattern?parts.first+parts.separator:"",suffix:state.directMode==="full"?"":pairPattern?"":parts.separator+parts.second,userAnswer,userAnswerParts,correctAnswer:target,correct:normalizeAnswer(userAnswer)===normalizeAnswer(target)}});
  recordQuestions("direct",p,questions,rate);
- state.directStats={practiced:state.directStats.practiced+sentences.length,bestRate:Math.max(state.directStats.bestRate,rate)};
+ state.directStats={practiced:state.directStats.practiced+1,bestRate:Math.max(state.directStats.bestRate,rate)};
  state.directResult=true;
  state.directPerfectCountdown=rate===100?3:0;
  render();
