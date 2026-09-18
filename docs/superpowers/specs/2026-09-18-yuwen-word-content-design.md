@@ -19,7 +19,7 @@
 - 《芣苢》：单元 `a738eb5ca76659a9e8f67ef5659434d4`，名称为“第一单元（课内）”。
 - 《劝学》《师说》：单元 `a453b281b71fd478be1d9d791307bf5c`，名称为“第五单元（课内）”。
 
-用户提供的两张业务表没有教材关联字段，因此不新增未经确认的表结构。词义表的 `source` 保存可读的完整教材路径；另附 `word_book_scope.csv` 保存版本、分册、单元、篇目和 `sense_id` 的可导入映射。
+用户提供的两张业务表没有教材关联字段，因此教材关系单独落到 `edu_chn_word_catalog`，字段沿用附件目录的版本/分册/单元信息，并以 `sense_id` 关联 `edu_chn_word_sense.id`。同时保留 `word_book_scope.csv` 作为表格核对文件。
 
 ## 3. 内容数据
 
@@ -51,7 +51,7 @@
 
 ### 3.3 教材映射
 
-文件 `word_book_scope.csv` 至少包含：`version_id,version_name,volume_id,volume_name,unit_id,unit_name,chapter,word_class,word,sense_id`。每个 `sense_id` 都必须能在词义 SQL 中找到，映射中的篇目限定为三篇目标课文。
+文件 `sql/edu_chn_word_catalog.sql` 创建并写入 `edu_chn_word_catalog` 关系表；`word_book_scope.csv` 提供同一份关系的表格核对版本。字段至少包含：`version_id,version_name,volume_id,volume_name,unit_id,unit_name,chapter,word_class,word,sense_id`。每个 `sense_id` 都必须能在词义 SQL 中找到，映射中的篇目限定为三篇目标课文。
 
 ## 4. 学生端预览
 
@@ -87,6 +87,6 @@
 ## 6. 不纳入范围
 
 - 不修改用户现有的 `index.html` 主 Demo 数据。
-- 不新增数据库表或修改用户提供的表结构。
+- 不修改用户提供的两张词义/题目表结构；教材关系使用本次新增的 `edu_chn_word_catalog` 表。
 - 不实现线上审核流程、提交判题、学习记录和后端接口。
 - 不扩展到《沁园春·长沙》《插秧歌》或必修上册其他篇目。

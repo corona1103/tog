@@ -173,6 +173,61 @@ function scopeCsv() {
   return [header, ...rows].map(row => row.map(csvString).join(',')).join('\n') + '\n';
 }
 
+function catalogSql() {
+  const sortMap = new Map();
+  const relationRows = records.map((row, index) => {
+    const sort = (sortMap.get(row.unitId) || 0) + 1;
+    sortMap.set(row.unitId, sort);
+    return { ...row, relationId: index + 1, sort };
+  });
+  const table = [
+    'CREATE TABLE IF NOT EXISTS `edu_chn_word_catalog` (',
+    '`id` int(10) NOT NULL AUTO_INCREMENT COMMENT \'实虚词教材关联ID\',',
+    '`version_id` varchar(32) NOT NULL COMMENT \'教材版本ID\',',
+    '`version_name` varchar(64) NOT NULL COMMENT \'教材版本名称\',',
+    '`volume_id` varchar(32) NOT NULL COMMENT \'教材分册ID\',',
+    '`volume_name` varchar(64) NOT NULL COMMENT \'教材分册名称\',',
+    '`unit_id` varchar(32) NOT NULL COMMENT \'教材单元ID\',',
+    '`unit_name` varchar(128) NOT NULL COMMENT \'教材单元名称\',',
+    '`chapter` varchar(64) NOT NULL COMMENT \'教材篇目\',',
+    '`word_class` tinyint NOT NULL COMMENT \'分类：1=实词，2=虚词\',',
+    '`word` varchar(32) NOT NULL COMMENT \'原词\',',
+    '`sense_id` int(10) NOT NULL COMMENT \'词义ID，关联 edu_chn_word_sense.id\',',
+    '`sort` int(10) NOT NULL DEFAULT 0 COMMENT \'单元内排序\',',
+    '`status` tinyint(2) NOT NULL DEFAULT 0 COMMENT \'0=草稿，1=上架\',',
+    '`is_del` tinyint(2) NOT NULL DEFAULT 0 COMMENT \'0=未删除，1=已删除\',',
+    '`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT \'创建时间\',',
+    '`update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT \'更新时间\',',
+    'PRIMARY KEY (`id`),',
+    'UNIQUE KEY `uk_book_sense` (`version_id`, `volume_id`, `unit_id`, `sense_id`),',
+    'KEY `idx_sense` (`sense_id`, `is_del`, `status`),',
+    'KEY `idx_book` (`version_id`, `volume_id`, `unit_id`, `is_del`, `status`)',
+    ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT=\'语文积累本-实虚词教材关联\';',
+  ].join('\n');
+  const values = relationRows.map(row => `(${row.relationId}, ${sqlString(VERSION.id)}, ${sqlString(VERSION.name)}, ${sqlString(VOLUME.id)}, ${sqlString(VOLUME.name)}, ${sqlString(row.unitId)}, ${sqlString(row.unitName)}, ${sqlString(`《${row.book}》`)}, ${row.wordClass}, ${sqlString(row.word)}, ${row.id}, ${row.sort}, 0, 0)`).join(',\n');
+  const insert = [
+    'INSERT INTO `edu_chn_word_catalog`',
+    '(`id`, `version_id`, `version_name`, `volume_id`, `volume_name`, `unit_id`, `unit_name`, `chapter`, `word_class`, `word`, `sense_id`, `sort`, `status`, `is_del`)',
+    'VALUES',
+    values,
+    'ON DUPLICATE KEY UPDATE',
+    '`version_id` = VALUES(`version_id`),',
+    '`version_name` = VALUES(`version_name`),',
+    '`volume_id` = VALUES(`volume_id`),',
+    '`volume_name` = VALUES(`volume_name`),',
+    '`unit_id` = VALUES(`unit_id`),',
+    '`unit_name` = VALUES(`unit_name`),',
+    '`chapter` = VALUES(`chapter`),',
+    '`word_class` = VALUES(`word_class`),',
+    '`word` = VALUES(`word`),',
+    '`sense_id` = VALUES(`sense_id`),',
+    '`sort` = VALUES(`sort`),',
+    '`status` = VALUES(`status`),',
+    '`is_del` = VALUES(`is_del`);',
+  ].join('\n');
+  return `-- 语文积累本-高中部编版必修上册实虚词教材关系\n-- 版本、分册、单元 ID 沿用 edu_chn_poem_catalog_demo.sql；sense_id 关联 edu_chn_word_sense.id\n${table}\n\nSTART TRANSACTION;\n\n${insert}\n\nCOMMIT;\n`;
+}
+
 function renderMeaning(row) {
   return `<div class="meaning-block"><div class="meaning-head"><span class="type-tag">${row.wordClass === 1 ? '实词' : '虚词'}</span><b>${htmlText(row.meaning)}</b></div><div class="example-text">${richText(row.example)}</div><div class="example-meta"><span>${htmlText(row.book)}</span><span>${htmlText(row.exampleTrans)}</span></div></div>`;
 }
@@ -201,6 +256,7 @@ function previewHtml() {
 
 fs.writeFileSync(path.join(ROOT, 'sql', 'edu_chn_word_sense.sql'), senseSql());
 fs.writeFileSync(path.join(ROOT, 'sql', 'edu_chn_word_question.sql'), questionSql());
+fs.writeFileSync(path.join(ROOT, 'sql', 'edu_chn_word_catalog.sql'), catalogSql());
 fs.writeFileSync(path.join(ROOT, 'word_book_scope.csv'), scopeCsv());
 fs.writeFileSync(path.join(ROOT, 'demo/yuwen/accumulation/word-student-preview.html'), previewHtml());
-console.log(JSON.stringify({ senses: records.length, questions: questionRows().length, words: new Set(records.map(row => row.word)).size, books: Object.keys(BOOKS), outputs: ['sql/edu_chn_word_sense.sql', 'sql/edu_chn_word_question.sql', 'word_book_scope.csv', 'demo/yuwen/accumulation/word-student-preview.html'] }, null, 2));
+console.log(JSON.stringify({ senses: records.length, questions: questionRows().length, catalogRows: records.length, words: new Set(records.map(row => row.word)).size, books: Object.keys(BOOKS), outputs: ['sql/edu_chn_word_sense.sql', 'sql/edu_chn_word_question.sql', 'sql/edu_chn_word_catalog.sql', 'word_book_scope.csv', 'demo/yuwen/accumulation/word-student-preview.html'] }, null, 2));

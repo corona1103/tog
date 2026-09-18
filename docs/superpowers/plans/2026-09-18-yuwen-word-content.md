@@ -39,6 +39,7 @@
 - Modify: `tools/generate_yuwen_word_content.js`
 - Create: `sql/edu_chn_word_sense.sql`
 - Create: `sql/edu_chn_word_question.sql`
+- Create: `sql/edu_chn_word_catalog.sql`
 - Create: `word_book_scope.csv`
 
 - [x] **Step 1: 输出词义 SQL**
@@ -52,6 +53,10 @@
 - [x] **Step 3: 输出教材映射 CSV**
 
 输出固定版本、分册、单元、篇目、词类、原词和 `sense_id`，每个词义只挂载到其来源篇目对应的单元。
+
+- [x] **Step 4: 输出教材关系 SQL**
+
+创建 `edu_chn_word_catalog` 关系表，并写入与 CSV 相同的 78 条映射记录，使用 `(version_id, volume_id, unit_id, sense_id)` 唯一约束。
 
 ### Task 3: 创建独立学生端预览
 
