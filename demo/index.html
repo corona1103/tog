@@ -21,6 +21,13 @@ h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
 .demo-list .arrow { color: #ccc; transition: all 0.2s; }
 .demo-list a:hover .arrow { color: #00BCD4; transform: translateX(4px); }
 .demo-desc { font-size: 12px; color: #999; margin-top: 2px; }
+.demo-entry { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; gap: 18px; }
+.demo-entry-main { flex: 1; min-width: 0; color: #333; text-decoration: none; }
+.demo-entry-main:hover { color: #00BCD4; }
+.demo-extra-links { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.demo-extra-links a { padding: 7px 10px; color: #00a9b8; text-decoration: none; background: #f0fafa; border-radius: 7px; font-size: 12px; white-space: nowrap; }
+.demo-extra-links a:hover { background: #dff7f7; color: #008b9a; }
+@media (max-width: 720px) { .demo-entry { align-items: flex-start; flex-direction: column; gap: 10px; } .demo-extra-links { flex-wrap: wrap; } }
 </style>
 </head>
 <body>
@@ -32,13 +39,19 @@ h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
     <div class="module-title">学生平板</div>
     <ul class="demo-list">
       <li>
-        <a href="yuwen/accumulation/index.html">
+        <div class="demo-entry">
+          <a class="demo-entry-main" href="yuwen/accumulation/index.html">
           <div>
             <div>语文自学 · 积累本 <span style="font-size:11px;color:#aaa;font-weight:400;">V1103</span></div>
             <div class="demo-desc">古诗文背默 + 文言文实虚词交互演示（横屏）</div>
           </div>
+          </a>
+          <div class="demo-extra-links">
+            <a href="yuwen/accumulation/word-student-preview.html">实虚词预览</a>
+            <a href="yuwen/accumulation/content-preview.html">古诗文内容预览</a>
+          </div>
           <span class="arrow">→</span>
-        </a>
+        </div>
       </li>
       <li>
         <a href="../aitutor/demo-v4.html">
