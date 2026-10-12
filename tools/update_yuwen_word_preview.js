@@ -78,10 +78,12 @@ for (const row of questions) {
 
 const records = senses.map(row => {
   const source = row[6] || '';
-  const parts = source.split('｜');
-  const volume = parts[1] || '';
-  const unitName = parts[2] || '';
-  const book = (parts[3] || '').replace(/^《|》$/g, '');
+  const parts = source.split('｜').map(item => item.trim()).filter(Boolean);
+  const legacySource = parts.length >= 4;
+  const sourceVersion = legacySource ? parts[0] : '';
+  const volume = legacySource ? parts[1] : (parts[0] || '');
+  const unitName = legacySource ? parts[2] : '';
+  const book = (legacySource ? parts[3] : (parts[1] || '')).replace(/^《|》$/g, '');
   const catalog = catalogBySense.get(String(row[0])) || [];
   const questions1 = q1.get(String(row[0])) || [];
   const questions2 = q2.get(String(row[0])) || [];
@@ -96,7 +98,7 @@ const records = senses.map(row => {
     source,
     exampleTrans: row[7] || '',
     versionId: catalog[1] || '',
-    versionName: catalog[2] || parts[0] || '',
+    versionName: catalog[2] || sourceVersion || '',
     volumeId: catalog[3] || '',
     volumeName: catalog[4] || volume,
     distractors: questions1.slice(1).map(item => item.content),
@@ -105,7 +107,7 @@ const records = senses.map(row => {
     compareCorrect: 0,
     questionEnabled: Boolean(questions1.length && questions2.length && row[5]),
     book,
-    unitId: md5(`${parts[0] || ''}|${volume}|${unitName}`),
+    unitId: md5(`${catalog[2] || sourceVersion || ''}|${volume}|${unitName}`),
     unitName,
   };
 });
