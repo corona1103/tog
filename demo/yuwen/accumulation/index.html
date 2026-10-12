@@ -225,7 +225,7 @@ let state = {
   directStats:{practiced:3,bestRate:100}, compStats:{practiced:0,correct:0,totalRate:0}, poemReciteStats:{}, reciteCompleted:false, reciteCountdown:0, directPerfectCountdown:0,
   learningRecords:createSeedLearningRecords(), recordFilter:"poem", expandedRecordId:null, recordRoundTabs:{}, compSessionType:"comprehension",
   randomRound:[], randomQuestion:0, randomAnswers:{}, randomResults:{}, randomFeedback:null, randomResult:false, randomStartedAt:null, wordCardModalKey:null,
-  wordPracticeAnswer:"", wordPracticeFeedback:null, wordPracticeResult:false, wordPracticeStage:"meaning", wordPracticeQueue:[], wordPracticeRetryQueue:[], wordPracticeCard:false, wordPracticeCardQuestion:null, wordPracticeLocked:false, wordPracticeMistakes:0, wordPracticeMode:"learn", wordPracticeOffset:0, feedbackChoice:""
+  wordPracticeAnswer:"", wordPracticeFeedback:null, wordPracticeResult:false, wordPracticeStage:"meaning", wordPracticeQueue:[], wordPracticeRetryQueue:[], wordPracticeCard:false, wordPracticeCardQuestion:null, wordPracticeLocked:false, wordPracticeHadWrong:false, wordPracticeMistakes:0, wordPracticeMode:"learn", wordPracticeOffset:0, feedbackChoice:""
 };
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
@@ -311,7 +311,7 @@ function openWordPractice(mode="learn",offset=0){
  const list=practicePool();
  if(!list.length){toast(mode==="review"?"暂无已学会词目可复习":"当前筛选范围暂无可练词目");return}
  state.wordPracticeQueue=createMeaningQuestions(list);
- return setState({screen:"wordPractice",module:"words",wordPracticeIndex:0,wordPracticeStage:"meaning",wordPracticeRetryQueue:[],wordPracticeAnswer:"",wordPracticeFeedback:null,wordPracticeResult:false,wordPracticeCard:false,wordPracticeCardQuestion:null,wordPracticeLocked:false,wordPracticeMistakes:0});
+ return setState({screen:"wordPractice",module:"words",wordPracticeIndex:0,wordPracticeStage:"meaning",wordPracticeRetryQueue:[],wordPracticeAnswer:"",wordPracticeFeedback:null,wordPracticeResult:false,wordPracticeCard:false,wordPracticeCardQuestion:null,wordPracticeLocked:false,wordPracticeHadWrong:false,wordPracticeMistakes:0});
 }
 function startNextWordGroup(){const scope=practiceScope();if(!scope.length){toast(state.wordPracticeMode==="review"?"暂无已学会词目可复习":"当前范围暂无可学习词目");return}const count=Math.max(1,Math.min(Number(state.wordCount)||2,scope.length));const nextOffset=state.wordPracticeOffset+count<scope.length?state.wordPracticeOffset+count:0;return openWordPractice(state.wordPracticeMode,nextOffset)}
 function poem(p){return p || currentPoem()}
@@ -456,7 +456,8 @@ function currentWordPracticeQuestion(){return state.wordPracticeQueue[state.word
 function renderWordPracticeCard(q){
  const list=practicePool(),w=list[q.wordIndex],meaning=w.meanings[q.meaningIndex],focused=!!state.focusedWords[wordKey(w)];
  const focusButton='<button class="outline-btn '+(focused?"focus-on":"")+'" data-action="mark-practice-focus" data-word-index="'+q.wordIndex+'">'+(focused?"已收藏重点":"标记重点")+'</button>';
- return header("词卡学习","","wordHome")+'<div class="word-practice-card"><div class="card word-practice-head"><div><div class="eyebrow">'+(q.kind==="meaning"?"词义选择 · 错题学习":"辨析选择 · 错题学习")+'</div><h3>当前词：“'+esc(w.word)+'”</h3><p>看完词卡后，手动点击“继续下一题”。</p></div>'+focusButton+'</div><div class="word-card detail"><div class="word-card-detail-scroll"><div class="word-detail-head"><div><div class="eyebrow">词卡详情 · '+esc(w.category)+'</div><h3>'+esc(w.word)+'</h3></div></div><div class="word-practice-focus"><b>本题释义 · '+esc(meaning.label)+'</b><br>'+highlightWord(meaning.examples[0].sentence,w.word)+'<br><small>'+esc(meaning.examples[0].translation)+' · '+esc(meaning.examples[0].source)+'</small></div>'+renderWordMeanings(w,q.meaningIndex)+'</div></div><div class="action-row" style="justify-content:center"><button class="primary-btn" data-action="continue-word-practice">继续下一题</button></div></div>';
+ const cardLabel=state.wordPracticeHadWrong?"错题巩固":"词卡学习";
+ return header("词卡学习","","wordHome")+'<div class="word-practice-card"><div class="card word-practice-head"><div><div class="eyebrow">'+(q.kind==="meaning"?"词义选择 · "+cardLabel:"辨析选择 · "+cardLabel)+'</div><h3>当前词：“'+esc(w.word)+'”</h3><p>看完词卡后，手动点击“继续下一题”。</p></div>'+focusButton+'</div><div class="word-card detail"><div class="word-card-detail-scroll"><div class="word-detail-head"><div><div class="eyebrow">词卡详情 · '+esc(w.category)+'</div><h3>'+esc(w.word)+'</h3></div></div><div class="word-practice-focus"><b>本题释义 · '+esc(meaning.label)+'</b><br>'+highlightWord(meaning.examples[0].sentence,w.word)+'<br><small>'+esc(meaning.examples[0].translation)+' · '+esc(meaning.examples[0].source)+'</small></div>'+renderWordMeanings(w,q.meaningIndex)+'</div></div><div class="action-row" style="justify-content:center"><button class="primary-btn" data-action="continue-word-practice">继续下一题</button></div></div>';
 }
 function renderWordPractice(){
  if(state.wordPracticeResult)return renderWordResultModal();
@@ -467,8 +468,9 @@ function renderWordPractice(){
  const stageName=state.wordPracticeStage==="meaning"?"第一轮 · 词义选择":state.wordPracticeStage==="meaningRedo"?"第一轮 · 错题重做":state.wordPracticeStage==="compare"?"第二轮 · 辨析选择":"第二轮 · 错题重做";
  const overall=practiceProgress(list);
  const prompt=q.kind==="meaning"?'选择“'+esc(w.word)+'”在下面例句中的意思':'下列选项中与例句加点字的用法和释义相同的是';
- const feedbackHtml=feedback?'<div class="word-practice-feedback '+(feedback.correct?"ok":"bad")+'">'+(feedback.correct?"✓ 回答正确，正在进入下一题":"✕ 回答错误，正在打开词卡")+'</div>':"";
- const choices=q.options.map(c=>'<button class="choice '+(selected===c?"selected ":"")+(feedback?(c===q.correct?"correct":selected===c?"wrong":""):"")+'" data-word-choice="'+esc(c)+'" '+(state.wordPracticeLocked?"disabled":"")+'>'+ (q.kind==="compare"?highlightWord(c,w.word):esc(c)) +'</button>').join("");
+ const successToCard=state.wordPracticeMode==="learn"||state.wordPracticeHadWrong;
+ const feedbackHtml=feedback?'<div class="word-practice-feedback '+(feedback.correct?"ok":"bad")+'">'+(feedback.correct?(successToCard?"✓ 回答正确，正在打开词卡":"✓ 回答正确，正在进入下一题"):"✕ 回答错误，再选一次")+'</div>':"";
+ const choices=q.options.map(c=>'<button class="choice '+(selected===c?"selected ":"")+(feedback?(feedback.correct&&c===q.correct?"correct":!feedback.correct&&selected===c?"wrong":""):"")+'" data-word-choice="'+esc(c)+'" '+(state.wordPracticeLocked?"disabled":"")+'>'+ (q.kind==="compare"?highlightWord(c,w.word):esc(c)) +'</button>').join("");
  const helper=q.kind==="compare"?"选择与题干例句中加点字用法和释义相同的例句":"选出最符合当前语境的释义";
  const phase=state.wordPracticeStage.startsWith("meaning")?"第一轮 · 词义选择":"第二轮 · 辨析选择";
  return header("文言文词汇 · 词汇练习","","wordHome")+'<div class="word-practice-overall card"><div class="overall-copy"><div class="eyebrow">两轮练习整体进度</div><b>已完成 '+overall.done+' / '+overall.total+' 题</b><span>'+phase+'</span></div><div class="overall-progress"><div class="word-practice-progress"><i style="width:'+Math.max(overall.done?4:0,overall.percent)+'%"></i></div><small>'+overall.percent+'%</small></div></div><div class="word-practice-layout"><div class="card word-practice-question"><div class="question-meta"><span class="question-no">'+phase+'</span><span class="question-type">'+(q.kind==="meaning"?"词义选择":"辨析选择")+'</span></div><div class="eyebrow" style="margin-top:20px">'+prompt+'</div><div class="word-question">'+highlightWord(w.example,w.word)+'</div><p class="word-practice-prompt">'+helper+'</p><div class="choice-list">'+choices+'</div>'+feedbackHtml+'</div></div>';
@@ -590,10 +592,10 @@ function nextComp(){if(state.compQuestion>=4)return;setState({compQuestion:state
 function submitRandom(){const data=currentRandomQuestion(),position=state.randomQuestion;if(!data||state.randomResults[position])return;const answer=clozeAnswer(data.question.answer,state.randomAnswers[position]).trim(),correct=answerRate(answer,data.question.answer)===100;state.randomResults[position]={correct,unanswered:!answer};const finished=state.randomRound.length>0&&state.randomRound.every((_,index)=>state.randomResults[index]);if(finished){const questions=state.randomRound.map((item,index)=>{const p=poems.find(poem=>poem.id===item.poemId),q=p.comprehension[item.questionIndex],result=state.randomResults[index];return {question:q.title,userAnswer:clozeAnswer(q.answer,state.randomAnswers[index]).trim(),correctAnswer:q.answer,correct:result.correct,poemTitle:p.title}});const totalRate=Math.round(questions.filter(item=>item.correct).length/questions.length*100);recordQuestions("random",null,questions,totalRate,state.randomStartedAt);state.randomResult=true}setState({randomFeedback:{correct,unanswered:!answer}})}
 function nextRandom(){if(state.randomQuestion>=state.randomRound.length-1)return;setState({randomQuestion:state.randomQuestion+1,randomFeedback:null})}
 function currentWordForPractice(){const q=currentWordPracticeQuestion(),list=practicePool();return q?list[q.wordIndex]:list[0]}
-function finishWordPractice(){const list=practicePool().slice();list.forEach(w=>{const key=wordKey(w);if(!state.learned[key]){state.learned[key]=true;const now=recordNow();appendLearningRecord({...now,category:"word",type:"wordCard",title:"“"+w.word+"”",wordKey:key,status:"learned"})}});state.wordPracticeResult=true;state.wordPracticeCard=false;state.wordPracticeCardQuestion=null;state.wordPracticeLocked=false;render()}
-function startComparePractice(){state.wordPracticeStage="compare";state.wordPracticeQueue=createCompareQuestions(practicePool());state.wordPracticeRetryQueue=[];state.wordPracticeIndex=0;state.wordPracticeAnswer="";state.wordPracticeFeedback=null;state.wordPracticeLocked=false;render()}
+function finishWordPractice(){const list=practicePool().slice();list.forEach(w=>{const key=wordKey(w);if(!state.learned[key]){state.learned[key]=true;const now=recordNow();appendLearningRecord({...now,category:"word",type:"wordCard",title:"“"+w.word+"”",wordKey:key,status:"learned"})}});state.wordPracticeResult=true;state.wordPracticeCard=false;state.wordPracticeCardQuestion=null;state.wordPracticeLocked=false;state.wordPracticeHadWrong=false;render()}
+function startComparePractice(){state.wordPracticeStage="compare";state.wordPracticeQueue=createCompareQuestions(practicePool());state.wordPracticeRetryQueue=[];state.wordPracticeIndex=0;state.wordPracticeAnswer="";state.wordPracticeFeedback=null;state.wordPracticeLocked=false;state.wordPracticeHadWrong=false;render()}
 function advanceWordPractice(){
- state.wordPracticeAnswer="";state.wordPracticeFeedback=null;state.wordPracticeLocked=false;
+ state.wordPracticeAnswer="";state.wordPracticeFeedback=null;state.wordPracticeLocked=false;state.wordPracticeHadWrong=false;
  if(state.wordPracticeIndex+1<state.wordPracticeQueue.length){state.wordPracticeIndex+=1;return render()}
  const retry=state.wordPracticeRetryQueue.slice();
  if(retry.length){state.wordPracticeStage=state.wordPracticeStage.startsWith("meaning")?"meaningRedo":"compareRedo";state.wordPracticeQueue=retry;state.wordPracticeRetryQueue=[];state.wordPracticeIndex=0;return render()}
@@ -603,12 +605,19 @@ function advanceWordPractice(){
 function answerWordChoice(choice){
  if(state.wordPracticeLocked||state.wordPracticeCard)return;
  const q=currentWordPracticeQuestion();if(!q)return;
- const correct=choice===q.correct;state.wordPracticeAnswer=choice;state.wordPracticeFeedback={correct};state.wordPracticeLocked=true;
- if(!correct){state.wordPracticeRetryQueue.push(q);state.wordPracticeMistakes+=1}
+ const correct=choice===q.correct;state.wordPracticeAnswer=choice;state.wordPracticeFeedback={correct};
+ if(!correct){
+  state.wordPracticeHadWrong=true;
+  if(!state.wordPracticeRetryQueue.includes(q)){state.wordPracticeRetryQueue.push(q);state.wordPracticeMistakes+=1}
+  state.wordPracticeLocked=false;
+  return render();
+ }
+ state.wordPracticeLocked=true;
  render();
  clearTimeout(window.__wordPracticeTimer);
- const isFinal=correct&&state.wordPracticeStage.startsWith("compare")&&state.wordPracticeIndex===state.wordPracticeQueue.length-1&&state.wordPracticeRetryQueue.length===0;
- window.__wordPracticeTimer=setTimeout(()=>{if(!correct){state.wordPracticeCard=true;state.wordPracticeCardQuestion=q;state.wordPracticeLocked=false;render()}else advanceWordPractice()},isFinal?1000:500);
+ const showCard=state.wordPracticeMode==="learn"||state.wordPracticeHadWrong;
+ const isFinal=!showCard&&state.wordPracticeStage.startsWith("compare")&&state.wordPracticeIndex===state.wordPracticeQueue.length-1&&state.wordPracticeRetryQueue.length===0;
+ window.__wordPracticeTimer=setTimeout(()=>{if(showCard){state.wordPracticeCard=true;state.wordPracticeCardQuestion=q;state.wordPracticeLocked=false;render()}else advanceWordPractice()},isFinal?1000:500);
 }
 document.addEventListener("click",e=>{const c=e.target.closest("[data-word-choice]");if(c)answerWordChoice(c.dataset.wordChoice)});
 document.addEventListener("click",e=>{const option=e.target.closest("[data-feedback-option]");if(!option)return;state.feedbackChoice=option.dataset.feedbackOption;document.querySelectorAll("[data-feedback-option]").forEach(x=>x.classList.toggle("selected",x===option));document.getElementById("feedbackOther").classList.toggle("show",state.feedbackChoice==="其他");});
