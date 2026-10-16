@@ -62,8 +62,48 @@ function readRows(file, fieldCount) {
   return tuples(text).map(tuple => splitTuple(tuple).map(sqlValue)).filter(row => row.length === fieldCount && /^\d+$/.test(String(row[0])));
 }
 
-const senses = readRows('edu_chn_word_sense.sql', 10);
-const questions = readRows('edu_chn_word_question.sql', 7);
+function applyMeaningUpdates(text, rows) {
+  const updates = new Map();
+  const statements = text.matchAll(/UPDATE\s+`edu_chn_word_sense`\s+SET\s+([\s\S]*?)\nWHERE[\s\S]*?;/g);
+  for (const statement of statements) {
+    const fieldCase = statement[1].match(/`meaning`\s*=\s*CASE\s+`id`([\s\S]*?)END\s*(?:,|$)/);
+    if (!fieldCase) continue;
+    for (const match of fieldCase[1].matchAll(/WHEN\s+(\d+)\s+THEN\s+'((?:''|[^'])*)'/g)) {
+      updates.set(match[1], match[2].replace(/''/g, "'"));
+    }
+  }
+  return rows.map(row => updates.has(String(row[0])) ? [...row.slice(0, 4), updates.get(String(row[0])), ...row.slice(5)] : row);
+}
+
+function applyExampleTranslationUpdates(text, rows) {
+  const updates = new Map();
+  const statements = text.matchAll(/UPDATE\s+`edu_chn_word_sense`\s+SET\s+([\s\S]*?)\nWHERE[\s\S]*?;/g);
+  for (const statement of statements) {
+    const fieldCase = statement[1].match(/`example_trans`\s*=\s*CASE\s+`id`([\s\S]*?)END\s*(?:,|$)/);
+    if (!fieldCase) continue;
+    for (const match of fieldCase[1].matchAll(/WHEN\s+(\d+)\s+THEN\s+'((?:''|[^'])*)'/g)) {
+      updates.set(match[1], match[2].replace(/''/g, "'"));
+    }
+  }
+  return rows.map(row => updates.has(String(row[0])) ? [...row.slice(0, 7), updates.get(String(row[0])), ...row.slice(8)] : row);
+}
+
+function applyQuestionOptionUpdates(text, rows) {
+  const updates = new Map();
+  const blocks = text.matchAll(/UPDATE\s+`edu_chn_word_question`\s+SET\s+`options_json`\s*=\s*CASE\s+`id`([\s\S]*?)END;\s*\nWHERE[\s\S]*?;/g);
+  for (const block of blocks) {
+    const body = block[1];
+    for (const match of body.matchAll(/WHEN\s+(\d+)\s+THEN\s+'((?:''|[^'])*)'/g)) {
+      updates.set(match[1], match[2].replace(/''/g, "'"));
+    }
+  }
+  return rows.map(row => updates.has(String(row[0])) ? [...row.slice(0, 4), updates.get(String(row[0])), ...row.slice(5)] : row);
+}
+
+const senseSqlText = fs.readFileSync(path.join(SQL_DIR, 'edu_chn_word_sense.sql'), 'utf8');
+const senses = applyExampleTranslationUpdates(senseSqlText, applyMeaningUpdates(senseSqlText, readRows('edu_chn_word_sense.sql', 10)));
+const questionSqlText = fs.readFileSync(path.join(SQL_DIR, 'edu_chn_word_question.sql'), 'utf8');
+const questions = applyQuestionOptionUpdates(questionSqlText, readRows('edu_chn_word_question.sql', 7));
 const catalogs = readRows('edu_chn_word_catalog.sql', 9);
 const catalogBySense = new Map(catalogs.map(row => [String(row[5]), row]));
 const q1 = new Map();
