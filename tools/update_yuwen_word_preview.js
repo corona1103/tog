@@ -62,30 +62,17 @@ function readRows(file, fieldCount) {
   return tuples(text).map(tuple => splitTuple(tuple).map(sqlValue)).filter(row => row.length === fieldCount && /^\d+$/.test(String(row[0])));
 }
 
-function applyMeaningUpdates(text, rows) {
+function applyFieldCaseUpdates(text, rows, field, index) {
   const updates = new Map();
   const statements = text.matchAll(/UPDATE\s+`edu_chn_word_sense`\s+SET\s+([\s\S]*?)\nWHERE[\s\S]*?;/g);
   for (const statement of statements) {
-    const fieldCase = statement[1].match(/`meaning`\s*=\s*CASE\s+`id`([\s\S]*?)END\s*(?:,|$)/);
+    const fieldCase = statement[1].match(new RegExp('`' + field + '`\\s*=\\s*CASE\\s+`id`([\\s\\S]*?)END\\s*(?:,|$)'));
     if (!fieldCase) continue;
     for (const match of fieldCase[1].matchAll(/WHEN\s+(\d+)\s+THEN\s+'((?:''|[^'])*)'/g)) {
       updates.set(match[1], match[2].replace(/''/g, "'"));
     }
   }
-  return rows.map(row => updates.has(String(row[0])) ? [...row.slice(0, 4), updates.get(String(row[0])), ...row.slice(5)] : row);
-}
-
-function applyExampleTranslationUpdates(text, rows) {
-  const updates = new Map();
-  const statements = text.matchAll(/UPDATE\s+`edu_chn_word_sense`\s+SET\s+([\s\S]*?)\nWHERE[\s\S]*?;/g);
-  for (const statement of statements) {
-    const fieldCase = statement[1].match(/`example_trans`\s*=\s*CASE\s+`id`([\s\S]*?)END\s*(?:,|$)/);
-    if (!fieldCase) continue;
-    for (const match of fieldCase[1].matchAll(/WHEN\s+(\d+)\s+THEN\s+'((?:''|[^'])*)'/g)) {
-      updates.set(match[1], match[2].replace(/''/g, "'"));
-    }
-  }
-  return rows.map(row => updates.has(String(row[0])) ? [...row.slice(0, 7), updates.get(String(row[0])), ...row.slice(8)] : row);
+  return rows.map(row => updates.has(String(row[0])) ? [...row.slice(0, index), updates.get(String(row[0])), ...row.slice(index + 1)] : row);
 }
 
 function applyQuestionOptionUpdates(text, rows) {
@@ -101,7 +88,10 @@ function applyQuestionOptionUpdates(text, rows) {
 }
 
 const senseSqlText = fs.readFileSync(path.join(SQL_DIR, 'edu_chn_word_sense.sql'), 'utf8');
-const senses = applyExampleTranslationUpdates(senseSqlText, applyMeaningUpdates(senseSqlText, readRows('edu_chn_word_sense.sql', 10)));
+let senses = readRows('edu_chn_word_sense.sql', 10);
+for (const [field, index] of [['meaning', 4], ['example', 5], ['source', 6], ['example_trans', 7], ['status', 8], ['is_del', 9]]) {
+  senses = applyFieldCaseUpdates(senseSqlText, senses, field, index);
+}
 const questionSqlText = fs.readFileSync(path.join(SQL_DIR, 'edu_chn_word_question.sql'), 'utf8');
 const questions = applyQuestionOptionUpdates(questionSqlText, readRows('edu_chn_word_question.sql', 7));
 const catalogs = readRows('edu_chn_word_catalog.sql', 9);
