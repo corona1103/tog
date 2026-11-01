@@ -275,6 +275,8 @@ if (optionStart < 0 || optionEnd < 0) throw new Error('预览页题目选项渲�
 const newOptionMarkup = `function optionMarkup(items,highlight){return items.map((item,index)=>{const text=String(item??'');const unavailable=text==='暂无例句';return '<div class="option'+(unavailable?' option-unavailable':'')+'" data-label="'+String.fromCharCode(65+index)+'">'+(highlight?rich(text):esc(text))+'</div>'}).join('')}`;
 html = `${html.slice(0, optionStart)}${newOptionMarkup}${html.slice(optionEnd)}`;
 
+// 生成器可重复执行：清理旧版本反复注入的搜索状态声明，避免同名 let 导致页面脚本报错。
+html = html.replace(/(?:let searchWord='';)+(?=function draw\(\)\{)/g, '');
 const drawStart = html.indexOf('function draw(){');
 const drawEnd = html.indexOf('function openDrawer', drawStart);
 if (drawStart < 0 || drawEnd < 0) throw new Error('预览页 draw 函数未找到');
