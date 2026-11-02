@@ -1535,7 +1535,7 @@ VALUES
 (3063, 2183, 1, '下列对例句“据亿丈之城，临不测之渊，以为固。”中“为”的解释，正确的一项是', '[{"content":"<动>作为，当作","correct":true},{"content":"<动>成为；变成","correct":false},{"content":"<动>以为；认为","correct":false},{"content":"<动>做；干","correct":false}]' , 1, 0),
 (3064, 2183, 2, '下列句子中“为”的意义和用法，与例句相同的一项是', '[{"content":"斩木<b>为</b>兵，揭竿<b>为</b>旗。","correct":true},{"content":"窃<b>为</b>大王不取也。","correct":false}]' , 1, 0),
 (3065, 2184, 1, '下列对例句“为天下理财，不为征利‌。”中“为”的解释，正确的一项是', '[{"content":"<介>为了","correct":true},{"content":"<动>以为；认为","correct":false},{"content":"<动>做；干","correct":false},{"content":"<介>因为","correct":false}]' , 1, 0),
-(3066, 2184, 2, '下列句子中“为”的意义和用法，与例句相同的一项是', '[{"content":"中峨冠而多髯者<b>为</b>东坡。","correct":true},{"content":"窃<b>为</b>大王不取也。","correct":false}]' , 1, 0),
+(3066, 2184, 2, '下列句子中“为”的意义和用法，与例句相同的一项是', '[{"content":"慎勿<b>为</b>妇死，贵贱情何薄。","correct":true},{"content":"窃<b>为</b>大王不取也。","correct":false}]' , 1, 0),
 (3067, 2185, 1, '下列对例句“宫中府中，俱为一体。”中“为”的解释，正确的一项是', '[{"content":"<动>是","correct":true},{"content":"<动>以为；认为","correct":false},{"content":"<动>做；干","correct":false},{"content":"<介>在……的时候","correct":false}]' , 1, 0),
 (3068, 2185, 2, '下列句子中“为”的意义和用法，与例句相同的一项是', '[{"content":"中峨冠而多髯者<b>为</b>东坡。","correct":true},{"content":"窃<b>为</b>大王不取也。","correct":false}]' , 1, 0),
 (3069, 2186, 1, '下列对例句“中峨冠而多髯者为东坡。”中“为”的解释，正确的一项是', '[{"content":"<动>是","correct":true},{"content":"<动>以为；认为","correct":false},{"content":"<动>做；干","correct":false},{"content":"<介>在……的时候","correct":false}]' , 1, 0),
